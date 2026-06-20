@@ -43,14 +43,13 @@ describe('StatusBadge', () => {
     expect(badge.className).toContain('custom-class');
   });
 
-  it('applies distinct color classes for each status', () => {
-    const { container: c1 } = render(<StatusBadge status={CandidateStatus.Applied} />);
-    const { container: c2 } = render(<StatusBadge status={CandidateStatus.Rejected} />);
-    
-    const badge1 = c1.querySelector('[role="status"]');
-    const badge2 = c2.querySelector('[role="status"]');
-    
-    // Applied uses blue, Rejected uses red - they should have different classes
-    expect(badge1?.className).not.toEqual(badge2?.className);
+  it('applies distinct color styles for each status', () => {
+    render(<StatusBadge status={CandidateStatus.Applied} />);
+    const applied = screen.getByRole('status');
+    render(<StatusBadge status={CandidateStatus.Rejected} />);
+    const rejected = screen.getAllByRole('status')[1];
+
+    expect(applied.style.backgroundColor).not.toEqual(rejected.style.backgroundColor);
+    expect(applied.style.color).not.toEqual(rejected.style.color);
   });
 });

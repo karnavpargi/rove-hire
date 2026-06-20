@@ -89,9 +89,12 @@ test.describe('Create Job Opening Flow', () => {
     // Submit form
     await page.getByRole('button', { name: /create|submit|save/i }).click();
 
-    // Verify success: toast notification or redirect to job list/detail
+    // Verify success: toast notification (Sonner) or redirect
     await expect(
-      page.getByText(/created|success/i).or(page.getByText('QA Automation Engineer')),
+      page
+        .getByLabel('Notifications alt+T')
+        .getByText(/created|success/i)
+        .or(page.getByText('QA Automation Engineer')),
     ).toBeVisible({ timeout: 10_000 });
   });
 });
@@ -213,10 +216,10 @@ test.describe('Interview Scheduling Flow', () => {
     // Submit
     await page.getByRole('button', { name: /schedule interview$/i }).click();
 
-    // Verify success via toast notification
-    await expect(page.getByText('Interview scheduled successfully')).toBeVisible({
-      timeout: 10_000,
-    });
+    // Verify success via toast notification (avoid duplicate live-region match)
+    await expect(
+      page.getByLabel('Notifications alt+T').getByText('Interview scheduled successfully'),
+    ).toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -232,8 +235,8 @@ test.describe('Offer Generation Flow', () => {
     // Wait for profile to load
     await expect(page.getByText('Carol Chen')).toBeVisible({ timeout: 10_000 });
 
-    // Click the Actions section "Generate Offer Documents" button to open the form
-    const actionsButton = page.locator('button:has-text("Generate Offer Documents")').last();
+    // Click Generate Offer button in header actions
+    const actionsButton = page.getByRole('button', { name: /generate offer/i }).first();
     await expect(actionsButton).toBeVisible({ timeout: 5_000 });
     await actionsButton.click();
 
@@ -266,28 +269,18 @@ test.describe('Offer Generation Flow', () => {
     // Submit using the form's submit button (inside the form element)
     await page.locator('form button[type="submit"]').click();
 
-    // Wait for PDF generation (up to 15s as it involves Puppeteer)
-    await expect(
-      page
-        .getByText(/offer.*sent|generated|success/i)
-        .or(page.getByText(/offer_sent|OfferSent/i))
-        .or(page.getByText(/download/i)),
-    ).toBeVisible({ timeout: 30_000 });
+    // Wait for PDF generation (up to 30s as it involves Puppeteer)
+    await expect(page.getByRole('button', { name: /download offer letter/i })).toBeVisible({
+      timeout: 30_000,
+    });
 
     // Verify PDFs are listed (offer letter + NDA)
-    await expect(
-      page.getByText(/offer.*letter|offer-letter/i).or(page.getByRole('link', { name: /offer/i })),
-    ).toBeVisible();
+    await expect(page.getByRole('button', { name: /download offer letter/i })).toBeVisible();
 
-    await expect(
-      page
-        .getByRole('button', { name: /download nda/i })
-        .or(page.getByText(/^NDA$/))
-        .or(page.locator('text=NDA').first()),
-    ).toBeVisible();
+    await expect(page.getByRole('button', { name: /download nda/i })).toBeVisible();
 
     // Verify status badge updated to Offer Sent
-    await expect(page.getByText(/offer.?sent/i)).toBeVisible();
+    await expect(page.getByRole('status', { name: /offer sent/i })).toBeVisible();
   });
 });
 
@@ -304,7 +297,7 @@ test.describe('Mark as Hired Flow', () => {
     await expect(page.getByText('David Park')).toBeVisible({ timeout: 10_000 });
 
     // Click Mark as Hired button
-    const hireButton = page.getByRole('button', { name: /mark.*hired|hire/i });
+    const hireButton = page.getByRole('button', { name: /mark as hired|mark hired/i });
     await expect(hireButton).toBeVisible({ timeout: 5_000 });
     await hireButton.click();
 

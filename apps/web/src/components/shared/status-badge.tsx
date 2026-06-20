@@ -1,75 +1,67 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 import { CandidateStatus } from '@rove-hire/shared';
 
+import { TokenBadge, type TokenBadgeProps } from '@/components/shared/token-badge';
+
 /**
- * Status color configuration ensuring WCAG AA 4.5:1 contrast ratio.
- * Each status maps to a background + text color combination verified against
- * white/dark backgrounds for accessibility.
+ * Status color configuration using design-system CSS custom properties
+ * defined in globals.css (--color-status-*).
  */
-const STATUS_STYLES: Record<CandidateStatus, { bg: string; text: string; label: string }> = {
+const STATUS_STYLES: Record<CandidateStatus, { bgVar: string; textVar: string; label: string }> = {
   [CandidateStatus.Applied]: {
-    bg: 'bg-blue-100 dark:bg-blue-900/40',
-    text: 'text-blue-800 dark:text-blue-200',
+    bgVar: '--color-status-applied-bg',
+    textVar: '--color-status-applied',
     label: 'Applied',
   },
   [CandidateStatus.FormSubmitted]: {
-    bg: 'bg-indigo-100 dark:bg-indigo-900/40',
-    text: 'text-indigo-800 dark:text-indigo-200',
+    bgVar: '--color-status-form-submitted-bg',
+    textVar: '--color-status-form-submitted',
     label: 'Form Submitted',
   },
   [CandidateStatus.InterviewScheduled]: {
-    bg: 'bg-amber-100 dark:bg-amber-900/40',
-    text: 'text-amber-800 dark:text-amber-200',
+    bgVar: '--color-status-interview-scheduled-bg',
+    textVar: '--color-status-interview-scheduled',
     label: 'Interview Scheduled',
   },
   [CandidateStatus.OfferSent]: {
-    bg: 'bg-purple-100 dark:bg-purple-900/40',
-    text: 'text-purple-800 dark:text-purple-200',
+    bgVar: '--color-status-offer-sent-bg',
+    textVar: '--color-status-offer-sent',
     label: 'Offer Sent',
   },
   [CandidateStatus.Hired]: {
-    bg: 'bg-green-100 dark:bg-green-900/40',
-    text: 'text-green-800 dark:text-green-200',
+    bgVar: '--color-status-hired-bg',
+    textVar: '--color-status-hired',
     label: 'Hired',
   },
   [CandidateStatus.Rejected]: {
-    bg: 'bg-red-100 dark:bg-red-900/40',
-    text: 'text-red-800 dark:text-red-200',
+    bgVar: '--color-status-rejected-bg',
+    textVar: '--color-status-rejected',
     label: 'Rejected',
   },
 };
 
-export interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface StatusBadgeProps extends Omit<TokenBadgeProps, 'textVar' | 'bgVar' | 'label'> {
   /** The candidate pipeline status to display */
   status: CandidateStatus;
-  /** Optional size variant */
-  size?: 'sm' | 'md';
 }
 
 /**
  * StatusBadge displays a color-coded badge for each CandidateStatus.
- * Colors are chosen to meet WCAG AA 4.5:1 contrast requirements.
+ * Colors are sourced from globals.css design tokens.
  */
-export function StatusBadge({ status, size = 'md', className, ...props }: StatusBadgeProps) {
-  const style = STATUS_STYLES[status];
+export function StatusBadge({ status, size = 'md', ...props }: StatusBadgeProps) {
+  const config = STATUS_STYLES[status];
 
   return (
-    <span
-      role="status"
-      aria-label={`Status: ${style.label}`}
-      className={cn(
-        'inline-flex items-center rounded-full font-medium transition-colors duration-200',
-        size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs',
-        style.bg,
-        style.text,
-        className,
-      )}
+    <TokenBadge
+      size={size}
+      label={config.label}
+      ariaLabel={`Status: ${config.label}`}
+      textVar={config.textVar}
+      bgVar={config.bgVar}
       {...props}
-    >
-      {style.label}
-    </span>
+    />
   );
 }

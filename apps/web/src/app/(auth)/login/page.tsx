@@ -131,7 +131,11 @@ export default function LoginPage() {
   // Show loading state while checking auth
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center py-12" role="status" aria-label="Checking authentication">
+      <div
+        className="flex items-center justify-center py-12"
+        role="status"
+        aria-label="Checking authentication"
+      >
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -142,9 +146,11 @@ export default function LoginPage() {
 
   return (
     <Card>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Sign in to ROVE Hire</CardTitle>
-        <CardDescription>Enter your credentials to access the recruitment dashboard</CardDescription>
+      <CardHeader className="text-center lg:text-left">
+        <CardTitle className="text-heading-2">Sign in to ROVE Hire</CardTitle>
+        <CardDescription>
+          Enter your credentials to access the recruitment dashboard
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} noValidate aria-label="Login form">
@@ -164,9 +170,7 @@ export default function LoginPage() {
                 <span>
                   {generalError}
                   {retryAfter > 0 && (
-                    <span className="ml-1 font-medium">
-                      Retry in {retryAfter}s
-                    </span>
+                    <span className="ml-1 font-medium">Retry in {retryAfter}s</span>
                   )}
                 </span>
               </div>

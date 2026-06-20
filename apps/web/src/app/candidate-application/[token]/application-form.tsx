@@ -96,8 +96,7 @@ function validateForm(data: ApplicationFormInput): FieldError[] {
     ) {
       errors.push({
         field: 'linkedinUrl',
-        message:
-          'LinkedIn URL must start with https://linkedin.com/ or https://www.linkedin.com/',
+        message: 'LinkedIn URL must start with https://linkedin.com/ or https://www.linkedin.com/',
       });
     }
   }
@@ -304,7 +303,7 @@ export function ApplicationForm({ onSubmit, submitting, submitError }: Applicati
           {/* Submit */}
           <Button
             type="submit"
-            className="w-full"
+            className="w-full cursor-pointer"
             size="lg"
             disabled={submitting}
             aria-busy={submitting}

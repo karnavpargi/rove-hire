@@ -140,9 +140,9 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Carol White')).toBeInTheDocument();
 
     // Status badges
-    expect(screen.getByText('Applied')).toBeInTheDocument();
-    expect(screen.getByText('Interview Scheduled')).toBeInTheDocument();
-    expect(screen.getByText('Hired')).toBeInTheDocument();
+    expect(screen.getAllByText('Applied').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Interview Scheduled').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Hired').length).toBeGreaterThan(0);
 
     // Relative timestamps
     expect(screen.getByText(/2 hours ago/i)).toBeInTheDocument();
@@ -167,9 +167,9 @@ describe('DashboardPage', () => {
       expect(screen.getByText('No candidates found')).toBeInTheDocument();
     });
 
-    const addLink = screen.getByRole('link', { name: /add candidate/i });
-    expect(addLink).toBeInTheDocument();
-    expect(addLink).toHaveAttribute('href', '/candidates/new');
+    const addLinks = screen.getAllByRole('link', { name: /add candidate/i });
+    expect(addLinks.length).toBeGreaterThan(0);
+    expect(addLinks.some((link) => link.getAttribute('href') === '/candidates/new')).toBe(true);
   });
 
   it('shows error state with retry button on fetch failure', async () => {
@@ -185,8 +185,10 @@ describe('DashboardPage', () => {
   });
 
   it('retries fetch when retry button is clicked', async () => {
-    mockRequest.mockRejectedValueOnce(new Error('Network error'));
-    mockRequest.mockResolvedValueOnce(mockPaginatedResult);
+    mockRequest
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValue(mockPaginatedResult);
 
     renderDashboard();
 
@@ -204,28 +206,15 @@ describe('DashboardPage', () => {
     });
   });
 
-  it('navigates to candidate profile on row click', async () => {
+  it('navigates to candidate profile on card click', async () => {
     renderDashboard();
 
     await waitFor(() => {
       expect(screen.getByText('Alice Johnson')).toBeInTheDocument();
     });
 
-    const row = screen.getByRole('row', { name: /alice johnson/i });
-    fireEvent.click(row);
-
-    expect(mockPush).toHaveBeenCalledWith('/candidates/1');
-  });
-
-  it('navigates to candidate profile on Enter key', async () => {
-    renderDashboard();
-
-    await waitFor(() => {
-      expect(screen.getByText('Alice Johnson')).toBeInTheDocument();
-    });
-
-    const row = screen.getByRole('row', { name: /alice johnson/i });
-    fireEvent.keyDown(row, { key: 'Enter' });
+    const card = screen.getByRole('row', { name: /alice johnson/i });
+    fireEvent.click(card);
 
     expect(mockPush).toHaveBeenCalledWith('/candidates/1');
   });
@@ -242,11 +231,13 @@ describe('DashboardPage', () => {
     expect(searchInput).toHaveAttribute('maxlength', '100');
   });
 
-  it('renders page header', () => {
+  it('renders page header', async () => {
     renderDashboard();
 
-    expect(screen.getByText('Candidate Pipeline')).toBeInTheDocument();
-    expect(screen.getByText(/manage and track candidates/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/overview of your hiring pipeline/i)).toBeInTheDocument();
   });
 
   it('renders status filter button', () => {

@@ -13,13 +13,17 @@ vi.mock('next/navigation', () => ({
 // Mock useAuth
 vi.mock('@/hooks/use-auth', () => ({
   useAuth: () => ({
-    user: null,
+    user: { id: '1', name: 'HR Admin', email: 'admin@rove.com' },
     isAuthenticated: true,
     isLoading: false,
     login: vi.fn(),
     logout: vi.fn(),
     checkSession: vi.fn(),
   }),
+}));
+
+vi.mock('next-themes', () => ({
+  useTheme: () => ({ theme: 'light', setTheme: vi.fn() }),
 }));
 
 describe('Sidebar', () => {
@@ -30,7 +34,7 @@ describe('Sidebar', () => {
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Jobs')).toBeInTheDocument();
-    expect(screen.getByText('Candidates')).toBeInTheDocument();
+    expect(screen.getByText('Add Candidate')).toBeInTheDocument();
     expect(screen.getByText('Interviews')).toBeInTheDocument();
     expect(screen.getByText('Documents')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();

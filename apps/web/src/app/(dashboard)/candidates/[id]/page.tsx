@@ -54,12 +54,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  StatusBadge,
-  LoadingSkeleton,
-  ErrorState,
-  showToast,
-} from '@/components/shared';
+import { StatusBadge, LoadingSkeleton, ErrorState, showToast } from '@/components/shared';
 import { OfferGenerationForm } from '@/components/offer-generation-form';
 import { useCandidate } from '@/hooks/use-candidate';
 import { useStatusTransition } from '@/hooks/use-status-transition';
@@ -71,10 +66,7 @@ import { cn } from '@/lib/utils';
 // Constants
 // ---------------------------------------------------------------------------
 
-const TERMINAL_STATUSES: CandidateStatus[] = [
-  CandidateStatus.Hired,
-  CandidateStatus.Rejected,
-];
+const TERMINAL_STATUSES: CandidateStatus[] = [CandidateStatus.Hired, CandidateStatus.Rejected];
 
 const TIMELINE_MAX_EVENTS = 50;
 
@@ -160,12 +152,7 @@ export default function CandidateProfilePage() {
   const showOfferForm = searchParams?.get('action') === 'generate-offer';
 
   // Data fetching
-  const {
-    data: candidate,
-    isLoading,
-    error,
-    refetch,
-  } = useCandidate(candidateId);
+  const { data: candidate, isLoading, error, refetch } = useCandidate(candidateId);
 
   // Status transition hook
   const { transition, isPending: isTransitioning } = useStatusTransition({
@@ -179,8 +166,7 @@ export default function CandidateProfilePage() {
   });
 
   // Document download hook
-  const { download: downloadDocument, isPending: isDownloading } =
-    useDocumentDownload();
+  const { download: downloadDocument, isPending: isDownloading } = useDocumentDownload();
 
   // Rejection dialog state
   const [rejectionDialogOpen, setRejectionDialogOpen] = React.useState(false);
@@ -220,15 +206,11 @@ export default function CandidateProfilePage() {
   const handleConfirmReject = () => {
     const trimmed = rejectionReason.trim();
     if (trimmed.length < REJECTION_REASON_MIN) {
-      setRejectionReasonError(
-        `Reason must be at least ${REJECTION_REASON_MIN} characters`,
-      );
+      setRejectionReasonError(`Reason must be at least ${REJECTION_REASON_MIN} characters`);
       return;
     }
     if (trimmed.length > REJECTION_REASON_MAX) {
-      setRejectionReasonError(
-        `Reason must be at most ${REJECTION_REASON_MAX} characters`,
-      );
+      setRejectionReasonError(`Reason must be at most ${REJECTION_REASON_MAX} characters`);
       return;
     }
 
@@ -311,12 +293,8 @@ export default function CandidateProfilePage() {
   // Derived data
   // ---------------------------------------------------------------------------
 
-  const resume = candidate.documents.find(
-    (d) => d.type === DocumentType.Resume,
-  );
-  const offerLetter = candidate.documents.find(
-    (d) => d.type === DocumentType.OfferLetter,
-  );
+  const resume = candidate.documents.find((d) => d.type === DocumentType.Resume);
+  const offerLetter = candidate.documents.find((d) => d.type === DocumentType.OfferLetter);
   const nda = candidate.documents.find((d) => d.type === DocumentType.Nda);
 
   const hasCompletedInterview = candidate.interviews.some(
@@ -327,337 +305,329 @@ export default function CandidateProfilePage() {
 
   const timelineEvents = candidate.timelineEvents
     .slice(0, TIMELINE_MAX_EVENTS)
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   // ---------------------------------------------------------------------------
   // Render: Profile
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6">
-      {/* Header: Name + Status Badge */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {candidate.name}
-          </h1>
+    <div className="mx-auto max-w-6xl space-y-6 p-6 pb-24 lg:pb-6">
+      {/* Header band: Name, Status, Primary Actions */}
+      <div className="flex flex-col gap-4 border-b pb-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-heading-1 text-foreground">{candidate.name}</h1>
           {candidate.currentRole && (
-            <p className="text-sm text-muted-foreground">
-              {candidate.currentRole}
-            </p>
+            <p className="text-body text-muted-foreground">{candidate.currentRole}</p>
           )}
+          <StatusBadge
+            status={candidate.status}
+            size="lg"
+            className="transition-all duration-300 ease-in-out"
+          />
         </div>
-        <StatusBadge
-          status={candidate.status}
-          size="md"
-          className="transition-all duration-300 ease-in-out"
-        />
+
+        {!isTerminal && (
+          <div className="flex flex-wrap gap-2">
+            {candidate.status === CandidateStatus.InterviewScheduled && hasCompletedInterview && (
+              <Button onClick={handleGenerateOffer} disabled={isTransitioning} size="sm">
+                <SendIcon className="mr-2 h-4 w-4" />
+                Generate Offer
+              </Button>
+            )}
+            {candidate.status === CandidateStatus.OfferSent && (
+              <Button
+                onClick={handleMarkAsHired}
+                disabled={isTransitioning}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckCircleIcon className="mr-2 h-4 w-4" />
+                Mark as Hired
+              </Button>
+            )}
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              disabled={isTransitioning}
+              size="sm"
+            >
+              <XCircleIcon className="mr-2 h-4 w-4" />
+              Reject
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Profile Info Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {/* Email */}
-            <div className="flex items-center gap-3">
-              <MailIcon
-                className="h-4 w-4 text-muted-foreground"
-                aria-hidden="true"
-              />
-              <div>
-                <p className="text-xs text-muted-foreground">Email</p>
-                <a
-                  href={`mailto:${candidate.email}`}
-                  className="text-sm text-foreground hover:underline"
-                >
-                  {candidate.email}
-                </a>
-              </div>
-            </div>
-
-            {/* Phone */}
-            {candidate.phone && (
-              <div className="flex items-center gap-3">
-                <PhoneIcon
-                  className="h-4 w-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <div>
-                  <p className="text-xs text-muted-foreground">Phone</p>
-                  <a
-                    href={`tel:${candidate.phone}`}
-                    className="text-sm text-foreground hover:underline"
-                  >
-                    {candidate.phone}
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {/* Location */}
-            {candidate.location && (
-              <div className="flex items-center gap-3">
-                <MapPinIcon
-                  className="h-4 w-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <div>
-                  <p className="text-xs text-muted-foreground">Location</p>
-                  <p className="text-sm text-foreground">{candidate.location}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Role */}
-            {candidate.currentRole && (
-              <div className="flex items-center gap-3">
-                <BriefcaseIcon
-                  className="h-4 w-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <div>
-                  <p className="text-xs text-muted-foreground">Current Role</p>
-                  <p className="text-sm text-foreground">
-                    {candidate.currentRole}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Documents Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Documents</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {/* Resume */}
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <div className="flex items-center gap-3">
-                <FileTextIcon
-                  className="h-5 w-5 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <div>
-                  <p className="text-sm font-medium">Resume</p>
-                  <p className="text-xs text-muted-foreground">
-                    {resume?.originalFilename ?? 'PDF Document'}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!resume || isDownloading}
-                onClick={() => resume && downloadDocument(resume.id)}
-                aria-label="Download resume"
-              >
-                <DownloadIcon className="mr-1 h-3 w-3" />
-                Download
-              </Button>
-            </div>
-            {!resume && (
-              <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <AlertCircleIcon className="h-3 w-3" />
-                Resume not available
-              </p>
-            )}
-
-            {/* Offer Letter */}
-            {offerLetter && (
-              <div className="flex items-center justify-between rounded-md border p-3">
+      {/* Two-column layout: profile + documents | timeline */}
+      <div className="grid gap-6 lg:grid-cols-5">
+        <div className="space-y-6 lg:col-span-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Email */}
                 <div className="flex items-center gap-3">
-                  <FileTextIcon
-                    className="h-5 w-5 text-purple-500"
-                    aria-hidden="true"
-                  />
+                  <MailIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   <div>
-                    <p className="text-sm font-medium">Offer Letter</p>
-                    <p className="text-xs text-muted-foreground">
-                      {offerLetter.originalFilename ?? 'Offer Letter PDF'}
-                    </p>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <a
+                      href={`mailto:${candidate.email}`}
+                      className="text-sm text-foreground hover:underline"
+                    >
+                      {candidate.email}
+                    </a>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={isDownloading}
-                  onClick={() => downloadDocument(offerLetter.id)}
-                  aria-label="Download offer letter"
-                >
-                  <DownloadIcon className="mr-1 h-3 w-3" />
-                  Download
-                </Button>
-              </div>
-            )}
 
-            {/* NDA */}
-            {nda && (
-              <div className="flex items-center justify-between rounded-md border p-3">
-                <div className="flex items-center gap-3">
-                  <FileTextIcon
-                    className="h-5 w-5 text-amber-500"
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <p className="text-sm font-medium">NDA</p>
-                    <p className="text-xs text-muted-foreground">
-                      {nda.originalFilename ?? 'NDA PDF'}
-                    </p>
+                {/* Phone */}
+                {candidate.phone && (
+                  <div className="flex items-center gap-3">
+                    <PhoneIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Phone</p>
+                      <a
+                        href={`tel:${candidate.phone}`}
+                        className="text-sm text-foreground hover:underline"
+                      >
+                        {candidate.phone}
+                      </a>
+                    </div>
                   </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={isDownloading}
-                  onClick={() => downloadDocument(nda.id)}
-                  aria-label="Download NDA"
-                >
-                  <DownloadIcon className="mr-1 h-3 w-3" />
-                  Download
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Offer Generation Form (shown when ?action=generate-offer) */}
-      {showOfferForm &&
-        candidate.status === CandidateStatus.InterviewScheduled &&
-        hasCompletedInterview && (
-          <OfferGenerationForm
-            candidateId={candidate.id}
-            candidateName={candidate.name}
-            onSuccess={() => {
-              // Remove action param to hide form; the refetch will show updated status
-              router.replace(`/candidates/${candidate.id}`);
-              refetch();
-            }}
-            onCancel={() => {
-              router.replace(`/candidates/${candidate.id}`);
-            }}
-          />
-        )}
-
-      {/* Action Buttons */}
-      {!isTerminal && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              {/* Generate Offer: visible when Interview_Scheduled + completed interview */}
-              {candidate.status === CandidateStatus.InterviewScheduled &&
-                hasCompletedInterview && (
-                  <Button
-                    onClick={handleGenerateOffer}
-                    disabled={isTransitioning}
-                  >
-                    <SendIcon className="mr-2 h-4 w-4" />
-                    Generate Offer Documents
-                  </Button>
                 )}
 
-              {/* Mark as Hired: visible when Offer_Sent */}
-              {candidate.status === CandidateStatus.OfferSent && (
-                <Button
-                  onClick={handleMarkAsHired}
-                  disabled={isTransitioning}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <CheckCircleIcon className="mr-2 h-4 w-4" />
-                  Mark as Hired
-                </Button>
-              )}
-
-              {/* Reject: visible for any non-terminal status */}
-              <Button
-                variant="destructive"
-                onClick={handleReject}
-                disabled={isTransitioning}
-              >
-                <XCircleIcon className="mr-2 h-4 w-4" />
-                Reject
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Timeline Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Activity Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {timelineEvents.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No activity recorded yet.
-            </p>
-          ) : (
-            <div
-              className="relative space-y-0"
-              role="list"
-              aria-label="Candidate activity timeline"
-            >
-              {timelineEvents.map((event, index) => (
-                <div
-                  key={event.id}
-                  className="relative flex gap-4 pb-6 last:pb-0"
-                  role="listitem"
-                >
-                  {/* Vertical line connector */}
-                  {index < timelineEvents.length - 1 && (
-                    <div
-                      className="absolute left-4 top-8 h-full w-px bg-border"
-                      aria-hidden="true"
-                    />
-                  )}
-
-                  {/* Icon */}
-                  <div
-                    className={cn(
-                      'relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                      getTimelineIconColor(event.eventType as TimelineEventType),
-                    )}
-                    aria-hidden="true"
-                  >
-                    {getTimelineIcon(event.eventType as TimelineEventType)}
+                {/* Location */}
+                {candidate.location && (
+                  <div className="flex items-center gap-3">
+                    <MapPinIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Location</p>
+                      <p className="text-sm text-foreground">{candidate.location}</p>
+                    </div>
                   </div>
+                )}
 
-                  {/* Content */}
-                  <div className="flex-1 pt-0.5">
-                    <p className="text-sm font-medium text-foreground">
-                      {getTimelineLabel(event)}
-                    </p>
-                    {event.details && (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {event.details}
+                {/* Role */}
+                {candidate.currentRole && (
+                  <div className="flex items-center gap-3">
+                    <BriefcaseIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Current Role</p>
+                      <p className="text-sm text-foreground">{candidate.currentRole}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Documents Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Documents</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {/* Resume */}
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div className="flex items-center gap-3">
+                    <FileTextIcon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                    <div>
+                      <p className="text-sm font-medium">Resume</p>
+                      <p className="text-xs text-muted-foreground">
+                        {resume?.originalFilename ?? 'PDF Document'}
                       </p>
-                    )}
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      <time dateTime={event.createdAt}>
-                        {formatRelativeTime(event.createdAt)}
-                      </time>
-                    </p>
+                    </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!resume || isDownloading}
+                    onClick={() => resume && downloadDocument(resume.id)}
+                    aria-label="Download resume"
+                  >
+                    <DownloadIcon className="mr-1 h-3 w-3" />
+                    Download
+                  </Button>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                {!resume && (
+                  <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <AlertCircleIcon className="h-3 w-3" />
+                    Resume not available
+                  </p>
+                )}
+
+                {/* Offer Letter */}
+                {offerLetter && (
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <div className="flex items-center gap-3">
+                      <FileTextIcon className="h-5 w-5 text-purple-500" aria-hidden="true" />
+                      <div>
+                        <p className="text-sm font-medium">Offer Letter</p>
+                        <p className="text-xs text-muted-foreground">
+                          {offerLetter.originalFilename ?? 'Offer Letter PDF'}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isDownloading}
+                      onClick={() => downloadDocument(offerLetter.id)}
+                      aria-label="Download offer letter"
+                    >
+                      <DownloadIcon className="mr-1 h-3 w-3" />
+                      Download
+                    </Button>
+                  </div>
+                )}
+
+                {/* NDA */}
+                {nda && (
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <div className="flex items-center gap-3">
+                      <FileTextIcon className="h-5 w-5 text-amber-500" aria-hidden="true" />
+                      <div>
+                        <p className="text-sm font-medium">NDA</p>
+                        <p className="text-xs text-muted-foreground">
+                          {nda.originalFilename ?? 'NDA PDF'}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isDownloading}
+                      onClick={() => downloadDocument(nda.id)}
+                      aria-label="Download NDA"
+                    >
+                      <DownloadIcon className="mr-1 h-3 w-3" />
+                      Download
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Offer Generation Form (shown when ?action=generate-offer) */}
+          {showOfferForm &&
+            candidate.status === CandidateStatus.InterviewScheduled &&
+            hasCompletedInterview && (
+              <OfferGenerationForm
+                candidateId={candidate.id}
+                candidateName={candidate.name}
+                onSuccess={() => {
+                  router.replace(`/candidates/${candidate.id}`);
+                  refetch();
+                }}
+                onCancel={() => {
+                  router.replace(`/candidates/${candidate.id}`);
+                }}
+              />
+            )}
+        </div>
+
+        <div className="space-y-6 lg:col-span-2">
+          {/* Timeline Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity Timeline</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {timelineEvents.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No activity recorded yet.</p>
+              ) : (
+                <div
+                  className="relative space-y-0"
+                  role="list"
+                  aria-label="Candidate activity timeline"
+                >
+                  {timelineEvents.map((event, index) => (
+                    <div
+                      key={event.id}
+                      className="relative flex gap-4 pb-6 last:pb-0"
+                      role="listitem"
+                    >
+                      {/* Vertical line connector */}
+                      {index < timelineEvents.length - 1 && (
+                        <div
+                          className="absolute left-4 top-8 h-full w-px bg-border"
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      {/* Icon */}
+                      <div
+                        className={cn(
+                          'relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                          getTimelineIconColor(event.eventType as TimelineEventType),
+                        )}
+                        aria-hidden="true"
+                      >
+                        {getTimelineIcon(event.eventType as TimelineEventType)}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 pt-0.5">
+                        <p className="text-sm font-medium text-foreground">
+                          {getTimelineLabel(event)}
+                        </p>
+                        {event.details && (
+                          <p className="mt-0.5 text-xs text-muted-foreground">{event.details}</p>
+                        )}
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          <time dateTime={event.createdAt}>
+                            {formatRelativeTime(event.createdAt)}
+                          </time>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Sticky mobile action bar */}
+      {!isTerminal && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 p-3 backdrop-blur-sm lg:hidden">
+          <div className="mx-auto flex max-w-6xl gap-2">
+            {candidate.status === CandidateStatus.InterviewScheduled && hasCompletedInterview && (
+              <Button
+                onClick={handleGenerateOffer}
+                disabled={isTransitioning}
+                className="flex-1"
+                size="sm"
+              >
+                Generate Offer
+              </Button>
+            )}
+            {candidate.status === CandidateStatus.OfferSent && (
+              <Button
+                onClick={handleMarkAsHired}
+                disabled={isTransitioning}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                size="sm"
+              >
+                Mark Hired
+              </Button>
+            )}
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              disabled={isTransitioning}
+              size="sm"
+            >
+              Reject
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Rejection Dialog */}
       <RejectionDialog
@@ -721,13 +691,10 @@ function RejectionDialog({
               <AlertCircleIcon className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <DialogTitle id="reject-dialog-title">
-                Reject Candidate
-              </DialogTitle>
+              <DialogTitle id="reject-dialog-title">Reject Candidate</DialogTitle>
               <DialogDescription>
-                This action cannot be undone. Please provide a reason for the
-                rejection ({REJECTION_REASON_MIN}-{REJECTION_REASON_MAX}{' '}
-                characters).
+                This action cannot be undone. Please provide a reason for the rejection (
+                {REJECTION_REASON_MIN}-{REJECTION_REASON_MAX} characters).
               </DialogDescription>
             </div>
           </div>
@@ -735,10 +702,7 @@ function RejectionDialog({
 
         {/* Rejection Reason Textarea */}
         <div className="space-y-2">
-          <label
-            htmlFor="rejection-reason"
-            className="text-sm font-medium text-foreground"
-          >
+          <label htmlFor="rejection-reason" className="text-sm font-medium text-foreground">
             Reason for rejection
           </label>
           <textarea
@@ -753,34 +717,21 @@ function RejectionDialog({
             onChange={(e) => onReasonChange(e.target.value)}
             maxLength={REJECTION_REASON_MAX}
             aria-invalid={!!reasonError}
-            aria-describedby={
-              reasonError ? 'rejection-reason-error' : 'rejection-reason-hint'
-            }
+            aria-describedby={reasonError ? 'rejection-reason-error' : 'rejection-reason-hint'}
           />
           {reasonError ? (
-            <p
-              id="rejection-reason-error"
-              className="text-xs text-destructive"
-              role="alert"
-            >
+            <p id="rejection-reason-error" className="text-xs text-destructive" role="alert">
               {reasonError}
             </p>
           ) : (
-            <p
-              id="rejection-reason-hint"
-              className="text-xs text-muted-foreground"
-            >
+            <p id="rejection-reason-hint" className="text-xs text-muted-foreground">
               {reason.trim().length}/{REJECTION_REASON_MAX} characters
             </p>
           )}
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
           <Button

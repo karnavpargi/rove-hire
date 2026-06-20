@@ -12,7 +12,7 @@
 
 import * as React from 'react';
 import { FileTextIcon, DownloadIcon, Loader2Icon } from 'lucide-react';
-import { DocumentType } from '@rove-hire/shared';
+import type { DocumentType } from '@rove-hire/shared';
 import { useQuery } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
 import { graphqlClient } from '@/lib/graphql-client';
@@ -20,8 +20,8 @@ import { useDocumentDownload } from '@/hooks/use-document-download';
 import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
+import { DocumentTypeBadge } from '@/components/shared/entity-badges';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
 // GraphQL Query
@@ -57,39 +57,6 @@ interface DocumentItem {
     id: string;
     name: string;
   };
-}
-
-// ---------------------------------------------------------------------------
-// Document Type Badge
-// ---------------------------------------------------------------------------
-
-function DocumentTypeBadge({ type }: { type: DocumentType }) {
-  const styles: Record<DocumentType, string> = {
-    [DocumentType.Resume]:
-      'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
-    [DocumentType.OfferLetter]:
-      'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
-    [DocumentType.Nda]:
-      'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200',
-  };
-
-  const labels: Record<DocumentType, string> = {
-    [DocumentType.Resume]: 'Resume',
-    [DocumentType.OfferLetter]: 'Offer Letter',
-    [DocumentType.Nda]: 'NDA',
-  };
-
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-        styles[type],
-      )}
-      aria-label={`Document type: ${labels[type]}`}
-    >
-      {labels[type]}
-    </span>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -130,9 +97,7 @@ export default function DocumentsPage() {
   } = useQuery<DocumentItem[]>({
     queryKey: ['documents'],
     queryFn: async () => {
-      const data = await graphqlClient.request<{ documents: DocumentItem[] }>(
-        GET_ALL_DOCUMENTS,
-      );
+      const data = await graphqlClient.request<{ documents: DocumentItem[] }>(GET_ALL_DOCUMENTS);
       return data.documents;
     },
   });
@@ -166,7 +131,9 @@ export default function DocumentsPage() {
         <EmptyState
           icon={<FileTextIcon className="h-10 w-10 text-muted-foreground" />}
           title="No documents yet"
-          description="Documents will appear here once offer letters or NDAs are generated for candidates."
+          description="Documents appear here after you generate offer letters or NDAs from a candidate profile."
+          actionHref="/"
+          actionLabel="View Pipeline"
         />
       </div>
     );
@@ -182,21 +149,11 @@ export default function DocumentsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Type
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Candidate
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Filename
-                </th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  Created
-                </th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                  Actions
-                </th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Candidate</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Filename</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Created</th>
+                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -208,20 +165,11 @@ export default function DocumentsPage() {
                   <td className="px-4 py-3">
                     <DocumentTypeBadge type={doc.type} />
                   </td>
-                  <td className="px-4 py-3 font-medium">
-                    {doc.candidate.name}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {doc.originalFilename ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatDate(doc.createdAt)}
-                  </td>
+                  <td className="px-4 py-3 font-medium">{doc.candidate.name}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{doc.originalFilename ?? '—'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{formatDate(doc.createdAt)}</td>
                   <td className="px-4 py-3 text-right">
-                    <DownloadButton
-                      documentId={doc.id}
-                      filename={doc.originalFilename}
-                    />
+                    <DownloadButton documentId={doc.id} filename={doc.originalFilename} />
                   </td>
                 </tr>
               ))}

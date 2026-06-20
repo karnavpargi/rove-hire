@@ -19,42 +19,18 @@ import { useToast } from '@/components/shared/toast';
 import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
+import { JobStatusBadge } from '@/components/shared/entity-badges';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-/** Status badge specifically for job openings (Open/Closed). */
-function JobStatusBadge({ status }: { status: JobOpeningStatus }) {
-  const isOpen = status === JobOpeningStatus.Open;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-        isOpen
-          ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'
-          : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-      )}
-    >
-      {isOpen ? 'Open' : 'Closed'}
-    </span>
-  );
-}
-
 /** Status toggle switch for Open ↔ Closed with optimistic update. */
-function StatusToggle({
-  id,
-  status,
-}: {
-  id: string;
-  status: JobOpeningStatus;
-}) {
+function StatusToggle({ id, status }: { id: string; status: JobOpeningStatus }) {
   const { mutate: updateStatus, isPending } = useUpdateJobStatus();
   const toast = useToast();
 
   const handleToggle = React.useCallback(() => {
     const newStatus =
-      status === JobOpeningStatus.Open
-        ? JobOpeningStatus.Closed
-        : JobOpeningStatus.Open;
+      status === JobOpeningStatus.Open ? JobOpeningStatus.Closed : JobOpeningStatus.Open;
 
     updateStatus(
       { id, status: newStatus },
@@ -161,9 +137,7 @@ export default function JobsPage() {
                   <UsersIcon className="h-3 w-3" />
                   {job.candidateCount ?? 0} candidate{(job.candidateCount ?? 0) !== 1 ? 's' : ''}
                 </span>
-                <span>
-                  Created {new Date(job.createdAt).toLocaleDateString()}
-                </span>
+                <span>Created {new Date(job.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
 

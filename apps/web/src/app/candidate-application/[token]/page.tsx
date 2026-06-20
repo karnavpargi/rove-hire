@@ -24,6 +24,7 @@ import {
 import { ApplicationForm } from './application-form';
 import { LinkUsedScreen } from './link-used-screen';
 import { LinkInvalidScreen } from './link-invalid-screen';
+import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
 
 type TokenStatus = 'loading' | 'valid' | 'expired' | 'used' | 'invalid';
 
@@ -42,7 +43,7 @@ export default function CandidateApplicationPage() {
       try {
         const data = await graphqlClient.request<MagicLinkValidationResult>(
           VALIDATE_MAGIC_LINK_QUERY,
-          { token }
+          { token },
         );
 
         if (data.validateMagicLink.valid) {
@@ -72,21 +73,20 @@ export default function CandidateApplicationPage() {
     setSubmitError(null);
 
     try {
-      await graphqlClient.request<SubmitApplicationResult>(
-        SUBMIT_APPLICATION_MUTATION,
-        { token, input: formData }
-      );
+      await graphqlClient.request<SubmitApplicationResult>(SUBMIT_APPLICATION_MUTATION, {
+        token,
+        input: formData,
+      });
       router.push('/candidate-application/success');
     } catch (error: unknown) {
       // Check if the error indicates the link was already used (concurrent submission)
-      const errorMessage =
-        error instanceof Error ? error.message : 'An unexpected error occurred';
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
 
       if (errorMessage.toLowerCase().includes('already used')) {
         setStatus('used');
       } else {
         setSubmitError(
-          'We couldn\u2019t submit your application. Please check your details and try again.'
+          'We couldn\u2019t submit your application. Please check your details and try again.',
         );
       }
     } finally {
@@ -96,14 +96,7 @@ export default function CandidateApplicationPage() {
 
   // Loading state
   if (status === 'loading') {
-    return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <div className="w-full max-w-md text-center" role="status" aria-label="Validating link">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="mt-4 text-sm text-muted-foreground">Validating your link...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton variant="card" />;
   }
 
   // Link already used
@@ -118,14 +111,13 @@ export default function CandidateApplicationPage() {
 
   // Valid token — show the form
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-8">
-      <div className="w-full max-w-lg">
-        <ApplicationForm
-          onSubmit={handleSubmit}
-          submitting={submitting}
-          submitError={submitError}
-        />
+    <div className="space-y-4">
+      <div className="text-center">
+        <p className="text-sm text-muted-foreground">
+          Complete your application to continue in the hiring process.
+        </p>
       </div>
+      <ApplicationForm onSubmit={handleSubmit} submitting={submitting} submitError={submitError} />
     </div>
   );
 }

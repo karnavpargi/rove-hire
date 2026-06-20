@@ -14,8 +14,8 @@
    * Falls back to system font stack for maximum compatibility.
    * ------------------------------------------------------------------ */
   --font-sans:
-    var(--font-inter, 'Inter'), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    var(--font-jakarta, 'Plus Jakarta Sans'), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono:
     'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, 'Liberation Mono',
     monospace;
@@ -141,6 +141,10 @@
   --color-status-hired-bg: oklch(0.95 0.03 145);
   --color-status-rejected-bg: oklch(0.95 0.04 25);
 
+  /* Neutral badge (closed jobs, cancelled interviews) */
+  --color-badge-neutral: oklch(0.45 0.02 250);
+  --color-badge-neutral-bg: oklch(0.94 0.01 250);
+
   /* ------------------------------------------------------------------
    * Spacing Scale — 4px base grid system
    * ------------------------------------------------------------------ */
@@ -242,33 +246,33 @@
  * ============================================================ */
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 4%;
+  --background: 204 100% 97%;
+  --foreground: 201 90% 27%;
 
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 4%;
+  --card-foreground: 201 90% 27%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 4%;
+  --popover-foreground: 201 90% 27%;
 
-  --primary: 239 84% 67%;
+  --primary: 200 96% 32%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 220 14% 96%;
-  --secondary-foreground: 220 9% 46%;
+  --secondary: 199 89% 48%;
+  --secondary-foreground: 0 0% 100%;
 
-  --muted: 220 14% 96%;
-  --muted-foreground: 220 9% 46%;
+  --muted: 204 60% 94%;
+  --muted-foreground: 201 40% 40%;
 
-  --accent: 220 14% 96%;
-  --accent-foreground: 220 9% 15%;
+  --accent: 204 60% 94%;
+  --accent-foreground: 201 90% 27%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
-  --ring: 239 84% 67%;
+  --border: 204 40% 88%;
+  --input: 204 40% 88%;
+  --ring: 200 96% 32%;
 
   --radius: 0.5rem;
 
@@ -328,6 +332,22 @@
   --sidebar-accent: 240 4% 16%;
   --sidebar-accent-foreground: 0 0% 98%;
   --sidebar-ring: 239 84% 67%;
+
+  /* Pipeline / entity badge tints — dark mode */
+  --color-status-applied: oklch(0.75 0.12 250);
+  --color-status-applied-bg: oklch(0.28 0.04 250);
+  --color-status-form-submitted: oklch(0.78 0.12 70);
+  --color-status-form-submitted-bg: oklch(0.28 0.04 70);
+  --color-status-interview-scheduled: oklch(0.75 0.12 295);
+  --color-status-interview-scheduled-bg: oklch(0.28 0.04 295);
+  --color-status-offer-sent: oklch(0.72 0.12 160);
+  --color-status-offer-sent-bg: oklch(0.28 0.04 160);
+  --color-status-hired: oklch(0.72 0.12 145);
+  --color-status-hired-bg: oklch(0.28 0.04 145);
+  --color-status-rejected: oklch(0.72 0.14 25);
+  --color-status-rejected-bg: oklch(0.28 0.05 25);
+  --color-badge-neutral: oklch(0.7 0.02 250);
+  --color-badge-neutral-bg: oklch(0.25 0.01 250);
 }
 
 /* ============================================================
@@ -439,21 +459,18 @@
   }
 
   /* ------------------------------------------------------------------
-   * Touch Targets — Minimum 44x44px
-   * All interactive elements get minimum touch target sizing
+   * Touch Targets — Minimum 44x44px for primary navigation
+   * Scoped to nav/sidebar to avoid breaking compact table actions
    * Requirements: 16.1
    * ------------------------------------------------------------------ */
-  button,
-  [role="button"],
-  a,
-  input[type="checkbox"],
-  input[type="radio"],
-  select {
+  nav a,
+  nav button,
+  [data-touch-target='true'] {
     min-height: 2.75rem; /* 44px */
     min-width: 2.75rem; /* 44px */
   }
 
-  /* Reset min-height for inline text elements that shouldn't be constrained */
+  /* Reset min-height for inline text links outside nav */
   a:not([class]) {
     min-height: auto;
     min-width: auto;

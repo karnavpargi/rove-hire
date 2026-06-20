@@ -14,12 +14,7 @@
 import * as React from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import {
-  ArrowLeftIcon,
-  BriefcaseIcon,
-  CalendarIcon,
-  UsersIcon,
-} from 'lucide-react';
+import { ArrowLeftIcon, BriefcaseIcon, CalendarIcon, UsersIcon } from 'lucide-react';
 import { JobOpeningStatus } from '@rove-hire/shared';
 import type { CandidateStatus } from '@rove-hire/shared';
 import { useJob, useUpdateJobStatus } from '@/hooks/use-jobs';
@@ -28,25 +23,9 @@ import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
 import { StatusBadge } from '@/components/shared/status-badge';
+import { JobStatusBadge } from '@/components/shared/entity-badges';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-/** Status badge for job opening (Open/Closed) */
-function JobStatusBadge({ status }: { status: JobOpeningStatus }) {
-  const isOpen = status === JobOpeningStatus.Open;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-3 py-1 text-sm font-medium',
-        isOpen
-          ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'
-          : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-      )}
-    >
-      {isOpen ? 'Open' : 'Closed'}
-    </span>
-  );
-}
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -59,9 +38,7 @@ export default function JobDetailPage() {
     if (!job) return;
 
     const newStatus =
-      job.status === JobOpeningStatus.Open
-        ? JobOpeningStatus.Closed
-        : JobOpeningStatus.Open;
+      job.status === JobOpeningStatus.Open ? JobOpeningStatus.Closed : JobOpeningStatus.Open;
 
     updateStatus(
       { id: job.id, status: newStatus },
@@ -110,9 +87,7 @@ export default function JobDetailPage() {
               </Link>
             </li>
             <li aria-hidden="true">/</li>
-            <li className="font-medium text-foreground truncate max-w-[200px]">
-              {job.title}
-            </li>
+            <li className="font-medium text-foreground truncate max-w-[200px]">{job.title}</li>
           </ol>
         </nav>
       </div>
@@ -125,7 +100,7 @@ export default function JobDetailPage() {
             <h1 className="text-2xl font-bold tracking-tight">{job.title}</h1>
           </div>
           <div className="flex items-center gap-4">
-            <JobStatusBadge status={job.status} />
+            <JobStatusBadge status={job.status} size="lg" />
             <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
               <UsersIcon className="h-4 w-4" />
               {job.candidateCount ?? 0} candidate{(job.candidateCount ?? 0) !== 1 ? 's' : ''}
@@ -206,13 +181,9 @@ export default function JobDetailPage() {
                 : 'This job is closed and not accepting new candidates.'
             }
             actionHref={
-              job.status === JobOpeningStatus.Open
-                ? `/candidates/new?jobId=${job.id}`
-                : undefined
+              job.status === JobOpeningStatus.Open ? `/candidates/new?jobId=${job.id}` : undefined
             }
-            actionLabel={
-              job.status === JobOpeningStatus.Open ? 'Add Candidate' : undefined
-            }
+            actionLabel={job.status === JobOpeningStatus.Open ? 'Add Candidate' : undefined}
           />
         ) : (
           <div className="space-y-2">
@@ -246,17 +217,17 @@ export default function JobDetailPage() {
 /** Simple markdown renderer for job description preview */
 function MarkdownContent({ content }: { content: string }) {
   const html = React.useMemo(() => {
-    let result = content
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    let result = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     // Code blocks
     result = result.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
     result = result.replace(/`([^`]+)`/g, '<code class="bg-muted px-1 rounded text-xs">$1</code>');
 
     // Headings
-    result = result.replace(/^### (.+)$/gm, '<h3 class="text-base font-semibold mt-3 mb-1">$1</h3>');
+    result = result.replace(
+      /^### (.+)$/gm,
+      '<h3 class="text-base font-semibold mt-3 mb-1">$1</h3>',
+    );
     result = result.replace(/^## (.+)$/gm, '<h2 class="text-lg font-semibold mt-3 mb-1">$1</h2>');
     result = result.replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold mt-3 mb-2">$1</h1>');
 
