@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temp
+tmp/
+.temp/
+
+# Graphify analysis (generated)
+graphify-out/*
+
+# Prisma generated client
+apps/api/src/generated/
+
+# Requirements source docs
+requirements/*
+.kiro/*
+.agents/*
