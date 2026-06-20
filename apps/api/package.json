@@ -9,6 +9,7 @@
     "start:prod": "node dist/main",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:integration": "vitest run test/graphql-resolvers.integration.spec.ts",
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {

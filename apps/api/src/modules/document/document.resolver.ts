@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { Resolver, Mutation, Query, Args, Context } from '@nestjs/graphql';
 import { DocumentService } from './document.service';
-import type { GenerateOfferInput } from './dto/generate-offer.input';
+import { GenerateOfferInput } from './dto/generate-offer.input';
 import { OfferDocumentsOutput } from './dto/offer-documents.output';
 import { DocumentModel } from './dto/document.model';
 import { DocumentListItemModel } from './dto/document-list-item.model';
@@ -46,7 +46,7 @@ export class DocumentResolver {
     description: 'Generate offer letter and NDA PDFs for a candidate',
   })
   async generateOfferDocuments(
-    @Args('input') input: GenerateOfferInput,
+    @Args('input', { type: () => GenerateOfferInput }) input: GenerateOfferInput,
     @Context() context: { req: { user?: { id: string } } },
   ): Promise<OfferDocumentsOutput> {
     const userId = context.req.user?.id ?? 'system';
