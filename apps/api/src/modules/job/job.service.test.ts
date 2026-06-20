@@ -14,6 +14,8 @@ const mockTx = {
     findUnique: vi.fn(),
   },
   jobOpeningSkill: {
+    findMany: vi.fn(),
+    createMany: vi.fn(),
     deleteMany: vi.fn(),
   },
 };
@@ -39,8 +41,8 @@ describe('JobService', () => {
     service = new JobService(mockPrisma as any);
 
     // Default $transaction behaviour: execute callback with a mock transaction client
-    mockPrisma.$transaction.mockImplementation(
-      async (cb: (tx: typeof mockTx) => unknown) => cb(mockTx),
+    mockPrisma.$transaction.mockImplementation(async (cb: (tx: typeof mockTx) => unknown) =>
+      cb(mockTx),
     );
   });
 
@@ -270,9 +272,7 @@ describe('JobService', () => {
     it('should throw NotFoundException for non-existent job', async () => {
       mockPrisma.jobOpening.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateStatus('non-existent', 'Open')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.updateStatus('non-existent', 'Open')).rejects.toThrow(NotFoundException);
     });
 
     it('should reject invalid status value', async () => {
@@ -311,6 +311,7 @@ describe('JobService', () => {
       setupJobFound();
       const updated = mockUpdatedJob();
       setupTransaction(updated);
+      mockTx.jobOpeningSkill.findMany.mockResolvedValue([{ tag: 'Node.js' }, { tag: 'React' }]);
 
       const result = await service.update('job-1', {
         id: 'job-1',
@@ -324,9 +325,15 @@ describe('JobService', () => {
       expect(result.skills).toEqual([{ id: 'sk-1', tag: 'TypeScript' }]);
       expect(result.candidateCount).toBe(2);
 
-      // Old skills deleted before create
-      expect(mockTx.jobOpeningSkill.deleteMany).toHaveBeenCalledWith({
+      expect(mockTx.jobOpeningSkill.findMany).toHaveBeenCalledWith({
         where: { jobOpeningId: 'job-1' },
+        select: { tag: true },
+      });
+      expect(mockTx.jobOpeningSkill.createMany).toHaveBeenCalledWith({
+        data: [{ jobOpeningId: 'job-1', tag: 'TypeScript' }],
+      });
+      expect(mockTx.jobOpeningSkill.deleteMany).toHaveBeenCalledWith({
+        where: { jobOpeningId: 'job-1', tag: { in: ['Node.js', 'React'] } },
       });
 
       expect(mockTx.jobOpening.update).toHaveBeenCalledWith({
@@ -334,7 +341,6 @@ describe('JobService', () => {
         data: {
           title: 'Updated Developer',
           description: 'Updated description',
-          skills: { create: [{ tag: 'TypeScript' }] },
         },
         include: { skills: true, _count: { select: { candidates: true } } },
       });
@@ -353,7 +359,9 @@ describe('JobService', () => {
         include: { skills: true, _count: { select: { candidates: true } } },
       });
 
-      // Skills not provided → no delete
+      // Skills not provided → no skill diff
+      expect(mockTx.jobOpeningSkill.findMany).not.toHaveBeenCalled();
+      expect(mockTx.jobOpeningSkill.createMany).not.toHaveBeenCalled();
       expect(mockTx.jobOpeningSkill.deleteMany).not.toHaveBeenCalled();
     });
 
@@ -373,6 +381,8 @@ describe('JobService', () => {
           data: { status: 'Closed' },
         }),
       );
+      expect(mockTx.jobOpeningSkill.findMany).not.toHaveBeenCalled();
+      expect(mockTx.jobOpeningSkill.createMany).not.toHaveBeenCalled();
       expect(mockTx.jobOpeningSkill.deleteMany).not.toHaveBeenCalled();
     });
 
@@ -404,9 +414,9 @@ describe('JobService', () => {
     it('should reject empty title', async () => {
       setupJobFound();
 
-      await expect(
-        service.update('job-1', { id: 'job-1', title: '' }),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.update('job-1', { id: 'job-1', title: '' })).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject title exceeding 200 characters', async () => {
@@ -420,9 +430,9 @@ describe('JobService', () => {
     it('should reject empty skills array', async () => {
       setupJobFound();
 
-      await expect(
-        service.update('job-1', { id: 'job-1', skills: [] }),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.update('job-1', { id: 'job-1', skills: [] })).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject more than 20 skill tags', async () => {
