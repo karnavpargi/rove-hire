@@ -1,0 +1,634 @@
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+/* ============================================================
+ * ROVE Hire — Design System Tokens
+ * Tailwind CSS v4 Configuration via @theme directive
+ * ============================================================ */
+
+@theme {
+  /* ------------------------------------------------------------------
+   * Typography — Font Families
+   * Inter is the primary font for a clean HR tool aesthetic.
+   * Falls back to system font stack for maximum compatibility.
+   * ------------------------------------------------------------------ */
+  --font-sans:
+    var(--font-inter, 'Inter'), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, 'Liberation Mono',
+    monospace;
+
+  /* ------------------------------------------------------------------
+   * Responsive Breakpoints
+   * Mobile-first: sm (640px), tablet (768px), desktop (1024px)
+   * ------------------------------------------------------------------ */
+  --breakpoint-sm: 40rem; /* 640px */
+  --breakpoint-md: 48rem; /* 768px — tablet */
+  --breakpoint-lg: 64rem; /* 1024px — desktop */
+  --breakpoint-xl: 80rem; /* 1280px */
+  --breakpoint-2xl: 96rem; /* 1536px */
+
+  /* ------------------------------------------------------------------
+   * Color Palette — Primary (Indigo/Blue)
+   * Professional HR tool aesthetic with indigo tones
+   * ------------------------------------------------------------------ */
+  --color-primary-50: oklch(0.97 0.01 260);
+  --color-primary-100: oklch(0.94 0.03 260);
+  --color-primary-200: oklch(0.88 0.06 260);
+  --color-primary-300: oklch(0.79 0.1 260);
+  --color-primary-400: oklch(0.68 0.15 260);
+  --color-primary-500: oklch(0.55 0.19 260);
+  --color-primary-600: oklch(0.47 0.2 260);
+  --color-primary-700: oklch(0.4 0.18 260);
+  --color-primary-800: oklch(0.34 0.15 260);
+  --color-primary-900: oklch(0.28 0.12 260);
+  --color-primary-950: oklch(0.2 0.09 260);
+
+  /* ------------------------------------------------------------------
+   * Color Palette — Secondary (Slate Blue)
+   * Complementary tone for secondary actions and accents
+   * ------------------------------------------------------------------ */
+  --color-secondary-50: oklch(0.97 0.005 250);
+  --color-secondary-100: oklch(0.94 0.01 250);
+  --color-secondary-200: oklch(0.88 0.02 250);
+  --color-secondary-300: oklch(0.79 0.04 250);
+  --color-secondary-400: oklch(0.68 0.06 250);
+  --color-secondary-500: oklch(0.55 0.08 250);
+  --color-secondary-600: oklch(0.47 0.07 250);
+  --color-secondary-700: oklch(0.4 0.06 250);
+  --color-secondary-800: oklch(0.34 0.05 250);
+  --color-secondary-900: oklch(0.28 0.04 250);
+  --color-secondary-950: oklch(0.2 0.03 250);
+
+  /* ------------------------------------------------------------------
+   * Color Palette — Neutral (Cool Gray)
+   * Clean, professional neutrals for backgrounds, borders, text
+   * ------------------------------------------------------------------ */
+  --color-neutral-50: oklch(0.985 0.002 260);
+  --color-neutral-100: oklch(0.965 0.003 260);
+  --color-neutral-200: oklch(0.925 0.005 260);
+  --color-neutral-300: oklch(0.87 0.008 260);
+  --color-neutral-400: oklch(0.71 0.01 260);
+  --color-neutral-500: oklch(0.55 0.012 260);
+  --color-neutral-600: oklch(0.45 0.012 260);
+  --color-neutral-700: oklch(0.37 0.012 260);
+  --color-neutral-800: oklch(0.27 0.01 260);
+  --color-neutral-900: oklch(0.21 0.008 260);
+  --color-neutral-950: oklch(0.13 0.005 260);
+
+  /* ------------------------------------------------------------------
+   * Semantic Colors — Success (Green)
+   * ------------------------------------------------------------------ */
+  --color-success-50: oklch(0.97 0.02 145);
+  --color-success-100: oklch(0.94 0.04 145);
+  --color-success-200: oklch(0.88 0.08 145);
+  --color-success-300: oklch(0.79 0.13 145);
+  --color-success-400: oklch(0.68 0.16 145);
+  --color-success-500: oklch(0.55 0.15 145);
+  --color-success-600: oklch(0.47 0.13 145);
+  --color-success-700: oklch(0.4 0.11 145);
+  --color-success-800: oklch(0.34 0.09 145);
+  --color-success-900: oklch(0.28 0.07 145);
+  --color-success-950: oklch(0.2 0.05 145);
+
+  /* ------------------------------------------------------------------
+   * Semantic Colors — Warning (Amber)
+   * ------------------------------------------------------------------ */
+  --color-warning-50: oklch(0.98 0.02 85);
+  --color-warning-100: oklch(0.95 0.05 85);
+  --color-warning-200: oklch(0.9 0.1 85);
+  --color-warning-300: oklch(0.84 0.15 85);
+  --color-warning-400: oklch(0.77 0.17 85);
+  --color-warning-500: oklch(0.7 0.16 85);
+  --color-warning-600: oklch(0.6 0.15 85);
+  --color-warning-700: oklch(0.5 0.13 85);
+  --color-warning-800: oklch(0.42 0.1 85);
+  --color-warning-900: oklch(0.35 0.08 85);
+  --color-warning-950: oklch(0.25 0.06 85);
+
+  /* ------------------------------------------------------------------
+   * Semantic Colors — Error/Destructive (Red)
+   * ------------------------------------------------------------------ */
+  --color-error-50: oklch(0.97 0.02 25);
+  --color-error-100: oklch(0.94 0.05 25);
+  --color-error-200: oklch(0.88 0.1 25);
+  --color-error-300: oklch(0.79 0.15 25);
+  --color-error-400: oklch(0.68 0.18 25);
+  --color-error-500: oklch(0.55 0.2 25);
+  --color-error-600: oklch(0.47 0.19 25);
+  --color-error-700: oklch(0.4 0.16 25);
+  --color-error-800: oklch(0.34 0.13 25);
+  --color-error-900: oklch(0.28 0.1 25);
+  --color-error-950: oklch(0.2 0.07 25);
+
+  /* ------------------------------------------------------------------
+   * Candidate Status Colors — Pipeline-specific semantic colors
+   * ------------------------------------------------------------------ */
+  --color-status-applied: oklch(0.6 0.16 250); /* Blue */
+  --color-status-form-submitted: oklch(0.7 0.15 70); /* Amber */
+  --color-status-interview-scheduled: oklch(0.6 0.16 295); /* Violet */
+  --color-status-offer-sent: oklch(0.6 0.15 160); /* Emerald */
+  --color-status-hired: oklch(0.55 0.15 145); /* Green */
+  --color-status-rejected: oklch(0.55 0.2 25); /* Red */
+
+  /* Status background tints (lower opacity appearance) */
+  --color-status-applied-bg: oklch(0.95 0.03 250);
+  --color-status-form-submitted-bg: oklch(0.95 0.04 70);
+  --color-status-interview-scheduled-bg: oklch(0.95 0.03 295);
+  --color-status-offer-sent-bg: oklch(0.95 0.03 160);
+  --color-status-hired-bg: oklch(0.95 0.03 145);
+  --color-status-rejected-bg: oklch(0.95 0.04 25);
+
+  /* ------------------------------------------------------------------
+   * Spacing Scale — 4px base grid system
+   * ------------------------------------------------------------------ */
+  --spacing-0: 0px;
+  --spacing-0-5: 0.125rem; /* 2px */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-1-5: 0.375rem; /* 6px */
+  --spacing-2: 0.5rem; /* 8px */
+  --spacing-2-5: 0.625rem; /* 10px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-3-5: 0.875rem; /* 14px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-5: 1.25rem; /* 20px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-7: 1.75rem; /* 28px */
+  --spacing-8: 2rem; /* 32px */
+  --spacing-9: 2.25rem; /* 36px */
+  --spacing-10: 2.5rem; /* 40px */
+  --spacing-12: 3rem; /* 48px */
+  --spacing-14: 3.5rem; /* 56px */
+  --spacing-16: 4rem; /* 64px */
+  --spacing-20: 5rem; /* 80px */
+  --spacing-24: 6rem; /* 96px */
+  --spacing-28: 7rem; /* 112px */
+  --spacing-32: 8rem; /* 128px */
+  --spacing-36: 9rem; /* 144px */
+  --spacing-40: 10rem; /* 160px */
+  --spacing-44: 11rem; /* 176px */
+  --spacing-48: 12rem; /* 192px */
+  --spacing-52: 13rem; /* 208px */
+  --spacing-56: 14rem; /* 224px */
+  --spacing-60: 15rem; /* 240px */
+  --spacing-64: 16rem; /* 256px */
+  --spacing-72: 18rem; /* 288px */
+  --spacing-80: 20rem; /* 320px */
+  --spacing-96: 24rem; /* 384px */
+
+  /* ------------------------------------------------------------------
+   * Border Radius
+   * ------------------------------------------------------------------ */
+  --radius-sm: 0.25rem; /* 4px */
+  --radius-md: 0.375rem; /* 6px */
+  --radius-lg: 0.5rem; /* 8px */
+  --radius-xl: 0.75rem; /* 12px */
+  --radius-2xl: 1rem; /* 16px */
+  --radius-full: 9999px;
+
+  /* ------------------------------------------------------------------
+   * Shadows
+   * ------------------------------------------------------------------ */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ------------------------------------------------------------------
+   * Animations & Transitions
+   * ------------------------------------------------------------------ */
+  --animate-fade-in: fade-in 200ms ease-out;
+  --animate-slide-up: slide-up 300ms ease-out;
+  --animate-slide-down: slide-down 300ms ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ============================================================
+ * CSS Custom Properties for Shadcn/UI component theming
+ * Uses HSL values for compatibility with Shadcn components
+ * ============================================================ */
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 4%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 4%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 4%;
+
+  --primary: 239 84% 67%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 220 9% 46%;
+
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+
+  --accent: 220 14% 96%;
+  --accent-foreground: 220 9% 15%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 239 84% 67%;
+
+  --radius: 0.5rem;
+
+  --chart-1: 239 84% 67%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 35 92% 50%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+
+  /* Sidebar theming */
+  --sidebar: 0 0% 98%;
+  --sidebar-foreground: 240 6% 25%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-accent: 220 14% 96%;
+  --sidebar-accent-foreground: 220 9% 15%;
+  --sidebar-ring: 239 84% 67%;
+}
+
+.dark {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+
+  --card: 240 10% 6%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 240 10% 6%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 239 84% 67%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 240 4% 16%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 65%;
+
+  --accent: 240 4% 16%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --ring: 239 84% 67%;
+
+  --chart-1: 239 70% 70%;
+  --chart-2: 160 50% 55%;
+  --chart-3: 35 80% 60%;
+  --chart-4: 280 55% 70%;
+  --chart-5: 340 65% 65%;
+
+  --sidebar: 240 6% 7%;
+  --sidebar-foreground: 240 5% 65%;
+  --sidebar-border: 240 4% 16%;
+  --sidebar-accent: 240 4% 16%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-ring: 239 84% 67%;
+}
+
+/* ============================================================
+ * Base Layer — Global resets and defaults
+ * ============================================================ */
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+  }
+
+  /* ------------------------------------------------------------------
+   * Typography Hierarchy — Responsive (14-18px body)
+   * Tablet (768px+): standard sizes
+   * Desktop (1024px+): slightly larger
+   * Requirements: 16.3
+   * ------------------------------------------------------------------ */
+  h1 {
+    font-size: 1.75rem; /* 28px mobile */
+    line-height: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    font-size: 1.375rem; /* 22px mobile */
+    line-height: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.625rem;
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem;
+    font-weight: 500;
+  }
+
+  p {
+    font-size: 0.875rem; /* 14px — mobile body */
+    line-height: 1.375rem;
+  }
+
+  small {
+    font-size: 0.75rem; /* 12px — caption */
+    line-height: 1rem;
+  }
+
+  /* Tablet (768px+): scale up body text */
+  @media (min-width: 768px) {
+    h1 {
+      font-size: 2rem; /* 32px */
+      line-height: 2.5rem;
+    }
+    h2 {
+      font-size: 1.5rem; /* 24px */
+      line-height: 2rem;
+    }
+    h3 {
+      font-size: 1.25rem; /* 20px */
+      line-height: 1.75rem;
+    }
+    h4 {
+      font-size: 1.125rem; /* 18px */
+      line-height: 1.625rem;
+    }
+    p {
+      font-size: 1rem; /* 16px */
+      line-height: 1.625rem;
+    }
+  }
+
+  /* Desktop (1024px+): max body size */
+  @media (min-width: 1024px) {
+    p {
+      font-size: 1rem; /* 16px — stays at 16px, max 18px for large text */
+      line-height: 1.75rem;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * Focus Visible — WCAG 2.1 AA Compliant
+   * 3:1 contrast ratio against adjacent colors using a high-visibility
+   * ring with offset to avoid overlapping content.
+   * Requirements: 15.4
+   * ------------------------------------------------------------------ */
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: var(--radius-sm, 0.25rem);
+  }
+
+  /* Ensure focus is visible on dark backgrounds too */
+  .dark :focus-visible {
+    outline-color: hsl(239 84% 75%);
+  }
+
+  /* ------------------------------------------------------------------
+   * Touch Targets — Minimum 44x44px
+   * All interactive elements get minimum touch target sizing
+   * Requirements: 16.1
+   * ------------------------------------------------------------------ */
+  button,
+  [role="button"],
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 2.75rem; /* 44px */
+    min-width: 2.75rem; /* 44px */
+  }
+
+  /* Reset min-height for inline text elements that shouldn't be constrained */
+  a:not([class]) {
+    min-height: auto;
+    min-width: auto;
+  }
+
+  /* Interactive elements need minimum 8px padding (Requirements: 16.3) */
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    padding: max(0.5rem, var(--tw-padding, 0.5rem));
+  }
+
+  /* ------------------------------------------------------------------
+   * Screen reader only utility (visually hidden but accessible)
+   * ------------------------------------------------------------------ */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* ------------------------------------------------------------------
+   * Reduced motion preference — respect user's system setting
+   * ------------------------------------------------------------------ */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * High contrast focus for forced-colors mode (Windows High Contrast)
+   * ------------------------------------------------------------------ */
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline: 3px solid CanvasText;
+    }
+  }
+}
+
+/* ============================================================
+ * Utility Layer — Typography Scale Classes & Accessibility
+ * ============================================================ */
+
+@layer utilities {
+  /* Heading scale: 24-32px */
+  .text-heading-1 {
+    font-size: 1.75rem; /* 28px mobile */
+    line-height: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .text-heading-2 {
+    font-size: 1.375rem; /* 22px mobile */
+    line-height: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* Subheading scale: 18-20px */
+  .text-subheading-1 {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.625rem;
+    font-weight: 600;
+  }
+
+  .text-subheading-2 {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem;
+    font-weight: 500;
+  }
+
+  /* Body scale: 14-18px (responsive) */
+  .text-body {
+    font-size: 0.875rem; /* 14px mobile */
+    line-height: 1.375rem;
+    font-weight: 400;
+  }
+
+  .text-body-sm {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+    font-weight: 400;
+  }
+
+  /* Caption scale: 12px */
+  .text-caption {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1rem;
+    font-weight: 400;
+  }
+
+  .text-caption-medium {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1rem;
+    font-weight: 500;
+  }
+
+  /* Tablet (768px+): larger body text */
+  @media (min-width: 768px) {
+    .text-heading-1 {
+      font-size: 2rem; /* 32px */
+      line-height: 2.5rem;
+    }
+    .text-heading-2 {
+      font-size: 1.5rem; /* 24px */
+      line-height: 2rem;
+    }
+    .text-subheading-1 {
+      font-size: 1.25rem; /* 20px */
+      line-height: 1.75rem;
+    }
+    .text-subheading-2 {
+      font-size: 1.125rem; /* 18px */
+      line-height: 1.625rem;
+    }
+    .text-body {
+      font-size: 1rem; /* 16px tablet */
+      line-height: 1.625rem;
+    }
+  }
+
+  /* Desktop (1024px+): max text size */
+  @media (min-width: 1024px) {
+    .text-body {
+      font-size: 1rem; /* 16px desktop */
+      line-height: 1.75rem;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+   * Touch Target Utility — Ensures minimum 44x44px clickable area
+   * Apply to interactive elements that are visually smaller
+   * Requirements: 16.1
+   * ------------------------------------------------------------------ */
+  .touch-target {
+    position: relative;
+  }
+
+  .touch-target::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ------------------------------------------------------------------
+   * Focus visible override for components that need custom styles
+   * Requirements: 15.4
+   * ------------------------------------------------------------------ */
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: var(--radius-sm, 0.25rem);
+  }
+}
