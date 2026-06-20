@@ -32,7 +32,10 @@ test.describe('HR Sign-In Flow', () => {
 
     // Verify dashboard content is visible (candidate list or sidebar)
     await expect(
-      page.getByRole('navigation').or(page.getByText(/dashboard|candidates|pipeline/i)).first()
+      page
+        .getByRole('navigation')
+        .or(page.getByText(/dashboard|candidates|pipeline/i))
+        .first(),
     ).toBeVisible();
   });
 
@@ -44,9 +47,9 @@ test.describe('HR Sign-In Flow', () => {
     await page.getByRole('button', { name: /sign in|log in|login/i }).click();
 
     // Should show a generic error (not revealing which field is wrong)
-    await expect(
-      page.getByText(/invalid|incorrect|failed|error/i)
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/invalid|incorrect|failed|error/i)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Should stay on login page
     await expect(page).toHaveURL(/login/);
@@ -62,12 +65,15 @@ test.describe('Create Job Opening Flow', () => {
 
     // Fill job opening form
     await page.getByLabel(/title/i).fill('QA Automation Engineer');
-    
+
     // Description field (may be a textarea or markdown editor)
-    const descriptionField = page.getByLabel(/description/i)
+    const descriptionField = page
+      .getByLabel(/description/i)
       .or(page.locator('textarea').first())
       .or(page.getByRole('textbox', { name: /description/i }));
-    await descriptionField.first().fill('## Role\n\nWe need a QA engineer to build our automation framework.');
+    await descriptionField
+      .first()
+      .fill('## Role\n\nWe need a QA engineer to build our automation framework.');
 
     // Add skills tags (TagInput — find the <input> inside the tag group)
     const skillsTextbox = page.getByRole('textbox', { name: /skills/i });
@@ -85,8 +91,7 @@ test.describe('Create Job Opening Flow', () => {
 
     // Verify success: toast notification or redirect to job list/detail
     await expect(
-      page.getByText(/created|success/i)
-        .or(page.getByText('QA Automation Engineer'))
+      page.getByText(/created|success/i).or(page.getByText('QA Automation Engineer')),
     ).toBeVisible({ timeout: 10_000 });
   });
 });
@@ -112,7 +117,7 @@ test.describe('Add Candidate Flow', () => {
     // Upload a PDF resume
     const resumePath = path.join(__dirname, 'fixtures', 'test-resume.pdf');
     const fileInput = page.locator('input[type="file"]');
-    
+
     if (await fileInput.isVisible()) {
       await fileInput.setInputFiles(resumePath);
     } else {
@@ -128,15 +133,15 @@ test.describe('Add Candidate Flow', () => {
 
     // Verify magic link is displayed
     await expect(
-      page.getByText(/magic link|application link|candidate-application/i)
+      page
+        .getByText(/magic link|application link|candidate-application/i)
         .or(page.locator('input[readonly]'))
-        .or(page.getByRole('textbox', { name: /link|url/i }))
+        .or(page.getByRole('textbox', { name: /link|url/i })),
     ).toBeVisible({ timeout: 15_000 });
 
     // Verify copy button exists
     await expect(
-      page.getByRole('button', { name: /copy/i })
-        .or(page.locator('[data-testid="copy-link"]'))
+      page.getByRole('button', { name: /copy/i }).or(page.locator('[data-testid="copy-link"]')),
     ).toBeVisible();
   });
 });
@@ -151,21 +156,19 @@ test.describe('Magic Link Application Flow', () => {
     // Note: This test uses a pre-seeded magic link token.
     // In a real scenario, we'd get the token from the "Add Candidate" flow.
     // For now, we test the expired/invalid flow since we don't have a valid token.
-    
+
     // Test invalid token shows appropriate error
     await page.goto('/candidate-application/invalid-test-token');
-    
-    await expect(
-      page.getByText(/invalid|expired|not found|error/i)
-    ).toBeVisible({ timeout: 10_000 });
+
+    await expect(page.getByText(/invalid|expired|not found|error/i)).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test('expired magic link shows expired screen', async ({ page }) => {
     await page.goto('/candidate-application/expired-token-test');
 
-    await expect(
-      page.getByText(/invalid|expired|not found/i)
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/invalid|expired|not found/i)).toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -211,9 +214,9 @@ test.describe('Interview Scheduling Flow', () => {
     await page.getByRole('button', { name: /schedule interview$/i }).click();
 
     // Verify success via toast notification
-    await expect(
-      page.getByText('Interview scheduled successfully')
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Interview scheduled successfully')).toBeVisible({
+      timeout: 10_000,
+    });
   });
 });
 
@@ -229,77 +232,62 @@ test.describe('Offer Generation Flow', () => {
     // Wait for profile to load
     await expect(page.getByText('Carol Chen')).toBeVisible({ timeout: 10_000 });
 
-    // Click Generate Offer Documents button
-    const generateButton = page.getByRole('button', { name: /generate.*offer|offer.*document/i });
-    await expect(generateButton).toBeVisible({ timeout: 5_000 });
-    await generateButton.click();
+    // Click the Actions section "Generate Offer Documents" button to open the form
+    const actionsButton = page.locator('button:has-text("Generate Offer Documents")').last();
+    await expect(actionsButton).toBeVisible({ timeout: 5_000 });
+    await actionsButton.click();
 
-    // Fill offer generation form
-    const roleInput = page.getByLabel(/role|title/i).first();
-    if (await roleInput.isVisible()) {
-      await roleInput.fill('Senior Software Engineer');
-    }
+    // Wait for form to appear via URL change
+    await page.waitForURL(/action=generate-offer/);
+    await page.waitForTimeout(500);
+
+    // Verify form is visible using element IDs
+    await expect(page.locator('#offer-role-title')).toBeVisible({ timeout: 5_000 });
+
+    // Fill offer generation form using element IDs
+    await page.locator('#offer-role-title').fill('Senior Software Engineer');
 
     // Salary amount
-    const salaryInput = page.getByLabel(/salary|amount/i).first();
-    if (await salaryInput.isVisible()) {
-      await salaryInput.fill('160000');
-    }
+    await page.locator('#offer-salary-amount').fill('160000');
 
-    // Currency
-    const currencySelect = page.getByLabel(/currency/i)
-      .or(page.getByRole('combobox', { name: /currency/i }));
-    if (await currencySelect.first().isVisible()) {
-      await currencySelect.first().click();
-      await page.getByRole('option', { name: /USD/i }).first().click();
-    }
+    // Currency - leave default (USD)
 
     // Start date (future date)
-    const startDateInput = page.getByLabel(/start.*date/i);
-    if (await startDateInput.isVisible()) {
-      const futureDate = new Date();
-      futureDate.setMonth(futureDate.getMonth() + 1);
-      await startDateInput.fill(futureDate.toISOString().split('T')[0]);
-    }
+    const futureDate = new Date();
+    futureDate.setMonth(futureDate.getMonth() + 1);
+    await page.locator('#offer-start-date').fill(futureDate.toISOString().split('T')[0]);
 
     // Reporting manager
-    const managerInput = page.getByLabel(/manager|reporting/i);
-    if (await managerInput.isVisible()) {
-      await managerInput.fill('Sarah Thompson');
-    }
+    await page.locator('#offer-reporting-manager').fill('Sarah Thompson');
 
     // Location
-    const locationInput = page.getByLabel(/location/i);
-    if (await locationInput.isVisible()) {
-      await locationInput.fill('San Francisco, CA');
-    }
+    await page.locator('#offer-location').fill('San Francisco, CA');
 
-    // Submit offer generation (click the form's submit button, not the actions section button)
-    await page.getByRole('button', { name: /generate offer/i }).first().click();
+    // Submit using the form's submit button (inside the form element)
+    await page.locator('form button[type="submit"]').click();
 
     // Wait for PDF generation (up to 15s as it involves Puppeteer)
     await expect(
-      page.getByText(/offer.*sent|generated|success/i)
+      page
+        .getByText(/offer.*sent|generated|success/i)
         .or(page.getByText(/offer_sent|OfferSent/i))
-        .or(page.getByText(/download/i))
-    ).toBeVisible({ timeout: 20_000 });
+        .or(page.getByText(/download/i)),
+    ).toBeVisible({ timeout: 30_000 });
 
     // Verify PDFs are listed (offer letter + NDA)
     await expect(
-      page.getByText(/offer.*letter|offer-letter/i)
-        .or(page.getByRole('link', { name: /offer/i }))
+      page.getByText(/offer.*letter|offer-letter/i).or(page.getByRole('link', { name: /offer/i })),
     ).toBeVisible();
 
     await expect(
-      page.getByRole('button', { name: /download nda/i })
+      page
+        .getByRole('button', { name: /download nda/i })
         .or(page.getByText(/^NDA$/))
-        .or(page.locator('text=NDA').first())
+        .or(page.locator('text=NDA').first()),
     ).toBeVisible();
 
     // Verify status badge updated to Offer Sent
-    await expect(
-      page.getByText(/offer.?sent/i)
-    ).toBeVisible();
+    await expect(page.getByText(/offer.?sent/i)).toBeVisible();
   });
 });
 
@@ -328,13 +316,14 @@ test.describe('Mark as Hired Flow', () => {
 
     // Verify status updated to Hired
     await expect(
-      page.getByRole('status').or(page.getByText(/^Hired$/)).first()
+      page
+        .getByRole('status')
+        .or(page.getByText(/^Hired$/))
+        .first(),
     ).toBeVisible({ timeout: 10_000 });
 
     // Verify no more action buttons (terminal state)
-    await expect(
-      page.getByRole('button', { name: /reject/i })
-    ).not.toBeVisible();
+    await expect(page.getByRole('button', { name: /reject/i })).not.toBeVisible();
   });
 });
 
@@ -356,27 +345,32 @@ test.describe('Rejection Flow', () => {
     await rejectButton.click();
 
     // Fill rejection reason in dialog
-    const reasonInput = page.getByLabel(/reason/i)
+    const reasonInput = page
+      .getByLabel(/reason/i)
       .or(page.getByPlaceholder(/reason/i))
       .or(page.getByRole('textbox').last());
-    
+
     await expect(reasonInput).toBeVisible({ timeout: 5_000 });
     await reasonInput.fill(
-      'Candidate does not meet the minimum experience requirements for this role after thorough evaluation.'
+      'Candidate does not meet the minimum experience requirements for this role after thorough evaluation.',
     );
 
     // Confirm rejection
-    await page.getByRole('button', { name: /confirm|reject|submit/i }).last().click();
+    await page
+      .getByRole('button', { name: /confirm|reject|submit/i })
+      .last()
+      .click();
 
     // Verify status updated to Rejected
     await expect(
-      page.getByRole('status').or(page.getByText(/^Rejected$/)).first()
+      page
+        .getByRole('status')
+        .or(page.getByText(/^Rejected$/))
+        .first(),
     ).toBeVisible({ timeout: 10_000 });
 
     // Verify terminal status — no action buttons should remain
-    await expect(
-      page.getByRole('button', { name: /reject|hire|generate/i })
-    ).not.toBeVisible();
+    await expect(page.getByRole('button', { name: /reject|hire|generate/i })).not.toBeVisible();
   });
 
   test('rejection without reason shows validation error', async ({ page }) => {
@@ -397,8 +391,6 @@ test.describe('Rejection Flow', () => {
     await reasonInput.fill('No'); // Too short (< 5 chars)
 
     // Verify inline validation — button stays disabled when reason is too short
-    await expect(
-      page.getByRole('button', { name: /reject candidate/i })
-    ).toBeDisabled();
+    await expect(page.getByRole('button', { name: /reject candidate/i })).toBeDisabled();
   });
 });

@@ -1,0 +1,65 @@
+- generic [ref=e1]:
+    - generic [ref=e24]:
+        - link "Skip to main content" [ref=e25] [cursor=pointer]:
+            - /url: '#main-content'
+        - navigation "Main navigation" [ref=e26]:
+            - link "ROVE Hire" [ref=e28] [cursor=pointer]:
+                - /url: /
+                - generic [ref=e29]: R
+                - text: ROVE Hire
+            - navigation "Sidebar navigation" [ref=e30]:
+                - link "Dashboard" [ref=e31] [cursor=pointer]:
+                    - /url: /
+                    - img [ref=e32]
+                    - text: Dashboard
+                - link "Jobs" [ref=e37] [cursor=pointer]:
+                    - /url: /jobs
+                    - img [ref=e38]
+                    - text: Jobs
+                - link "Candidates" [ref=e41] [cursor=pointer]:
+                    - /url: /candidates
+                    - img [ref=e42]
+                    - text: Candidates
+                - link "Interviews" [ref=e47] [cursor=pointer]:
+                    - /url: /interviews
+                    - img [ref=e48]
+                    - text: Interviews
+                - link "Documents" [ref=e50] [cursor=pointer]:
+                    - /url: /documents
+                    - img [ref=e51]
+                    - text: Documents
+                - link "Settings" [ref=e54] [cursor=pointer]:
+                    - /url: /settings
+                    - img [ref=e55]
+                    - text: Settings
+            - generic [ref=e59]:
+                - generic [ref=e60]: HR
+                - generic [ref=e61]:
+                    - paragraph [ref=e62]: HR Admin
+                    - paragraph [ref=e63]: admin@rove.com
+        - generic [ref=e64]:
+            - banner [ref=e65]
+            - main "Page content" [active] [ref=e66]:
+                - generic [ref=e67]:
+                    - generic [ref=e68]:
+                        - heading "Candidate Pipeline" [level=1] [ref=e69]
+                        - paragraph [ref=e70]: Manage and track candidates through your hiring pipeline.
+                    - generic [ref=e71]:
+                        - generic [ref=e72]:
+                            - generic [ref=e73]: Search by name or role...
+                            - img
+                            - searchbox "Search candidates by name or role" [ref=e74]
+                        - button "Filter by status" [ref=e76]:
+                            - img
+                            - generic [ref=e77]: Status
+                    - alert [ref=e78]:
+                        - img [ref=e80]
+                        - heading "Failed to load candidates" [level=3] [ref=e82]
+                        - paragraph [ref=e83]: "GraphQL Error (Code: 400): {\"response\":{\"status\":400,\"headers\":{}},\"request\":{\"query\":\"\\n query Candidates(\\n $page: Int\\n $pageSize: Int\\n $statuses: [CandidateStatus!]\\n $search: String\\n $sortBy: String\\n $sortOrder: String\\n ) {\\n candidates(\\n page: $page\\n pageSize: $pageSize\\n statuses: $statuses\\n search: $search\\n sortBy: $sortBy\\n sortOrder: $sortOrder\\n ) {\\n items {\\n id\\n name\\n email\\n currentRole\\n status\\n lastActivityAt\\n jobOpeningId\\n }\\n total\\n page\\n pageSize\\n totalPages\\n hasNextPage\\n hasPreviousPage\\n }\\n }\\n\",\"variables\":{\"page\":1,\"pageSize\":20,\"sortBy\":\"lastActivity\",\"sortOrder\":\"desc\"}}}"
+                        - button "Try again" [ref=e84]:
+                            - img
+                            - text: Try again
+    - status [ref=e20]: Navigated to Dashboard
+    - status [ref=e21]
+    - alert [ref=e22]
+    - alert [ref=e23]

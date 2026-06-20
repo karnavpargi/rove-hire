@@ -1,0 +1,22 @@
+- generic [active] [ref=e1]:
+    - main "Authentication" [ref=e2]:
+        - generic [ref=e4]:
+            - generic [ref=e5]:
+                - generic [ref=e6]: Sign in to ROVE Hire
+                - generic [ref=e7]: Enter your credentials to access the recruitment dashboard
+            - form "Login form" [ref=e9]:
+                - generic [ref=e10]:
+                    - generic [ref=e11]:
+                        - generic [ref=e12]: Email
+                        - textbox "Email" [ref=e13]:
+                            - /placeholder: you@rove.com
+                    - generic [ref=e14]:
+                        - generic [ref=e15]: Password
+                        - textbox "Password" [ref=e16]:
+                            - /placeholder: ••••••••
+                    - button "Sign in" [ref=e17]
+            - paragraph [ref=e19]: Internal access only. Contact IT for credentials.
+    - status [ref=e20]: Navigated to Login
+    - status [ref=e21]
+    - alert [ref=e22]
+    - alert [ref=e23]
