@@ -1,5 +1,5 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { Injectable, Inject, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { jobTitleSchema, skillsTagsSchema } from '@rove-hire/shared';
 import type { CreateJobOpeningInput } from './dto/create-job-opening.input';
 import type { UpdateJobOpeningInput } from './dto/update-job-opening.input';
@@ -18,7 +18,7 @@ import type { UpdateJobOpeningInput } from './dto/update-job-opening.input';
 export class JobService {
   private readonly logger = new Logger(JobService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Create a new job opening with validation.

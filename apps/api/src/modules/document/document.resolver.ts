@@ -1,5 +1,6 @@
+import { Inject } from '@nestjs/common';
 import { Resolver, Mutation, Query, Args, Context } from '@nestjs/graphql';
-import type { DocumentService } from './document.service';
+import { DocumentService } from './document.service';
 import type { GenerateOfferInput } from './dto/generate-offer.input';
 import { OfferDocumentsOutput } from './dto/offer-documents.output';
 import { DocumentModel } from './dto/document.model';
@@ -11,7 +12,7 @@ import { DocumentListItemModel } from './dto/document-list-item.model';
  */
 @Resolver(() => DocumentModel)
 export class DocumentResolver {
-  constructor(private readonly documentService: DocumentService) {}
+  constructor(@Inject(DocumentService) private readonly documentService: DocumentService) {}
 
   /**
    * List all documents across all candidates (HR documents page).

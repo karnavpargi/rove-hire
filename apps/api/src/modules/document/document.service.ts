@@ -1,7 +1,7 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import type { PrismaService } from '../../prisma/prisma.service';
-import type { FileService } from '../file/file.service';
-import type { TimelineService } from '../timeline/timeline.service';
+import { Injectable, Inject, Logger, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { FileService } from '../file/file.service';
+import { TimelineService } from '../timeline/timeline.service';
 import { SUPPORTED_CURRENCIES, TimelineEventType, DocumentType } from '@rove-hire/shared';
 import {
   salaryAmountSchema,
@@ -38,9 +38,9 @@ export class DocumentService {
   private ndaTemplate!: Handlebars.TemplateDelegate;
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly fileService: FileService,
-    private readonly timelineService: TimelineService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(FileService) private readonly fileService: FileService,
+    @Inject(TimelineService) private readonly timelineService: TimelineService,
   ) {
     this.loadTemplates();
   }
