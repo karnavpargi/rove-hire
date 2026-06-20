@@ -359,6 +359,20 @@ export class DocumentService {
   }
 
   /**
+   * Find all documents across candidates (HR documents page).
+   */
+  async findAll() {
+    return this.prisma.document.findMany({
+      include: {
+        candidate: {
+          select: { id: true, name: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
    * Validate offer input fields.
    * Throws BadRequestException on any validation failure.
    */

@@ -163,7 +163,7 @@ export function CandidateDataTable({ candidates, onRowClick }: CandidateDataTabl
 
       <div className="rounded-md border">
         <Table aria-label="Candidate pipeline list">
-          <TableHeader className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
+          <TableHeader className="sticky top-0 z-10 border-b bg-card">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (

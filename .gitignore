@@ -32,7 +32,16 @@ tmp/
 .temp/
 
 # Graphify analysis (generated)
-graphify-out/*
+graphify-out/
+**/graphify-out/
+
+# AI / agent tooling artifacts
+.playwright-mcp/
+AGENTS.md
+SUMMARY.md
+design-system/
+.planning/
+.taskmaster/
 
 # Prisma generated client
 apps/api/src/generated/

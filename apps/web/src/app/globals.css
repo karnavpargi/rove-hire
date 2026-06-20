@@ -270,7 +270,7 @@
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 204 40% 88%;
+  --border: 204 35% 82%;
   --input: 204 40% 88%;
   --ring: 200 96% 32%;
 
@@ -348,6 +348,44 @@
   --color-status-rejected-bg: oklch(0.28 0.05 25);
   --color-badge-neutral: oklch(0.7 0.02 250);
   --color-badge-neutral-bg: oklch(0.25 0.01 250);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
 }
 
 /* ============================================================
@@ -459,13 +497,12 @@
   }
 
   /* ------------------------------------------------------------------
-   * Touch Targets — Minimum 44x44px for primary navigation
-   * Scoped to nav/sidebar to avoid breaking compact table actions
+   * Touch Targets — Minimum 44x44px for primary navigation links
+   * Compact controls (switches, icon buttons) use .touch-target instead.
    * Requirements: 16.1
    * ------------------------------------------------------------------ */
   nav a,
-  nav button,
-  [data-touch-target='true'] {
+  nav button {
     min-height: 2.75rem; /* 44px */
     min-width: 2.75rem; /* 44px */
   }
@@ -476,13 +513,11 @@
     min-width: auto;
   }
 
-  /* Interactive elements need minimum 8px padding (Requirements: 16.3) */
-  button,
-  [role="button"],
-  input,
-  select,
-  textarea {
-    padding: max(0.5rem, var(--tw-padding, 0.5rem));
+  /* Switch toggles — fixed dimensions; global button rules must not apply */
+  button[role='switch'] {
+    padding: 0;
+    min-height: auto;
+    min-width: auto;
   }
 
   /* ------------------------------------------------------------------
@@ -648,4 +683,21 @@
     outline-offset: 2px;
     border-radius: var(--radius-sm, 0.25rem);
   }
+}
+
+/* ============================================================
+ * Sonner toasts — solid surfaces (no glass/transparency)
+ * ============================================================ */
+
+[data-sonner-toast],
+[data-sonner-toast].sonner-toast {
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: var(--shadow-md) !important;
+  opacity: 1 !important;
+}
+
+[data-sonner-toast] [data-description] {
+  color: hsl(var(--muted-foreground)) !important;
 }

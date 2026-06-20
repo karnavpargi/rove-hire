@@ -1,8 +1,9 @@
 import { Resolver, Mutation, Query, Args, Context } from '@nestjs/graphql';
-import { DocumentService } from './document.service';
-import { GenerateOfferInput } from './dto/generate-offer.input';
+import type { DocumentService } from './document.service';
+import type { GenerateOfferInput } from './dto/generate-offer.input';
 import { OfferDocumentsOutput } from './dto/offer-documents.output';
 import { DocumentModel } from './dto/document.model';
+import { DocumentListItemModel } from './dto/document-list-item.model';
 
 /**
  * GraphQL resolver for document operations.
@@ -11,6 +12,29 @@ import { DocumentModel } from './dto/document.model';
 @Resolver(() => DocumentModel)
 export class DocumentResolver {
   constructor(private readonly documentService: DocumentService) {}
+
+  /**
+   * List all documents across all candidates (HR documents page).
+   */
+  @Query(() => [DocumentListItemModel], {
+    description: 'List all documents across candidates',
+  })
+  async documents(): Promise<DocumentListItemModel[]> {
+    const rows = await this.documentService.findAll();
+    return rows.map((doc) => ({
+      id: doc.id,
+      candidateId: doc.candidateId,
+      type: doc.type,
+      s3Key: doc.s3Key,
+      originalFilename: doc.originalFilename,
+      fileSizeBytes: doc.fileSizeBytes,
+      createdAt: doc.createdAt.toISOString(),
+      candidate: {
+        id: doc.candidate.id,
+        name: doc.candidate.name,
+      },
+    }));
+  }
 
   /**
    * Generate offer letter and NDA PDFs for a candidate.
@@ -34,9 +58,7 @@ export class DocumentResolver {
   @Query(() => String, {
     description: 'Get a pre-signed download URL for a document (15-min expiry)',
   })
-  async documentUrl(
-    @Args('id', { type: () => String }) documentId: string,
-  ): Promise<string> {
+  async documentUrl(@Args('id', { type: () => String }) documentId: string): Promise<string> {
     return this.documentService.getDocumentUrl(documentId);
   }
 

@@ -49,11 +49,7 @@ describe('DocumentService', () => {
       logEvent: vi.fn().mockResolvedValue({}),
     };
 
-    service = new DocumentService(
-      mockPrisma,
-      mockFileService,
-      mockTimelineService,
-    );
+    service = new DocumentService(mockPrisma, mockFileService, mockTimelineService);
   });
 
   describe('validateOfferInput (via generateOfferDocuments)', () => {
@@ -61,7 +57,7 @@ describe('DocumentService', () => {
       candidateId: 'candidate-123',
       roleTitle: 'Senior Engineer',
       salaryCurrency: 'USD',
-      salaryAmount: 150000.00,
+      salaryAmount: 150000.0,
       startDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
       reportingManager: 'John Doe',
       location: 'Dubai, UAE',
@@ -69,44 +65,44 @@ describe('DocumentService', () => {
 
     it('should reject missing role title', async () => {
       const input = { ...validInput, roleTitle: '' };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject role title exceeding 200 chars', async () => {
       const input = { ...validInput, roleTitle: 'x'.repeat(201) };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject salary below 0.01', async () => {
       const input = { ...validInput, salaryAmount: 0 };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject salary above 9,999,999.99', async () => {
       const input = { ...validInput, salaryAmount: 10_000_000 };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject salary with more than 2 decimal places', async () => {
       const input = { ...validInput, salaryAmount: 100.123 };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject unsupported currency', async () => {
       const input = { ...validInput, salaryCurrency: 'XYZ' };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should accept all supported currencies', async () => {
@@ -116,9 +112,9 @@ describe('DocumentService', () => {
 
       for (const currency of ['USD', 'EUR', 'GBP', 'INR', 'AED']) {
         const input = { ...validInput, salaryCurrency: currency };
-        await expect(
-          service.generateOfferDocuments(input, 'user-1'),
-        ).rejects.toThrow('Candidate not found');
+        await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+          'Candidate not found',
+        );
       }
     });
 
@@ -127,9 +123,9 @@ describe('DocumentService', () => {
         ...validInput,
         startDate: '2020-01-01',
       };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should accept today as start date', async () => {
@@ -137,37 +133,37 @@ describe('DocumentService', () => {
       const input = { ...validInput, startDate: today };
       mockPrisma.candidate.findUnique.mockResolvedValue(null);
       // Should fail on candidate not found, not validation
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow('Candidate not found');
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        'Candidate not found',
+      );
     });
 
     it('should reject missing reporting manager', async () => {
       const input = { ...validInput, reportingManager: '' };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject reporting manager exceeding 100 chars', async () => {
       const input = { ...validInput, reportingManager: 'x'.repeat(101) };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject missing location', async () => {
       const input = { ...validInput, location: '' };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject location exceeding 200 chars', async () => {
       const input = { ...validInput, location: 'x'.repeat(201) };
-      await expect(
-        service.generateOfferDocuments(input, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.generateOfferDocuments(input, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -176,7 +172,7 @@ describe('DocumentService', () => {
       candidateId: 'candidate-123',
       roleTitle: 'Senior Engineer',
       salaryCurrency: 'USD',
-      salaryAmount: 150000.00,
+      salaryAmount: 150000.0,
       startDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
       reportingManager: 'John Doe',
       location: 'Dubai, UAE',
@@ -184,9 +180,9 @@ describe('DocumentService', () => {
 
     it('should reject when candidate not found', async () => {
       mockPrisma.candidate.findUnique.mockResolvedValue(null);
-      await expect(
-        service.generateOfferDocuments(validInput, 'user-1'),
-      ).rejects.toThrow('Candidate not found');
+      await expect(service.generateOfferDocuments(validInput, 'user-1')).rejects.toThrow(
+        'Candidate not found',
+      );
     });
 
     it('should reject when candidate has no completed interview', async () => {
@@ -194,13 +190,11 @@ describe('DocumentService', () => {
         id: 'candidate-123',
         name: 'Test Candidate',
         status: 'InterviewScheduled',
-        interviews: [
-          { status: 'Scheduled', feedback: null },
-        ],
+        interviews: [{ status: 'Scheduled', feedback: null }],
       });
-      await expect(
-        service.generateOfferDocuments(validInput, 'user-1'),
-      ).rejects.toThrow('at least one completed interview with feedback');
+      await expect(service.generateOfferDocuments(validInput, 'user-1')).rejects.toThrow(
+        'at least one completed interview with feedback',
+      );
     });
 
     it('should reject when interview is completed but has no feedback', async () => {
@@ -208,13 +202,11 @@ describe('DocumentService', () => {
         id: 'candidate-123',
         name: 'Test Candidate',
         status: 'InterviewScheduled',
-        interviews: [
-          { status: 'Completed', feedback: '' },
-        ],
+        interviews: [{ status: 'Completed', feedback: '' }],
       });
-      await expect(
-        service.generateOfferDocuments(validInput, 'user-1'),
-      ).rejects.toThrow('at least one completed interview with feedback');
+      await expect(service.generateOfferDocuments(validInput, 'user-1')).rejects.toThrow(
+        'at least one completed interview with feedback',
+      );
     });
 
     it('should reject when interview is completed but feedback is only whitespace', async () => {
@@ -222,13 +214,11 @@ describe('DocumentService', () => {
         id: 'candidate-123',
         name: 'Test Candidate',
         status: 'InterviewScheduled',
-        interviews: [
-          { status: 'Completed', feedback: '   ' },
-        ],
+        interviews: [{ status: 'Completed', feedback: '   ' }],
       });
-      await expect(
-        service.generateOfferDocuments(validInput, 'user-1'),
-      ).rejects.toThrow('at least one completed interview with feedback');
+      await expect(service.generateOfferDocuments(validInput, 'user-1')).rejects.toThrow(
+        'at least one completed interview with feedback',
+      );
     });
   });
 
@@ -242,7 +232,9 @@ describe('DocumentService', () => {
 
       const url = await service.getDocumentUrl('doc-1');
       expect(url).toBe('https://s3.example.com/signed-url');
-      expect(mockFileService.getPresignedUrl).toHaveBeenCalledWith('documents/offer-letters/test.pdf');
+      expect(mockFileService.getPresignedUrl).toHaveBeenCalledWith(
+        'documents/offer-letters/test.pdf',
+      );
     });
 
     it('should throw when document not found', async () => {
@@ -271,6 +263,36 @@ describe('DocumentService', () => {
       mockPrisma.document.findMany.mockResolvedValue([]);
       const result = await service.findByCandidateId('candidate-123');
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return all documents with candidate info ordered by createdAt desc', async () => {
+      const mockDocuments = [
+        {
+          id: 'doc-1',
+          candidateId: 'candidate-1',
+          type: 'OfferLetter',
+          s3Key: 'key-1',
+          originalFilename: 'offer.pdf',
+          fileSizeBytes: 1024,
+          createdAt: new Date('2026-06-01'),
+          candidate: { id: 'candidate-1', name: 'Alice Johnson' },
+        },
+      ];
+      mockPrisma.document.findMany.mockResolvedValue(mockDocuments);
+
+      const result = await service.findAll();
+
+      expect(result).toEqual(mockDocuments);
+      expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+        include: {
+          candidate: {
+            select: { id: true, name: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
     });
   });
 });

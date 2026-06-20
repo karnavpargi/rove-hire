@@ -595,7 +595,7 @@ export default function CandidateProfilePage() {
 
       {/* Sticky mobile action bar */}
       {!isTerminal && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 p-3 backdrop-blur-sm lg:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background p-3 lg:hidden">
           <div className="mx-auto flex max-w-6xl gap-2">
             {candidate.status === CandidateStatus.InterviewScheduled && hasCompletedInterview && (
               <Button

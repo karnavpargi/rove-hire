@@ -238,8 +238,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <button
               onClick={logout}
               aria-label="Sign out"
-              data-touch-target="true"
-              className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-[hsl(var(--sidebar-accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="touch-target flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-[hsl(var(--sidebar-accent))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <LogOut className="h-5 w-5" aria-hidden="true" />
             </button>

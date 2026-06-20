@@ -29,7 +29,7 @@ export const VALIDATE_MAGIC_LINK_QUERY = gql`
 
 /** Submit the candidate application form using the magic link token */
 export const SUBMIT_APPLICATION_MUTATION = gql`
-  mutation SubmitApplication($token: String!, $input: ApplicationFormInput!) {
+  mutation SubmitApplication($token: String!, $input: SubmitApplicationInput!) {
     submitApplication(token: $token, input: $input) {
       id
       name

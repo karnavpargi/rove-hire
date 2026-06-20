@@ -121,6 +121,24 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type DocumentCandidate {
+  id: String!
+  name: String!
+}
+
+type DocumentListItem {
+  candidate: DocumentCandidate!
+  candidateId: String!
+  createdAt: String!
+  fileSizeBytes: Int
+  id: String!
+  originalFilename: String
+  s3Key: String!
+
+  """Document type: Resume, OfferLetter, or Nda"""
+  type: String!
+}
+
 type DocumentModel {
   candidateId: String!
   createdAt: String!
@@ -377,6 +395,9 @@ type Query {
 
   """Get a pre-signed download URL for a document (15-min expiry)"""
   documentUrl(id: String!): String!
+
+  """List all documents across candidates"""
+  documents: [DocumentListItem!]!
 
   """List interviews sorted by date ascending"""
   interviews(filters: InterviewFiltersInput): [Interview!]!

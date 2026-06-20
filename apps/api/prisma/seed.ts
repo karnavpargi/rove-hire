@@ -13,8 +13,27 @@
  * Idempotent: uses upsert pattern so it can be re-run safely.
  */
 
-import { PrismaClient, CandidateStatus, JobOpeningStatus, InterviewType, InterviewStatus, DocumentType, Recommendation } from '@prisma/client';
+import { createHash } from 'crypto';
+import {
+  PrismaClient,
+  CandidateStatus,
+  JobOpeningStatus,
+  InterviewType,
+  InterviewStatus,
+  DocumentType,
+  Recommendation,
+} from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+
+/** Deterministic tokens for Playwright E2E — plaintext never stored, only SHA-256 hash. */
+const E2E_MAGIC_LINK_TOKENS = {
+  valid: 'e2e-valid-magic-link-token-rove-hire-2026',
+  expired: 'e2e-expired-magic-link-token-rove-hire-2026',
+} as const;
+
+function hashMagicLinkToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
 
 const prisma = new PrismaClient();
 
@@ -34,6 +53,12 @@ const IDS = {
     interviewScheduled: '00000000-0000-4000-c000-000000000003',
     offerSent: '00000000-0000-4000-c000-000000000004',
     rejected: '00000000-0000-4000-c000-000000000005',
+    e2eMagicLink: '00000000-0000-4000-c000-000000000006',
+    e2eExpiredLink: '00000000-0000-4000-c000-000000000007',
+  },
+  magicLinks: {
+    e2eValid: '00000000-0000-4000-f000-000000000001',
+    e2eExpired: '00000000-0000-4000-f000-000000000002',
   },
   interviews: {
     screening: '00000000-0000-4000-d000-000000000001',
@@ -48,6 +73,24 @@ const IDS = {
 
 async function main() {
   console.log('🌱 Seeding ROVE Hire database...\n');
+
+  const seedCandidateIds = Object.values(IDS.candidates);
+
+  // Remove candidates/jobs created by prior E2E runs (not in deterministic seed set)
+  const orphanCandidates = await prisma.candidate.findMany({
+    where: { id: { notIn: seedCandidateIds } },
+    select: { id: true },
+  });
+  const orphanCandidateIds = orphanCandidates.map((c) => c.id);
+
+  if (orphanCandidateIds.length > 0) {
+    await prisma.timelineEvent.deleteMany({ where: { candidateId: { in: orphanCandidateIds } } });
+    await prisma.magicLink.deleteMany({ where: { candidateId: { in: orphanCandidateIds } } });
+    await prisma.interview.deleteMany({ where: { candidateId: { in: orphanCandidateIds } } });
+    await prisma.document.deleteMany({ where: { candidateId: { in: orphanCandidateIds } } });
+    await prisma.candidate.deleteMany({ where: { id: { in: orphanCandidateIds } } });
+    console.log(`🧹 Removed ${orphanCandidateIds.length} orphan candidate(s) from prior E2E runs`);
+  }
 
   // ─────────────────────────────────────────────────────────────
   // 1. HR User
@@ -73,21 +116,24 @@ async function main() {
     {
       id: IDS.jobs.fullStack,
       title: 'Senior Full-Stack Engineer',
-      description: '## About the Role\n\nWe are looking for a Senior Full-Stack Engineer to join our platform team. You will work on building scalable web applications using React, Node.js, and PostgreSQL.\n\n## Responsibilities\n\n- Design and implement new features\n- Mentor junior engineers\n- Participate in architecture decisions',
+      description:
+        '## About the Role\n\nWe are looking for a Senior Full-Stack Engineer to join our platform team. You will work on building scalable web applications using React, Node.js, and PostgreSQL.\n\n## Responsibilities\n\n- Design and implement new features\n- Mentor junior engineers\n- Participate in architecture decisions',
       status: JobOpeningStatus.Open,
       skills: ['TypeScript', 'React', 'Node.js', 'PostgreSQL', 'AWS'],
     },
     {
       id: IDS.jobs.designer,
       title: 'Product Designer',
-      description: '## About the Role\n\nJoin our design team to craft beautiful, accessible user experiences for our internal tools and client-facing products.\n\n## Responsibilities\n\n- Create wireframes and high-fidelity designs\n- Conduct user research and usability testing\n- Collaborate with engineers on implementation',
+      description:
+        '## About the Role\n\nJoin our design team to craft beautiful, accessible user experiences for our internal tools and client-facing products.\n\n## Responsibilities\n\n- Create wireframes and high-fidelity designs\n- Conduct user research and usability testing\n- Collaborate with engineers on implementation',
       status: JobOpeningStatus.Open,
       skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems', 'Accessibility'],
     },
     {
       id: IDS.jobs.devOps,
       title: 'DevOps Engineer',
-      description: '## About the Role\n\nWe need a DevOps Engineer to improve our CI/CD pipelines, infrastructure automation, and observability stack.\n\n## Responsibilities\n\n- Manage Kubernetes clusters\n- Build and maintain CI/CD pipelines\n- Implement monitoring and alerting',
+      description:
+        '## About the Role\n\nWe need a DevOps Engineer to improve our CI/CD pipelines, infrastructure automation, and observability stack.\n\n## Responsibilities\n\n- Manage Kubernetes clusters\n- Build and maintain CI/CD pipelines\n- Implement monitoring and alerting',
       status: JobOpeningStatus.Closed,
       skills: ['Kubernetes', 'Terraform', 'AWS', 'Docker', 'GitHub Actions'],
     },
@@ -197,6 +243,22 @@ async function main() {
       lastActivityAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
     },
     {
+      id: IDS.candidates.e2eMagicLink,
+      name: 'Frank E2E Applicant',
+      email: 'frank.e2e@example.com',
+      status: CandidateStatus.Applied,
+      jobOpeningId: IDS.jobs.fullStack,
+      lastActivityAt: new Date(now.getTime() - 12 * 60 * 60 * 1000),
+    },
+    {
+      id: IDS.candidates.e2eExpiredLink,
+      name: 'Grace Expired Link',
+      email: 'grace.expired@example.com',
+      status: CandidateStatus.Applied,
+      jobOpeningId: IDS.jobs.fullStack,
+      lastActivityAt: new Date(now.getTime() - 48 * 60 * 60 * 1000),
+    },
+    {
       id: IDS.candidates.rejected,
       name: 'Emma Wilson',
       email: 'emma.wilson@example.com',
@@ -207,7 +269,8 @@ async function main() {
       salaryExpectation: '$130,000 - $150,000',
       linkedinUrl: 'https://www.linkedin.com/in/emma-wilson',
       status: CandidateStatus.Rejected,
-      rejectionReason: 'Candidate did not meet the required experience level for Kubernetes and Terraform. We recommend applying again after gaining more hands-on infrastructure experience.',
+      rejectionReason:
+        'Candidate did not meet the required experience level for Kubernetes and Terraform. We recommend applying again after gaining more hands-on infrastructure experience.',
       jobOpeningId: IDS.jobs.fullStack,
       lastActivityAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
     },
@@ -247,7 +310,8 @@ async function main() {
       notes: 'Initial phone screening to assess cultural fit and communication skills.',
       status: InterviewStatus.Completed,
       recommendation: Recommendation.Hire,
-      feedback: 'Carol demonstrated excellent communication skills and deep technical knowledge. She articulated her experience with design systems clearly and showed genuine passion for accessibility. Strong cultural fit with our team values. Recommend proceeding to technical interview.',
+      feedback:
+        'Carol demonstrated excellent communication skills and deep technical knowledge. She articulated her experience with design systems clearly and showed genuine passion for accessibility. Strong cultural fit with our team values. Recommend proceeding to technical interview.',
       completedAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
       candidateId: IDS.candidates.interviewScheduled,
     },
@@ -260,7 +324,8 @@ async function main() {
       notes: 'Initial phone screening to assess cultural fit and communication skills.',
       status: InterviewStatus.Completed,
       recommendation: Recommendation.Hire,
-      feedback: 'Carol demonstrated excellent communication skills and deep technical knowledge. She articulated her experience with design systems clearly and showed genuine passion for accessibility. Strong cultural fit with our team values. Recommend proceeding to technical interview.',
+      feedback:
+        'Carol demonstrated excellent communication skills and deep technical knowledge. She articulated her experience with design systems clearly and showed genuine passion for accessibility. Strong cultural fit with our team values. Recommend proceeding to technical interview.',
       completedAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
     },
   });
@@ -289,6 +354,44 @@ async function main() {
     },
   });
   console.log('✅ Interviews: Screening (Completed) + Technical (Scheduled) for Carol Chen');
+
+  // ─────────────────────────────────────────────────────────────
+  // 4b. E2E Magic Links (valid + expired tokens for Playwright)
+  // ─────────────────────────────────────────────────────────────
+  await prisma.magicLink.upsert({
+    where: { candidateId: IDS.candidates.e2eMagicLink },
+    update: {
+      tokenHash: hashMagicLinkToken(E2E_MAGIC_LINK_TOKENS.valid),
+      expiresAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
+      isConsumed: false,
+      consumedAt: null,
+    },
+    create: {
+      id: IDS.magicLinks.e2eValid,
+      tokenHash: hashMagicLinkToken(E2E_MAGIC_LINK_TOKENS.valid),
+      candidateId: IDS.candidates.e2eMagicLink,
+      expiresAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
+      isConsumed: false,
+    },
+  });
+
+  await prisma.magicLink.upsert({
+    where: { candidateId: IDS.candidates.e2eExpiredLink },
+    update: {
+      tokenHash: hashMagicLinkToken(E2E_MAGIC_LINK_TOKENS.expired),
+      expiresAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+      isConsumed: false,
+      consumedAt: null,
+    },
+    create: {
+      id: IDS.magicLinks.e2eExpired,
+      tokenHash: hashMagicLinkToken(E2E_MAGIC_LINK_TOKENS.expired),
+      candidateId: IDS.candidates.e2eExpiredLink,
+      expiresAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+      isConsumed: false,
+    },
+  });
+  console.log('✅ E2E Magic Links: valid (Frank) + expired (Grace)');
 
   // ─────────────────────────────────────────────────────────────
   // 5. Documents (for OfferSent candidate — David Park)
@@ -365,6 +468,17 @@ async function main() {
   });
 
   const timelineEvents = [
+    // Frank E2E — Applied (magic link E2E)
+    {
+      candidateId: IDS.candidates.e2eMagicLink,
+      eventType: 'status_change',
+      previousStatus: null,
+      newStatus: 'Applied',
+      details: 'Candidate added for E2E magic link testing.',
+      actorId: IDS.hrUser,
+      createdAt: new Date(now.getTime() - 12 * 60 * 60 * 1000),
+    },
+
     // Alice Johnson — Applied
     {
       candidateId: IDS.candidates.applied,
@@ -429,7 +543,8 @@ async function main() {
       eventType: 'feedback_submitted',
       previousStatus: null,
       newStatus: null,
-      details: 'Screening interview completed. Recommendation: Hire. Feedback recorded by Sarah Thompson.',
+      details:
+        'Screening interview completed. Recommendation: Hire. Feedback recorded by Sarah Thompson.',
       actorId: IDS.hrUser,
       createdAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
     },
@@ -476,7 +591,8 @@ async function main() {
       eventType: 'feedback_submitted',
       previousStatus: null,
       newStatus: null,
-      details: 'Technical interview completed. Recommendation: Hire. Outstanding design portfolio and system thinking.',
+      details:
+        'Technical interview completed. Recommendation: Hire. Outstanding design portfolio and system thinking.',
       actorId: IDS.hrUser,
       createdAt: new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000),
     },
@@ -523,7 +639,8 @@ async function main() {
       eventType: 'rejection_recorded',
       previousStatus: 'InterviewScheduled',
       newStatus: 'Rejected',
-      details: 'Candidate did not meet the required experience level for Kubernetes and Terraform. We recommend applying again after gaining more hands-on infrastructure experience.',
+      details:
+        'Candidate did not meet the required experience level for Kubernetes and Terraform. We recommend applying again after gaining more hands-on infrastructure experience.',
       actorId: IDS.hrUser,
       createdAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
     },

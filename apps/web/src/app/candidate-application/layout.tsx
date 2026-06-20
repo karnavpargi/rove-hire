@@ -5,7 +5,7 @@ export default function CandidateApplicationLayout({ children }: { children: Rea
   return (
     <div className="min-h-screen bg-[#F0F9FF] dark:bg-background">
       <SkipNav />
-      <header className="border-b bg-card/80 backdrop-blur-sm">
+      <header className="border-b bg-card">
         <div className="mx-auto flex h-14 max-w-lg items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <span

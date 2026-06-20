@@ -29,9 +29,8 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9"
+          className="touch-target h-9 w-9"
           aria-label="Toggle theme"
-          data-touch-target="true"
         >
           {theme === 'dark' ? (
             <MoonIcon className="h-4 w-4" />

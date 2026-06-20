@@ -1,8 +1,8 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 import { jobTitleSchema, skillsTagsSchema } from '@rove-hire/shared';
-import { CreateJobOpeningInput } from './dto/create-job-opening.input';
-import { UpdateJobOpeningInput } from './dto/update-job-opening.input';
+import type { CreateJobOpeningInput } from './dto/create-job-opening.input';
+import type { UpdateJobOpeningInput } from './dto/update-job-opening.input';
 
 /**
  * JobService handles CRUD operations for job openings.
@@ -33,17 +33,13 @@ export class JobService {
     // Validate title using shared schema
     const titleResult = jobTitleSchema.safeParse(input.title);
     if (!titleResult.success) {
-      throw new BadRequestException(
-        titleResult.error.issues.map((i) => i.message).join('; '),
-      );
+      throw new BadRequestException(titleResult.error.issues.map((i) => i.message).join('; '));
     }
 
     // Validate skills using shared schema
     const skillsResult = skillsTagsSchema.safeParse(input.skills);
     if (!skillsResult.success) {
-      throw new BadRequestException(
-        skillsResult.error.issues.map((i) => i.message).join('; '),
-      );
+      throw new BadRequestException(skillsResult.error.issues.map((i) => i.message).join('; '));
     }
 
     // Validate description length
@@ -190,9 +186,7 @@ export class JobService {
     if (input.title !== undefined) {
       const titleResult = jobTitleSchema.safeParse(input.title);
       if (!titleResult.success) {
-        throw new BadRequestException(
-          titleResult.error.issues.map((i) => i.message).join('; '),
-        );
+        throw new BadRequestException(titleResult.error.issues.map((i) => i.message).join('; '));
       }
     }
 
@@ -200,14 +194,16 @@ export class JobService {
     if (input.skills !== undefined) {
       const skillsResult = skillsTagsSchema.safeParse(input.skills);
       if (!skillsResult.success) {
-        throw new BadRequestException(
-          skillsResult.error.issues.map((i) => i.message).join('; '),
-        );
+        throw new BadRequestException(skillsResult.error.issues.map((i) => i.message).join('; '));
       }
     }
 
     // Validate description length if provided
-    if (input.description !== undefined && input.description !== null && input.description.length > 5000) {
+    if (
+      input.description !== undefined &&
+      input.description !== null &&
+      input.description.length > 5000
+    ) {
       throw new BadRequestException('Description must not exceed 5000 characters');
     }
 
@@ -222,9 +218,27 @@ export class JobService {
 
     // Run mutation inside transaction so skill replacement is atomic
     const updated = await this.prisma.$transaction(async (tx) => {
-      // Delete old skills when new ones are explicitly provided
+      // Diff skills safely: add new tags first so DB trigger never sees 0 skills
       if (input.skills !== undefined) {
-        await tx.jobOpeningSkill.deleteMany({ where: { jobOpeningId: id } });
+        const existingSkills = await tx.jobOpeningSkill.findMany({
+          where: { jobOpeningId: id },
+          select: { tag: true },
+        });
+        const existingTags = new Set(existingSkills.map((s) => s.tag));
+        const newTags = new Set(input.skills);
+        const tagsToAdd = input.skills.filter((t) => !existingTags.has(t));
+        const tagsToRemove = existingSkills.filter((s) => !newTags.has(s.tag)).map((s) => s.tag);
+
+        if (tagsToAdd.length > 0) {
+          await tx.jobOpeningSkill.createMany({
+            data: tagsToAdd.map((tag) => ({ jobOpeningId: id, tag })),
+          });
+        }
+        if (tagsToRemove.length > 0) {
+          await tx.jobOpeningSkill.deleteMany({
+            where: { jobOpeningId: id, tag: { in: tagsToRemove } },
+          });
+        }
       }
 
       return tx.jobOpening.update({
@@ -233,11 +247,6 @@ export class JobService {
           ...(input.title !== undefined && { title: input.title }),
           ...(input.description !== undefined && { description: input.description }),
           ...(input.status !== undefined && { status: input.status }),
-          ...(input.skills !== undefined && {
-            skills: {
-              create: input.skills.map((tag) => ({ tag })),
-            },
-          }),
         },
         include: {
           skills: true,

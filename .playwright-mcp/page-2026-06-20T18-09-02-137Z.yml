@@ -1,8 +1,0 @@
-- generic [active] [ref=e1]:
-    - main "Authentication" [ref=e2]:
-        - status "Checking authentication" [ref=e4]:
-            - img [ref=e5]
-    - status [ref=e7]: Navigated to Login
-    - status [ref=e8]
-    - alert [ref=e9]
-    - alert [ref=e10]
