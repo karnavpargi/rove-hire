@@ -14,8 +14,8 @@
 
 import * as React from 'react';
 import { CalendarIcon, PlusIcon, MessageSquareIcon } from 'lucide-react';
-import type { InterviewType } from '@rove-hire/shared';
 import { InterviewStatus } from '@rove-hire/shared';
+import type { InterviewType, Recommendation } from '@rove-hire/shared';
 import { useCandidates } from '@/hooks/use-candidates';
 import { useInterviews, useScheduleInterview, useRecordFeedback } from '@/hooks/use-interviews';
 import { useToast } from '@/components/shared/toast';
