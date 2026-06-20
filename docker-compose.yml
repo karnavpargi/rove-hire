@@ -1,0 +1,86 @@
+# =============================================================================
+# ROVE Hire — Docker Compose (Development)
+# Services: PostgreSQL 16, NestJS API
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 16 Database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: rove-hire-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rove_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rove_password}
+      POSTGRES_DB: ${POSTGRES_DB:-rove_hire}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-rove_user} -d ${POSTGRES_DB:-rove_hire}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - rove-network
+
+  # ---------------------------------------------------------------------------
+  # NestJS API Server
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: rove-hire-api
+    restart: unless-stopped
+    ports:
+      - '${API_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-rove_user}:${POSTGRES_PASSWORD:-rove_password}@postgres:5432/${POSTGRES_DB:-rove_hire}?schema=public
+      # AWS S3 configuration (set in .env for real credentials)
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-rove-hire-files}
+      # JWT Secret
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      # Frontend origin for CORS
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+    volumes:
+      - ./apps/api/src:/app/apps/api/src:ro
+      - ./packages/shared/src:/app/packages/shared/src:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rove-network
+
+  # ---------------------------------------------------------------------------
+  # Cloudflare Tunnel (Public Access Proxy)
+  # ---------------------------------------------------------------------------
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: rove-hire-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - rove-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  rove-network:
+    driver: bridge

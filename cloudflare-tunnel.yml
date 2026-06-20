@@ -1,0 +1,33 @@
+# =============================================================================
+# Cloudflare Tunnel Configuration — ROVE Hire
+# =============================================================================
+#
+# This file configures cloudflared ingress rules for routing external traffic
+# to the ROVE Hire backend API running inside Docker.
+#
+# Prerequisites:
+#   1. A Cloudflare account with a domain configured
+#   2. A Cloudflare Tunnel created via the dashboard or CLI
+#   3. The TUNNEL_TOKEN environment variable set (from Cloudflare dashboard)
+#
+# The tunnel token approach is used (no credentials file needed).
+# Set TUNNEL_TOKEN in your .env file or environment.
+# =============================================================================
+
+# Ingress rules define how incoming requests are routed to local services.
+# Rules are evaluated top-to-bottom; first match wins.
+ingress:
+  # Route API traffic to the NestJS backend container
+  - hostname: api.yourdomain.com
+    service: http://api:3000
+    originRequest:
+      connectTimeout: 10s
+      noTLSVerify: true
+
+  # Health check path — useful for monitoring
+  - hostname: api.yourdomain.com
+    path: /api/health
+    service: http://api:3000
+
+  # Catch-all rule (required by cloudflared) — returns 404 for unmatched requests
+  - service: http_status:404

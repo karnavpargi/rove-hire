@@ -41,3 +41,18 @@ apps/api/src/generated/
 requirements/*
 .kiro/*
 .agents/*
+
+# --- ltm-power ---
+ltm/store/*.jsonl
+ltm/runtime/*
+ltm/reports/*
+ltm/snapshots/*
+# --- /ltm-power ---
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+e2e/.auth/user.json
+ltm/*
