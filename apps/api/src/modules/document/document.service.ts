@@ -1,12 +1,8 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { FileService } from '../file/file.service';
-import { TimelineService } from '../timeline/timeline.service';
-import {
-  SUPPORTED_CURRENCIES,
-  TimelineEventType,
-  DocumentType,
-} from '@rove-hire/shared';
+import type { PrismaService } from '../../prisma/prisma.service';
+import type { FileService } from '../file/file.service';
+import type { TimelineService } from '../timeline/timeline.service';
+import { SUPPORTED_CURRENCIES, TimelineEventType, DocumentType } from '@rove-hire/shared';
 import {
   salaryAmountSchema,
   currencySchema,
@@ -17,7 +13,7 @@ import * as puppeteer from 'puppeteer';
 import * as Handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
-import { GenerateOfferInput } from './dto/generate-offer.input';
+import type { GenerateOfferInput } from './dto/generate-offer.input';
 
 /** Currency symbols for display in PDF templates */
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -55,14 +51,8 @@ export class DocumentService {
   private loadTemplates(): void {
     const templatesDir = path.resolve(process.cwd(), 'templates');
 
-    const offerHtml = fs.readFileSync(
-      path.join(templatesDir, 'offer-letter.html'),
-      'utf-8',
-    );
-    const ndaHtml = fs.readFileSync(
-      path.join(templatesDir, 'nda.html'),
-      'utf-8',
-    );
+    const offerHtml = fs.readFileSync(path.join(templatesDir, 'offer-letter.html'), 'utf-8');
+    const ndaHtml = fs.readFileSync(path.join(templatesDir, 'nda.html'), 'utf-8');
 
     this.offerLetterTemplate = Handlebars.compile(offerHtml);
     this.ndaTemplate = Handlebars.compile(ndaHtml);
@@ -185,9 +175,7 @@ export class DocumentService {
       await ndaPage.close();
     } catch (error) {
       this.logger.error('PDF generation failed', (error as Error).message);
-      throw new BadRequestException(
-        `PDF generation failed: ${(error as Error).message}`,
-      );
+      throw new BadRequestException(`PDF generation failed: ${(error as Error).message}`);
     } finally {
       if (browser) {
         await browser.close();
@@ -206,7 +194,10 @@ export class DocumentService {
         `offer-letter-${candidate.name.replace(/\s+/g, '-').toLowerCase()}.pdf`,
       );
     } catch (error) {
-      this.logger.warn('S3 unavailable for offer letter upload, proceeding with local fallback', (error as Error).message);
+      this.logger.warn(
+        'S3 unavailable for offer letter upload, proceeding with local fallback',
+        (error as Error).message,
+      );
       s3Available = false;
       offerUpload = { s3Key: `local/offer-letter-${candidateId}.pdf`, size: offerPdfBuffer.length };
     }
@@ -219,7 +210,10 @@ export class DocumentService {
           `nda-${candidate.name.replace(/\s+/g, '-').toLowerCase()}.pdf`,
         );
       } catch (error) {
-        this.logger.warn('S3 unavailable for NDA upload, proceeding with local fallback', (error as Error).message);
+        this.logger.warn(
+          'S3 unavailable for NDA upload, proceeding with local fallback',
+          (error as Error).message,
+        );
         s3Available = false;
         ndaUpload = { s3Key: `local/nda-${candidateId}.pdf`, size: ndaPdfBuffer.length };
         // Don't clean up offer letter — both use local fallback
@@ -291,7 +285,10 @@ export class DocumentService {
         try {
           offerLetterUrl = await this.fileService.getPresignedUrl(offerUpload.s3Key);
         } catch (error) {
-          this.logger.warn('Failed to generate presigned URL for offer letter', (error as Error).message);
+          this.logger.warn(
+            'Failed to generate presigned URL for offer letter',
+            (error as Error).message,
+          );
           offerLetterUrl = '#';
         }
         try {
@@ -395,11 +392,10 @@ export class DocumentService {
       if (isNaN(startDate.getTime())) {
         errors.push('Start date must be a valid date');
       } else {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const inputDate = new Date(input.startDate);
-        inputDate.setHours(0, 0, 0, 0);
-        if (inputDate < today) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayDate = new Date(todayStr + 'T00:00:00.000Z');
+        const inputDate = new Date(input.startDate + 'T00:00:00.000Z');
+        if (inputDate < todayDate) {
           errors.push('Start date must be today or in the future');
         }
       }

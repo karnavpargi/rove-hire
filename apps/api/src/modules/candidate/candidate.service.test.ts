@@ -120,34 +120,55 @@ describe('CandidateService', () => {
     });
 
     it('should reject if job is closed', async () => {
-      mockJobService.validateJobOpen.mockRejectedValue(
-        new BadRequestException('Job is closed'),
-      );
+      mockJobService.validateJobOpen.mockRejectedValue(new BadRequestException('Job is closed'));
 
-      await expect(
-        service.create(validInput, resumeBuffer, resumeFilename),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.create(validInput, resumeBuffer, resumeFilename)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject duplicate email+job combination', async () => {
       mockJobService.validateJobOpen.mockResolvedValue(undefined);
       mockPrisma.candidate.findUnique.mockResolvedValue({ id: 'existing' });
 
-      await expect(
-        service.create(validInput, resumeBuffer, resumeFilename),
-      ).rejects.toThrow(ConflictException);
+      await expect(service.create(validInput, resumeBuffer, resumeFilename)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
-    it('should not create DB record if resume upload fails', async () => {
+    it('should create DB record even if resume upload fails (non-fatal)', async () => {
       mockJobService.validateJobOpen.mockResolvedValue(undefined);
       mockPrisma.candidate.findUnique.mockResolvedValue(null);
       mockFileService.upload.mockRejectedValue(new Error('S3 unavailable'));
+      mockPrisma.candidate.create.mockResolvedValue({
+        id: 'cand-1',
+        name: 'John Doe',
+        email: 'john@example.com',
+        status: 'Applied',
+        jobOpeningId: '550e8400-e29b-41d4-a716-446655440000',
+        createdAt: new Date('2026-06-20T20:15:03.601Z'),
+        lastActivityAt: new Date('2026-06-20T20:15:03.601Z'),
+        currentRole: null,
+        location: null,
+        phone: null,
+        noticePeriod: null,
+        linkedinUrl: null,
+        resumeFileId: null,
+        rejectionReason: null,
+        salaryExpectation: null,
+        updatedAt: new Date('2026-06-20T20:15:03.601Z'),
+        jobOpening: { id: '550e8400-e29b-41d4-a716-446655440000', title: 'Software Engineer' },
+        timelineEvents: [],
+        interviews: [],
+        documents: [],
+        magicLinks: [],
+      });
 
-      await expect(
-        service.create(validInput, resumeBuffer, resumeFilename),
-      ).rejects.toThrow();
+      const result = await service.create(validInput, resumeBuffer, resumeFilename);
 
-      expect(mockPrisma.candidate.create).not.toHaveBeenCalled();
+      expect(result).toBeDefined();
+      expect(result.candidate).toBeDefined();
+      expect(mockPrisma.candidate.create).toHaveBeenCalled();
     });
   });
 
@@ -281,12 +302,7 @@ describe('CandidateService', () => {
         candidate: updatedCandidate,
       });
 
-      const result = await service.updateStatus(
-        'cand-1',
-        'FormSubmitted' as any,
-        {},
-        'user-1',
-      );
+      const result = await service.updateStatus('cand-1', 'FormSubmitted' as any, {}, 'user-1');
 
       expect(result.status).toBe('FormSubmitted');
       expect(mockStateMachineService.executeTransition).toHaveBeenCalledWith(
@@ -308,9 +324,9 @@ describe('CandidateService', () => {
         },
       });
 
-      await expect(
-        service.updateStatus('cand-1', 'Hired' as any, {}, 'user-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.updateStatus('cand-1', 'Hired' as any, {}, 'user-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw ConflictException on concurrent modification', async () => {

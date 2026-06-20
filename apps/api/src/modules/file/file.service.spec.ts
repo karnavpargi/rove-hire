@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { FileService, FileServiceError } from './file.service';
 
 // Mock UUID
@@ -108,7 +108,7 @@ describe('FileService', () => {
       const buffer = Buffer.from('pdf content');
       const result = await service.upload(buffer, 'resumes', 'my-resume.pdf');
 
-      expect(result.s3Key).toMatch(/^resumes\/test-uuid-1234\/my-resume\.pdf$/);
+      expect(result.s3Key).toMatch(/^karnav_resumes\/test-uuid-1234\/my-resume\.pdf$/);
       expect(result.bucket).toBe('test-bucket');
       expect(result.size).toBe(buffer.length);
       expect(result.originalName).toBe('my-resume.pdf');
@@ -118,14 +118,14 @@ describe('FileService', () => {
       const buffer = Buffer.from('pdf content');
       const result = await service.upload(buffer, 'documents', 'offer.pdf');
 
-      expect(result.s3Key).toMatch(/^documents\/test-uuid-1234\/offer\.pdf$/);
+      expect(result.s3Key).toMatch(/^karnav_documents\/test-uuid-1234\/offer\.pdf$/);
     });
 
     it('should generate a fallback filename when originalFilename is not provided', async () => {
       const buffer = Buffer.from('pdf content');
       const result = await service.upload(buffer, 'resumes');
 
-      expect(result.s3Key).toMatch(/^resumes\/test-uuid-1234\/test-uuid-1234\.pdf$/);
+      expect(result.s3Key).toMatch(/^karnav_resumes\/test-uuid-1234\/test-uuid-1234\.pdf$/);
     });
 
     it('should call S3 PutObjectCommand with correct params', async () => {
@@ -135,21 +135,19 @@ describe('FileService', () => {
 
       expect(PutObjectCommand).toHaveBeenCalledWith({
         Bucket: 'test-bucket',
-        Key: 'resumes/test-uuid-1234/test.pdf',
+        Key: 'karnav_resumes/test-uuid-1234/test.pdf',
         Body: buffer,
         ContentType: 'application/pdf',
       });
     });
 
     it('should retry once on first failure then succeed', async () => {
-      mockSend
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({});
+      mockSend.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({});
 
       const buffer = Buffer.from('pdf content');
       const result = await service.upload(buffer, 'resumes', 'file.pdf');
 
-      expect(result.s3Key).toMatch(/^resumes\/test-uuid-1234\/file\.pdf$/);
+      expect(result.s3Key).toMatch(/^karnav_resumes\/test-uuid-1234\/file\.pdf$/);
       expect(mockSend).toHaveBeenCalledTimes(2);
     });
 
@@ -201,11 +199,9 @@ describe('FileService', () => {
     it('should accept a custom expiry time', async () => {
       await service.getPresignedUrl('resumes/test.pdf', 3600);
 
-      expect(mockGetSignedUrl).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        { expiresIn: 3600 },
-      );
+      expect(mockGetSignedUrl).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        expiresIn: 3600,
+      });
     });
 
     it('should throw FileServiceError on presigned URL failure', async () => {
@@ -240,9 +236,7 @@ describe('FileService', () => {
     });
 
     it('should retry once on failure then succeed', async () => {
-      mockSend
-        .mockRejectedValueOnce(new Error('Timeout'))
-        .mockResolvedValueOnce({});
+      mockSend.mockRejectedValueOnce(new Error('Timeout')).mockResolvedValueOnce({});
 
       await expect(service.delete('resumes/test.pdf')).resolves.toBeUndefined();
       expect(mockSend).toHaveBeenCalledTimes(2);
