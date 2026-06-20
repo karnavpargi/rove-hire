@@ -1,0 +1,526 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthUser {
+  email: String!
+  id: String!
+  name: String!
+}
+
+type Candidate {
+  createdAt: DateTime!
+
+  """Current role (max 100 chars)"""
+  currentRole: String
+
+  """Candidate documents (resume, offer letter, NDA)"""
+  documents: [DocumentModel!]!
+
+  """Candidate email (RFC 5322)"""
+  email: String!
+  id: String!
+
+  """Candidate interviews"""
+  interviews: [Interview!]!
+
+  """Associated job opening ID"""
+  jobOpeningId: String!
+
+  """Last activity timestamp (used for sorting)"""
+  lastActivityAt: DateTime!
+
+  """LinkedIn URL (max 255 chars)"""
+  linkedinUrl: String
+
+  """Location (max 100 chars)"""
+  location: String
+
+  """Candidate full name (max 100 chars)"""
+  name: String!
+
+  """Notice period (max 50 chars)"""
+  noticePeriod: String
+
+  """Phone number (max 20 chars)"""
+  phone: String
+
+  """Reason for rejection (5-500 chars)"""
+  rejectionReason: String
+
+  """Salary expectation (max 50 chars)"""
+  salaryExpectation: String
+
+  """Current pipeline status"""
+  status: CandidateStatus!
+
+  """Candidate timeline events"""
+  timelineEvents: [TimelineEvent!]!
+  updatedAt: DateTime!
+}
+
+input CandidateFiltersInput {
+  """Filter by job opening ID"""
+  jobOpeningId: String
+
+  """Page number (1-based)"""
+  page: Int = 1
+
+  """Items per page (default 20)"""
+  pageSize: Int = 20
+
+  """Search by name or role (min 2 chars, case-insensitive)"""
+  search: String
+
+  """Filter by status (multi-select)"""
+  statuses: [CandidateStatus!]
+}
+
+"""Pipeline status of a candidate"""
+enum CandidateStatus {
+  Applied
+  FormSubmitted
+  Hired
+  InterviewScheduled
+  OfferSent
+  Rejected
+}
+
+input CreateCandidateInput {
+  """Candidate email (RFC 5322, max 254 chars)"""
+  email: String!
+
+  """Job opening ID to associate with"""
+  jobOpeningId: String!
+
+  """Candidate full name (max 100 chars)"""
+  name: String!
+}
+
+type CreateCandidateResult {
+  """The created candidate"""
+  candidate: Candidate!
+
+  """Magic link URL for candidate application form"""
+  magicLinkUrl: String!
+}
+
+input CreateJobOpeningInput {
+  """Job description (max 5000 characters)"""
+  description: String
+
+  """Skill tags (1-20 tags, each max 50 chars)"""
+  skills: [String!]!
+
+  """Job title (1-200 characters)"""
+  title: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type DocumentModel {
+  candidateId: String!
+  createdAt: String!
+  fileSizeBytes: Int
+  id: String!
+  originalFilename: String
+  s3Key: String!
+
+  """Document type: Resume, OfferLetter, or Nda"""
+  type: String!
+}
+
+input GenerateOfferInput {
+  """Candidate ID to generate offer for"""
+  candidateId: String!
+
+  """Work location (max 200 chars)"""
+  location: String!
+
+  """Reporting manager name (max 100 chars)"""
+  reportingManager: String!
+
+  """Role title for the offer (max 200 chars)"""
+  roleTitle: String!
+
+  """Salary amount (0.01–9,999,999.99, max 2 decimals)"""
+  salaryAmount: Float!
+
+  """Salary currency (USD, EUR, GBP, INR, AED)"""
+  salaryCurrency: String!
+
+  """Start date in ISO format (must be >= today)"""
+  startDate: String!
+}
+
+type Interview {
+  """Associated candidate info"""
+  candidate: InterviewCandidate
+
+  """ID of the associated candidate"""
+  candidateId: String!
+
+  """Date when the interview was completed"""
+  completedAt: DateTime
+  createdAt: DateTime!
+
+  """Feedback text after completion (1-2000 chars)"""
+  feedback: String
+  id: String!
+
+  """Name of the interviewer (1-100 chars)"""
+  interviewerName: String!
+
+  """Interview scheduling notes (max 1000 chars)"""
+  notes: String
+
+  """Recommendation after completion"""
+  recommendation: Recommendation
+
+  """Scheduled date and time for the interview"""
+  scheduledAt: DateTime!
+
+  """Current status of the interview"""
+  status: InterviewStatus!
+
+  """Type of interview (Screening or Technical)"""
+  type: InterviewType!
+  updatedAt: DateTime!
+}
+
+type InterviewCandidate {
+  id: String!
+  name: String!
+}
+
+input InterviewFiltersInput {
+  """Filter by candidate ID"""
+  candidateId: String
+
+  """Filter by interview status"""
+  status: InterviewStatus
+
+  """Filter by interview type"""
+  type: InterviewType
+}
+
+"""Status of the interview (Scheduled, Completed, or Cancelled)"""
+enum InterviewStatus {
+  Cancelled
+  Completed
+  Scheduled
+}
+
+"""Type of interview (Screening or Technical)"""
+enum InterviewType {
+  Screening
+  Technical
+}
+
+type JobOpening {
+  """Number of candidates associated with this job"""
+  candidateCount: Int!
+
+  """Associated candidates (only on detail view)"""
+  candidates: [JobOpeningCandidate!]
+  createdAt: DateTime!
+
+  """Job description (max 5000 chars)"""
+  description: String
+  id: String!
+
+  """Associated skill tags"""
+  skills: [JobOpeningSkillType!]!
+
+  """Current status (Open or Closed)"""
+  status: JobOpeningStatus!
+
+  """Job title (max 200 chars)"""
+  title: String!
+  updatedAt: DateTime!
+}
+
+type JobOpeningCandidate {
+  createdAt: DateTime!
+  currentRole: String
+  email: String!
+  id: String!
+  lastActivityAt: DateTime!
+  name: String!
+  status: String!
+}
+
+type JobOpeningSkillType {
+  id: String!
+  tag: String!
+}
+
+"""Status of a job opening (Open or Closed)"""
+enum JobOpeningStatus {
+  Closed
+  Open
+}
+
+type LoginResponse {
+  expiresAt: DateTime!
+  user: AuthUser!
+}
+
+type MagicLinkValidation {
+  """Candidate ID (only when valid)"""
+  candidateId: String
+
+  """Reason for invalidity: expired | used | invalid"""
+  reason: String
+
+  """Whether the magic link is valid and can be used"""
+  valid: Boolean!
+}
+
+type Mutation {
+  """Create a new candidate with resume"""
+  createCandidate(
+    input: CreateCandidateInput!
+
+    """Resume file as base64 string"""
+    resumeBase64: String!
+
+    """Original filename of the resume"""
+    resumeFilename: String!
+  ): CreateCandidateResult!
+
+  """Create a new job opening"""
+  createJobOpening(input: CreateJobOpeningInput!): JobOpening!
+
+  """Generate offer letter and NDA PDFs for a candidate"""
+  generateOfferDocuments(input: GenerateOfferInput!): OfferDocumentsOutput!
+
+  """Authenticate HR user with email and password"""
+  login(email: String!, password: String!): LoginResponse!
+
+  """Invalidate current session and clear cookie"""
+  logout: Boolean!
+
+  """Record feedback for an interview"""
+  recordFeedback(input: RecordFeedbackInput!): Interview!
+
+  """Schedule a new interview for a candidate"""
+  scheduleInterview(input: ScheduleInterviewInput!): Interview!
+
+  """Submit candidate application form via magic link"""
+  submitApplication(
+    input: SubmitApplicationInput!
+
+    """The magic link token from the URL"""
+    token: String!
+  ): Candidate!
+
+  """Transition candidate status"""
+  transitionCandidateStatus(input: UpdateCandidateStatusInput!): Candidate!
+
+  """Update a job opening (title, description, skills, status)"""
+  updateJobOpening(input: UpdateJobOpeningInput!): JobOpening!
+
+  """Update job opening status (Open/Closed)"""
+  updateJobOpeningStatus(input: UpdateJobOpeningStatusInput!): JobOpening!
+}
+
+type OfferDocumentsOutput {
+  """Document ID of the NDA"""
+  ndaId: String!
+
+  """Pre-signed URL for the generated NDA PDF"""
+  ndaUrl: String!
+
+  """Document ID of the offer letter"""
+  offerLetterId: String!
+
+  """Pre-signed URL for the generated offer letter PDF"""
+  offerLetterUrl: String!
+}
+
+type PaginatedCandidates {
+  """Whether a next page exists"""
+  hasNextPage: Boolean!
+
+  """Whether a previous page exists"""
+  hasPreviousPage: Boolean!
+
+  """List of candidates"""
+  items: [Candidate!]!
+
+  """Current page number"""
+  page: Int!
+
+  """Page size"""
+  pageSize: Int!
+
+  """Total number of matching candidates"""
+  total: Int!
+
+  """Total number of pages"""
+  totalPages: Int!
+}
+
+type Query {
+  """Get a single candidate by ID"""
+  candidate(id: String!): Candidate!
+
+  """List all documents for a candidate"""
+  candidateDocuments(candidateId: String!): [DocumentModel!]!
+
+  """List candidates with filters and pagination"""
+  candidates(filters: CandidateFiltersInput): PaginatedCandidates!
+
+  """Get a pre-signed download URL for a document (15-min expiry)"""
+  documentUrl(id: String!): String!
+
+  """List interviews sorted by date ascending"""
+  interviews(filters: InterviewFiltersInput): [Interview!]!
+
+  """Get a single job opening by ID"""
+  jobOpening(id: String!): JobOpening!
+
+  """List all job openings (most recent first)"""
+  jobOpenings: [JobOpening!]!
+
+  """Validate current session and return authenticated user"""
+  me: AuthUser
+
+  """Get timeline events for a candidate (most recent first)"""
+  timelineEvents(
+    """ID of the candidate to fetch events for"""
+    candidateId: String!
+
+    """Max events to return (default 50)"""
+    limit: Int
+  ): [TimelineEvent!]!
+
+  """Validate a magic link token status"""
+  validateMagicLink(
+    """The magic link token from the URL"""
+    token: String!
+  ): MagicLinkValidation!
+}
+
+"""Interview recommendation (Hire, NoHire, or Maybe)"""
+enum Recommendation {
+  Hire
+  Maybe
+  NoHire
+}
+
+input RecordFeedbackInput {
+  """Feedback notes (1-2000 characters)"""
+  feedback: String!
+
+  """ID of the interview"""
+  interviewId: String!
+
+  """Recommendation (Hire, NoHire, or Maybe)"""
+  recommendation: Recommendation!
+}
+
+input ScheduleInterviewInput {
+  """ID of the candidate to interview"""
+  candidateId: String!
+
+  """Name of the interviewer (1-100 characters)"""
+  interviewerName: String!
+
+  """Interview notes (max 1000 characters)"""
+  notes: String
+
+  """Scheduled date/time in ISO 8601 format (must be in the future)"""
+  scheduledAt: String!
+
+  """Type of interview (Screening or Technical)"""
+  type: InterviewType!
+}
+
+input SubmitApplicationInput {
+  """Current role (max 100 chars)"""
+  currentRole: String!
+
+  """
+  LinkedIn URL (optional, max 255 chars, must start with https://linkedin.com/ or https://www.linkedin.com/)
+  """
+  linkedinUrl: String
+
+  """Current location (max 100 chars)"""
+  location: String!
+
+  """Notice period (max 50 chars)"""
+  noticePeriod: String!
+
+  """Phone number (max 20 chars, digits/spaces/hyphens/parens/leading +)"""
+  phone: String!
+
+  """Salary expectation (max 50 chars)"""
+  salaryExpectation: String!
+}
+
+type TimelineEvent {
+  """ID of the HR user who performed the action"""
+  actorId: String
+
+  """Candidate ID this event belongs to"""
+  candidateId: String!
+
+  """Timestamp when the event occurred"""
+  createdAt: DateTime!
+
+  """Additional details about the event (max 2000 chars)"""
+  details: String
+
+  """Type of event (status_change, interview_scheduled, etc.)"""
+  eventType: String!
+
+  """Unique identifier for the event"""
+  id: String!
+
+  """New candidate status (for status change events)"""
+  newStatus: String
+
+  """Previous candidate status (for status change events)"""
+  previousStatus: String
+}
+
+input UpdateCandidateStatusInput {
+  """Candidate ID"""
+  candidateId: String!
+
+  """Reason for rejection (5-500 chars, required for Rejected)"""
+  rejectionReason: String
+
+  """Target pipeline status"""
+  targetStatus: CandidateStatus!
+}
+
+input UpdateJobOpeningInput {
+  """Job description (max 5000 characters)"""
+  description: String
+
+  """Job opening ID"""
+  id: String!
+
+  """Skill tags (1-20 tags, each max 50 chars)"""
+  skills: [String!]
+
+  """New status (Open or Closed)"""
+  status: JobOpeningStatus
+
+  """Job title (1-200 characters)"""
+  title: String
+}
+
+input UpdateJobOpeningStatusInput {
+  """Job opening ID"""
+  id: String!
+
+  """New status (Open or Closed)"""
+  status: JobOpeningStatus!
+}
