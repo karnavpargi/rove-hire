@@ -16,8 +16,10 @@ deploy/deploy.env
 # Production data (server only)
 data/
 
-# IDE
-.vscode/
+# IDE (commit shared editor settings; ignore local overrides)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 
 # OS
