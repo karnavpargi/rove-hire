@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Non-Disclosure Agreement — ROVE</title>
+  <style>
+    /* Base reset and Unicode/CJK/emoji font support */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    @page {
+      size: A4;
+      margin: 20mm 25mm 25mm 25mm;
+    }
+
+    body {
+      font-family: "Noto Sans", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR",
+                   "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji",
+                   "Helvetica Neue", Arial, sans-serif;
+      font-size: 12pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Text wrapping for long dynamic fields */
+    .dynamic-field {
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      max-width: 100%;
+    }
+
+    /* ROVE branded header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #1e3a5f;
+      padding-bottom: 16px;
+      margin-bottom: 32px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo-icon {
+      width: 48px;
+      height: 48px;
+      background: #1e3a5f;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 18pt;
+      letter-spacing: 1px;
+    }
+
+    .header-company-name {
+      font-size: 22pt;
+      font-weight: 700;
+      color: #1e3a5f;
+      letter-spacing: 2px;
+    }
+
+    .header-subtitle {
+      font-size: 10pt;
+      color: #5a6a7a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header-date {
+      font-size: 10pt;
+      color: #5a6a7a;
+      text-align: right;
+    }
+
+    /* Document title */
+    .document-title {
+      text-align: center;
+      font-size: 16pt;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin-bottom: 28px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Body content */
+    .content {
+      margin-bottom: 32px;
+    }
+
+    .content p {
+      margin-bottom: 14px;
+      text-align: justify;
+    }
+
+    /* Clause sections */
+    .clause {
+      margin: 20px 0;
+      padding: 0;
+    }
+
+    .clause-title {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #1e3a5f;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .clause-body {
+      font-size: 11pt;
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+
+    .clause-body ol {
+      margin: 8px 0 8px 24px;
+    }
+
+    .clause-body ol li {
+      margin-bottom: 6px;
+    }
+
+    /* Parties section */
+    .parties {
+      margin: 24px 0;
+      padding: 20px 24px;
+      background: #f7f9fc;
+      border-left: 4px solid #1e3a5f;
+      border-radius: 4px;
+    }
+
+    .parties-row {
+      display: flex;
+      padding: 8px 0;
+      border-bottom: 1px solid #e8ecf0;
+    }
+
+    .parties-row:last-child {
+      border-bottom: none;
+    }
+
+    .parties-label {
+      font-weight: 600;
+      color: #3a4a5a;
+      min-width: 160px;
+      flex-shrink: 0;
+    }
+
+    .parties-value {
+      color: #1a1a1a;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
+    /* Signature blocks */
+    .signatures {
+      margin-top: 48px;
+      page-break-inside: avoid;
+    }
+
+    .signature-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 48px;
+      margin-top: 32px;
+    }
+
+    .signature-block {
+      flex: 1;
+    }
+
+    .signature-line {
+      border-top: 1px solid #2a2a2a;
+      margin-top: 48px;
+      padding-top: 8px;
+    }
+
+    .signature-name {
+      font-weight: 600;
+      font-size: 11pt;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .signature-title {
+      font-size: 10pt;
+      color: #5a6a7a;
+      margin-top: 4px;
+    }
+
+    .signature-date {
+      font-size: 10pt;
+      color: #5a6a7a;
+      margin-top: 4px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+      text-align: center;
+      font-size: 9pt;
+      color: #8a8a8a;
+    }
+  </style>
+</head>
+<body>
+  <!-- ROVE Branded Header -->
+  <div class="header">
+    <div class="header-logo">
+      <div class="header-logo-icon">R</div>
+      <div>
+        <div class="header-company-name">ROVE</div>
+        <div class="header-subtitle">Non-Disclosure Agreement</div>
+      </div>
+    </div>
+    {{#if date}}
+    <div class="header-date">Date: <span class="dynamic-field">{{date}}</span></div>
+    {{/if}}
+  </div>
+
+  <!-- Document Title -->
+  <div class="document-title">Non-Disclosure Agreement</div>
+
+  <!-- Body Content -->
+  <div class="content">
+    <p>
+      This Non-Disclosure Agreement (&ldquo;Agreement&rdquo;) is entered into as of
+      {{#if date}}<strong class="dynamic-field">{{date}}</strong>{{else}}the date of execution{{/if}}
+      by and between:
+    </p>
+
+    <!-- Parties -->
+    <div class="parties">
+      <div class="parties-row">
+        <div class="parties-label">Disclosing Party</div>
+        <div class="parties-value">ROVE (the &ldquo;Company&rdquo;)</div>
+      </div>
+      <div class="parties-row">
+        <div class="parties-label">Receiving Party</div>
+        <div class="parties-value dynamic-field">{{candidateName}} (the &ldquo;Recipient&rdquo;)</div>
+      </div>
+    </div>
+
+    <!-- Confidentiality Clause -->
+    <div class="clause">
+      <div class="clause-title">1. Definition of Confidential Information</div>
+      <div class="clause-body">
+        <p>
+          &ldquo;Confidential Information&rdquo; refers to all non-public information disclosed by
+          the Company to the Recipient, whether orally, in writing, or by any other means,
+          including but not limited to:
+        </p>
+        <ol>
+          <li>Trade secrets, proprietary data, business strategies, and operational processes;</li>
+          <li>Software code, algorithms, technical designs, system architectures, and documentation;</li>
+          <li>Financial information, pricing models, client lists, and partnership agreements;</li>
+          <li>Employee data, organizational structures, and internal communications;</li>
+          <li>Any information designated as &ldquo;confidential&rdquo; or that reasonably should be understood as confidential given its nature and circumstances of disclosure.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="clause">
+      <div class="clause-title">2. Obligations of Receiving Party</div>
+      <div class="clause-body">
+        <p>The Recipient agrees to:</p>
+        <ol>
+          <li>Hold all Confidential Information in strict confidence and not disclose it to any third party without prior written consent from the Company;</li>
+          <li>Use the Confidential Information solely for the purpose of evaluating or performing services related to potential or actual employment with the Company;</li>
+          <li>Take all reasonable precautions to prevent unauthorized disclosure, including applying at minimum the same degree of care used to protect their own confidential information;</li>
+          <li>Immediately notify the Company of any unauthorized use or disclosure of Confidential Information;</li>
+          <li>Return or destroy all Confidential Information, including copies, upon termination of discussions or employment, or upon written request by the Company.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="clause">
+      <div class="clause-title">3. Exclusions</div>
+      <div class="clause-body">
+        <p>This Agreement does not apply to information that:</p>
+        <ol>
+          <li>Is or becomes publicly available through no fault of the Recipient;</li>
+          <li>Was already known to the Recipient prior to disclosure, as evidenced by written records;</li>
+          <li>Is independently developed by the Recipient without use of the Confidential Information;</li>
+          <li>Is required to be disclosed by law, regulation, or court order, provided that the Recipient gives the Company reasonable advance notice to seek protective measures.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="clause">
+      <div class="clause-title">4. Duration</div>
+      <div class="clause-body">
+        <p>
+          The obligations of confidentiality shall remain in effect for a period of two (2) years
+          from the date of disclosure of the Confidential Information, or until the information
+          ceases to qualify as confidential under the exclusions above, whichever occurs first.
+        </p>
+      </div>
+    </div>
+
+    <div class="clause">
+      <div class="clause-title">5. Remedies</div>
+      <div class="clause-body">
+        <p>
+          The Recipient acknowledges that any breach of this Agreement may cause irreparable
+          harm to the Company, for which monetary damages alone may be insufficient. The Company
+          shall be entitled to seek injunctive relief and any other remedies available at law or
+          in equity without the requirement of posting a bond.
+        </p>
+      </div>
+    </div>
+
+    <div class="clause">
+      <div class="clause-title">6. Governing Law</div>
+      <div class="clause-body">
+        <p>
+          This Agreement shall be governed by and construed in accordance with applicable
+          laws. Any disputes arising from or related to this Agreement shall be resolved
+          through binding arbitration in the jurisdiction where the Company is headquartered.
+        </p>
+      </div>
+    </div>
+
+    <p>
+      By signing below, both parties acknowledge that they have read, understood, and
+      agree to be bound by the terms and conditions of this Non-Disclosure Agreement.
+    </p>
+  </div>
+
+  <!-- Signature Blocks -->
+  <div class="signatures">
+    <div class="signature-row">
+      <!-- Employer Signature -->
+      <div class="signature-block">
+        <div class="signature-line">
+          <div class="signature-name">Authorized Signatory</div>
+          <div class="signature-title">ROVE — Human Resources</div>
+          <div class="signature-date">Date: _______________</div>
+        </div>
+      </div>
+
+      <!-- Candidate Signature -->
+      <div class="signature-block">
+        <div class="signature-line">
+          <div class="signature-name dynamic-field">{{candidateName}}</div>
+          <div class="signature-title">Recipient</div>
+          <div class="signature-date">Date: _______________</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>ROVE &mdash; Confidential &amp; Proprietary</p>
+    <p>This document is intended solely for the named parties and should not be shared or distributed.</p>
+  </div>
+</body>
+</html>

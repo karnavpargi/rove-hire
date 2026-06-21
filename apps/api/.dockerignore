@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build output
+dist
+
+# Development
+.turbo
+*.tsbuildinfo
+
+# Testing
+coverage
+.nyc_output
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Git
+.git
+.gitignore
+
+# Env files (secrets — never bake into image)
+.env
+.env.*
+!.env.example
+
+# Documentation
+*.md
+LICENSE

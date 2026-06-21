@@ -1,0 +1,208 @@
+// ─────────────────────────────────────────────────────────────
+// ROVE Hire — Prisma Schema
+// PostgreSQL database schema for the recruitment management tool
+// ─────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────
+
+enum CandidateStatus {
+  Applied
+  FormSubmitted
+  InterviewScheduled
+  OfferSent
+  Hired
+  Rejected
+}
+
+enum JobOpeningStatus {
+  Open
+  Closed
+}
+
+enum InterviewType {
+  Screening
+  Technical
+}
+
+enum InterviewStatus {
+  Scheduled
+  Completed
+  Cancelled
+}
+
+enum DocumentType {
+  Resume
+  OfferLetter
+  Nda
+}
+
+enum Recommendation {
+  Hire
+  NoHire
+  Maybe
+}
+
+// ─────────────────────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────────────────────
+
+model HrUser {
+  id             String          @id @default(uuid())
+  email          String          @unique @db.VarChar(254)
+  passwordHash   String          @map("password_hash")
+  name           String          @db.VarChar(100)
+  sessions       Session[]
+  timelineEvents TimelineEvent[] @relation("Actor")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  @@map("hr_users")
+}
+
+model Session {
+  id            String   @id @default(uuid())
+  user          HrUser   @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId        String   @map("user_id")
+  tokenHash     String   @map("token_hash")
+  expiresAt     DateTime @map("expires_at")
+  isInvalidated Boolean  @default(false) @map("is_invalidated")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("sessions")
+}
+
+model JobOpening {
+  id          String            @id @default(uuid())
+  title       String            @db.VarChar(200)
+  description String?           @db.Text
+  status      JobOpeningStatus  @default(Open)
+  skills      JobOpeningSkill[]
+  candidates  Candidate[]
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@map("job_openings")
+}
+
+model JobOpeningSkill {
+  id           String     @id @default(uuid())
+  jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id], onDelete: Restrict)
+  jobOpeningId String     @map("job_opening_id")
+  tag          String     @db.VarChar(50)
+
+  @@map("job_opening_skills")
+}
+
+model Candidate {
+  id                String          @id @default(uuid())
+  name              String          @db.VarChar(100)
+  email             String          @db.VarChar(254)
+  phone             String?         @db.VarChar(20)
+  location          String?         @db.VarChar(100)
+  currentRole       String?         @map("current_role") @db.VarChar(100)
+  noticePeriod      String?         @map("notice_period") @db.VarChar(50)
+  salaryExpectation String?         @map("salary_expectation") @db.VarChar(50)
+  linkedinUrl       String?         @map("linkedin_url") @db.VarChar(255)
+  status            CandidateStatus @default(Applied)
+  rejectionReason   String?         @map("rejection_reason") @db.VarChar(500)
+  jobOpening        JobOpening      @relation(fields: [jobOpeningId], references: [id], onDelete: Restrict)
+  jobOpeningId      String          @map("job_opening_id")
+  magicLink         MagicLink?
+  documents         Document[]
+  interviews        Interview[]
+  timelineEvents    TimelineEvent[]
+  lastActivityAt    DateTime        @default(now()) @map("last_activity_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  @@unique([email, jobOpeningId])
+  @@index([status])
+  @@index([jobOpeningId])
+  @@index([lastActivityAt(sort: Desc)])
+  @@map("candidates")
+}
+
+model MagicLink {
+  id          String    @id @default(uuid())
+  tokenHash   String    @unique @map("token_hash")
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+  candidateId String    @unique @map("candidate_id")
+  isConsumed  Boolean   @default(false) @map("is_consumed")
+  expiresAt   DateTime  @map("expires_at")
+  consumedAt  DateTime? @map("consumed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([tokenHash])
+  @@map("magic_links")
+}
+
+model Interview {
+  id              String          @id @default(uuid())
+  candidate       Candidate       @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+  candidateId     String          @map("candidate_id")
+  type            InterviewType
+  scheduledAt     DateTime        @map("scheduled_at")
+  interviewerName String          @map("interviewer_name") @db.VarChar(100)
+  notes           String?         @db.Text
+  status          InterviewStatus @default(Scheduled)
+  recommendation  Recommendation?
+  feedback        String?         @db.Text
+  completedAt     DateTime?       @map("completed_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  @@index([candidateId])
+  @@index([scheduledAt])
+  @@map("interviews")
+}
+
+model Document {
+  id               String       @id @default(uuid())
+  candidate        Candidate    @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+  candidateId      String       @map("candidate_id")
+  type             DocumentType
+  s3Key            String       @map("s3_key")
+  originalFilename String?      @map("original_filename") @db.VarChar(255)
+  fileSizeBytes    Int?         @map("file_size_bytes")
+  createdAt        DateTime     @default(now()) @map("created_at")
+
+  @@map("documents")
+}
+
+model TimelineEvent {
+  id             String    @id @default(uuid())
+  candidate      Candidate @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+  candidateId    String    @map("candidate_id")
+  eventType      String    @map("event_type") @db.VarChar(50)
+  previousStatus String?   @map("previous_status")
+  newStatus      String?   @map("new_status")
+  details        String?   @db.Text
+  actor          HrUser?   @relation("Actor", fields: [actorId], references: [id])
+  actorId        String?   @map("actor_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@index([candidateId, createdAt(sort: Desc)])
+  @@map("timeline_events")
+}
+
+model LoginAttempt {
+  id          String   @id @default(uuid())
+  source      String   @db.VarChar(255)
+  success     Boolean
+  attemptedAt DateTime @map("attempted_at")
+
+  @@index([source, attemptedAt])
+  @@map("login_attempts")
+}

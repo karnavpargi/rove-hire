@@ -1,0 +1,12 @@
+node_modules
+dist
+.next
+coverage
+pnpm-lock.yaml
+graphify-out
+.turbo
+packages/**/dist
+packages/**/node_modules
+packages/**/src/**/*.js
+packages/**/src/**/*.d.ts
+apps/api/src/generated

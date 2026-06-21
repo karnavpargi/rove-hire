@@ -1,0 +1,15 @@
+# =============================================================================
+# ROVE Hire — Development override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up postgres api -d
+# =============================================================================
+
+services:
+  api:
+    build:
+      target: build
+    command: ['pnpm', '--filter', '@rove-hire/api', 'dev']
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./apps/api/src:/app/apps/api/src:ro
+      - ./packages/shared/src:/app/packages/shared/src:ro
