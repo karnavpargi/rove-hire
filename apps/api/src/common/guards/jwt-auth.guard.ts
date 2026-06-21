@@ -1,13 +1,8 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import type { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { AuthService } from '../../modules/auth/auth.service';
+import type { AuthService } from '../../modules/auth/auth.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
@@ -31,7 +26,6 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Check if the resolver is marked as public
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -41,7 +35,11 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     }
 
-    // Get the GraphQL execution context
+    // JWT is enforced for GraphQL only; HTTP routes use @Public() where needed.
+    if (context.getType<string>() !== 'graphql') {
+      return false;
+    }
+
     const gqlContext = GqlExecutionContext.create(context);
     const ctx = gqlContext.getContext();
     const req = ctx.req;
@@ -79,12 +77,13 @@ export class JwtAuthGuard implements CanActivate {
    * Log failed authentication attempts with timestamp and IP address.
    * Requirements: 14.5
    */
-  private logFailedAttempt(req: { ip?: string; connection?: { remoteAddress?: string } }, reason: string): void {
+  private logFailedAttempt(
+    req: { ip?: string; connection?: { remoteAddress?: string } },
+    reason: string,
+  ): void {
     const ip = req?.ip || req?.connection?.remoteAddress || 'unknown';
     const timestamp = new Date().toISOString();
 
-    this.logger.warn(
-      `Auth failed: ${reason} | IP: ${ip} | Time: ${timestamp}`,
-    );
+    this.logger.warn(`Auth failed: ${reason} | IP: ${ip} | Time: ${timestamp}`);
   }
 }

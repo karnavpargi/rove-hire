@@ -2,9 +2,9 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import * as crypto from 'crypto';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 import { validateLoginForm } from '@rove-hire/shared';
-import { RateLimitService } from './rate-limit.service';
+import type { RateLimitService } from './rate-limit.service';
 
 /** JWT payload contents */
 export interface JwtPayload {
@@ -176,10 +176,14 @@ export class AuthService {
    * Secure=true in production, false in development.
    */
   getCookieOptions(): CookieOptions {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieSecureEnv = process.env.COOKIE_SECURE;
+    const secure =
+      cookieSecureEnv !== undefined
+        ? cookieSecureEnv === 'true'
+        : process.env.NODE_ENV === 'production';
     return {
       httpOnly: true,
-      secure: isProduction,
+      secure,
       sameSite: 'lax',
       path: '/',
       maxAge: JWT_EXPIRY_MS,

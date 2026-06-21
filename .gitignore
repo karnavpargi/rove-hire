@@ -11,6 +11,10 @@ dist/
 .env
 .env.local
 .env.*.local
+deploy/deploy.env
+
+# Production data (server only)
+data/
 
 # IDE
 .vscode/
@@ -65,3 +69,4 @@ ltm/snapshots/*
 /playwright/.cache/
 e2e/.auth/user.json
 ltm/*
+deploy/*

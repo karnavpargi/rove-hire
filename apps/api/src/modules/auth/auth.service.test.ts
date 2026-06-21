@@ -308,10 +308,18 @@ describe('AuthService', () => {
       expect(options.secure).toBe(false);
     });
 
-    it('should set secure=true in production', () => {
+    it('should set secure=true in production by default', () => {
       process.env.NODE_ENV = 'production';
+      delete process.env.COOKIE_SECURE;
       const options = service.getCookieOptions();
       expect(options.secure).toBe(true);
+    });
+
+    it('should honor COOKIE_SECURE=false for HTTP deployments', () => {
+      process.env.NODE_ENV = 'production';
+      process.env.COOKIE_SECURE = 'false';
+      const options = service.getCookieOptions();
+      expect(options.secure).toBe(false);
     });
 
     it('should set maxAge to 8 hours in milliseconds', () => {

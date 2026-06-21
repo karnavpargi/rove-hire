@@ -1,6 +1,7 @@
-import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { RateLimitService } from './rate-limit.service';
+import type { RateLimitService } from './rate-limit.service';
 
 /**
  * Guard that enforces rate limiting on auth endpoints.
@@ -51,7 +52,7 @@ export class RateLimitGuard implements CanActivate {
     headers?: Record<string, string | string[] | undefined>;
     connection?: { remoteAddress?: string };
   }): string {
-    // Check X-Forwarded-For first (for proxy/tunnel environments)
+    // Check X-Forwarded-For first (for reverse-proxy environments)
     const forwarded = request.headers?.['x-forwarded-for'];
     if (forwarded) {
       const ip = Array.isArray(forwarded) ? forwarded[0] : forwarded.split(',')[0];

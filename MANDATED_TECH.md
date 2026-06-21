@@ -6,7 +6,7 @@
 | Backend           | latest Nest.js + Express + graphql + Docker                              |
 | Database          | PostgreSQL — justify choice in README                                    |
 | File storage      | AWS S3 — resumes and generated PDFs must persist and be re-downloadable  |
-| Hosting           | clodflare tunnel                                                         |
+| Hosting           | Docker Compose                                                           |
 | Rules             | UX Rules                                                                 |
 | Agents            | Design Critic Agent, Accessibility Agent                                 |
 | Tooling           | Context7, Graphify, UI/UX Pro Max                                        |

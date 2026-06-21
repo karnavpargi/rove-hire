@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { createHash, randomBytes } from 'crypto';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 import { CandidateStatus } from '../../generated/prisma';
 
 /** Magic link expiry duration: 14 days in milliseconds */
@@ -77,10 +77,7 @@ export class MagicLinkService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {
-    this.frontendUrl = this.configService.get<string>(
-      'FRONTEND_URL',
-      'http://localhost:3001',
-    );
+    this.frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
   }
 
   /**
@@ -99,8 +96,7 @@ export class MagicLinkService {
     const tokenBuffer = randomBytes(32);
 
     // Encode as URL-safe base64 (removes padding '=' for URL safety)
-    const token = tokenBuffer
-      .toString('base64url');
+    const token = tokenBuffer.toString('base64url');
 
     // Compute SHA-256 hash of the raw token for storage
     const tokenHash = this.hashToken(token);
@@ -119,10 +115,7 @@ export class MagicLinkService {
         },
       });
     } catch (error) {
-      this.logger.error(
-        `Failed to create magic link for candidate ${candidateId}`,
-        error,
-      );
+      this.logger.error(`Failed to create magic link for candidate ${candidateId}`, error);
       throw new MagicLinkError(
         `Failed to generate magic link: ${(error as Error).message}`,
         MagicLinkErrorCode.GENERATION_FAILED,
@@ -195,10 +188,7 @@ export class MagicLinkService {
         });
 
         if (!magicLink) {
-          throw new MagicLinkError(
-            'Magic link not found',
-            MagicLinkErrorCode.INVALID_TOKEN,
-          );
+          throw new MagicLinkError('Magic link not found', MagicLinkErrorCode.INVALID_TOKEN);
         }
 
         if (magicLink.isConsumed) {
@@ -209,10 +199,7 @@ export class MagicLinkService {
         }
 
         if (new Date() > magicLink.expiresAt) {
-          throw new MagicLinkError(
-            'Magic link has expired',
-            MagicLinkErrorCode.EXPIRED,
-          );
+          throw new MagicLinkError('Magic link has expired', MagicLinkErrorCode.EXPIRED);
         }
 
         // Mark the magic link as consumed atomically

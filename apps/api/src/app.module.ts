@@ -1,7 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import type { MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import type { ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloDriver } from '@nestjs/apollo';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -35,7 +37,10 @@ import { ContentTypeMiddleware, CsrfOriginMiddleware } from './common/middleware
  */
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [join(process.cwd(), '../../.env'), join(process.cwd(), '.env')],
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'schema.gql'),
@@ -49,10 +54,7 @@ import { ContentTypeMiddleware, CsrfOriginMiddleware } from './common/middleware
        *
        * Requirements: 23.2, 23.3
        */
-      plugins: [
-        createDepthLimitPlugin(7),
-        createComplexityPlugin(1000),
-      ],
+      plugins: [createDepthLimitPlugin(7), createComplexityPlugin(1000)],
       /**
        * Format all GraphQL errors into a structured response:
        * { message, extensions: { code, field?, details?, validTransitions? } }
@@ -86,8 +88,6 @@ export class AppModule implements NestModule {
    * at the database layer. No additional middleware needed for this protection.
    */
   configure(consumer: MiddlewareConsumer): void {
-    consumer
-      .apply(ContentTypeMiddleware, CsrfOriginMiddleware)
-      .forRoutes('*');
+    consumer.apply(ContentTypeMiddleware, CsrfOriginMiddleware).forRoutes('*');
   }
 }

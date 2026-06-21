@@ -61,22 +61,6 @@ services:
     networks:
       - rove-network
 
-  # ---------------------------------------------------------------------------
-  # Cloudflare Tunnel (Public Access Proxy)
-  # ---------------------------------------------------------------------------
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: rove-hire-tunnel
-    restart: unless-stopped
-    command: tunnel run
-    environment:
-      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
-    depends_on:
-      api:
-        condition: service_started
-    networks:
-      - rove-network
-
 volumes:
   postgres_data:
     driver: local

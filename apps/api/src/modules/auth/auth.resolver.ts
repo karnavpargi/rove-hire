@@ -1,6 +1,6 @@
 import { Resolver, Mutation, Query, Args, Context, ObjectType, Field } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import type { AuthService } from './auth.service';
 import { RateLimitGuard } from './rate-limit.guard';
 import { Public } from '../../common/decorators';
 
@@ -42,7 +42,8 @@ export class AuthResolver {
   async login(
     @Args('email') email: string,
     @Args('password') password: string,
-    @Context() ctx: {
+    @Context()
+    ctx: {
       req: {
         ip?: string;
         headers?: Record<string, string | string[] | undefined>;
@@ -92,12 +93,7 @@ export class AuthResolver {
       }
     }
 
-    ctx.res.clearCookie(this.authService.getCookieName(), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
+    ctx.res.clearCookie(this.authService.getCookieName(), this.authService.getCookieOptions());
 
     return true;
   }

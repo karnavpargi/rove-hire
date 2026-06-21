@@ -1,8 +1,13 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { GraphQLValidationPipe } from './common/pipes/graphql-validation.pipe';
+import { FILE_UPLOAD } from '@rove-hire/shared';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+
+/** Max JSON body size: 10MB PDF as base64 (~33% overhead) plus GraphQL envelope. */
+const JSON_BODY_LIMIT_BYTES = Math.ceil(FILE_UPLOAD.MAX_SIZE_BYTES * (4 / 3)) + 512 * 1024;
 
 /**
  * Bootstrap the ROVE Hire API application.
@@ -16,17 +21,22 @@ import cookieParser from 'cookie-parser';
  * Requirements: 13.1, 13.2, 13.3, 13.6, 13.9, 13.10, 23.5, 23.8
  */
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // GraphQL resume uploads arrive as base64 in JSON; default 100kb limit is too small.
+  app.useBodyParser('json', { limit: JSON_BODY_LIMIT_BYTES });
 
   // Security headers via Helmet (Req 13.6: HTTPS enforcement via HSTS)
-  // Strict-Transport-Security ensures browsers only communicate over HTTPS
+  const enableHsts = process.env.ENABLE_HSTS !== 'false';
   app.use(
     helmet({
-      hsts: {
-        maxAge: 31536000, // 1 year
-        includeSubDomains: true,
-        preload: true,
-      },
+      hsts: enableHsts
+        ? {
+            maxAge: 31536000, // 1 year
+            includeSubDomains: true,
+            preload: true,
+          }
+        : false,
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],

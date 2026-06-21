@@ -33,7 +33,7 @@ A full-stack recruitment management tool enabling ROVE's HR team to manage candi
 | **PDF Generation** | Puppeteer (Chromium headless) | High-fidelity HTML/CSS rendering, full Unicode/emoji support, branded templates               |
 | **Authentication** | JWT in HttpOnly cookies       | Prevents XSS token theft; SameSite=Lax mitigates CSRF; 8-hour expiry with bcrypt (cost 12)    |
 | **Monorepo**       | Turborepo + pnpm workspaces   | Shared types/configs between apps; parallel builds; efficient dependency management           |
-| **Hosting**        | Docker + Cloudflare Tunnel    | Zero-trust access without open ports; outbound-only connection to Cloudflare edge             |
+| **Hosting**        | Docker Compose                | Local and containerized deployment with PostgreSQL and API services                           |
 
 ---
 
@@ -44,12 +44,7 @@ A full-stack recruitment management tool enabling ROVE's HR team to manage candi
 │  Browser                                                         │
 │  Next.js Frontend (localhost:3001)                               │
 └───────────────┬─────────────────────────────────────────────────┘
-                │ GraphQL over HTTPS (HttpOnly JWT cookie)
-                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Cloudflare Tunnel (optional, for public access)                │
-└───────────────┬─────────────────────────────────────────────────┘
-                │
+                │ GraphQL over HTTP (HttpOnly JWT cookie)
                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  Docker Host                                                     │
@@ -86,7 +81,7 @@ rove-hire/
 │       └── Dockerfile      # Multi-stage build
 ├── packages/
 │   └── shared/             # Shared TypeScript types, enums, validation schemas, state machine
-├── docker-compose.yml      # PostgreSQL + API + Cloudflare Tunnel
+├── docker-compose.yml      # PostgreSQL + API
 ├── turbo.json              # Build pipeline config
 └── package.json            # Workspace root
 ```
@@ -155,21 +150,20 @@ pnpm --filter web dev          # → localhost:3001
 
 ### Environment Variables
 
-| Variable                | Default                   | Description                        |
-| ----------------------- | ------------------------- | ---------------------------------- |
-| `POSTGRES_USER`         | `rove_user`               | PostgreSQL username                |
-| `POSTGRES_PASSWORD`     | `rove_password`           | PostgreSQL password                |
-| `POSTGRES_DB`           | `rove_hire`               | Database name                      |
-| `DB_PORT`               | `5432`                    | PostgreSQL port                    |
-| `API_PORT`              | `3000`                    | NestJS API port                    |
-| `JWT_SECRET`            | `change-me-in-production` | Secret for JWT signing             |
-| `DATABASE_URL`          | (composed from above)     | Prisma connection string           |
-| `AWS_REGION`            | `us-east-1`               | AWS region for S3                  |
-| `AWS_ACCESS_KEY_ID`     | —                         | AWS credentials for S3             |
-| `AWS_SECRET_ACCESS_KEY` | —                         | AWS credentials for S3             |
-| `S3_BUCKET_NAME`        | `rove-hire-files`         | S3 bucket for file storage         |
-| `FRONTEND_URL`          | `http://localhost:3001`   | CORS allowed origin                |
-| `TUNNEL_TOKEN`          | —                         | Cloudflare Tunnel token (optional) |
+| Variable                | Default                   | Description                |
+| ----------------------- | ------------------------- | -------------------------- |
+| `POSTGRES_USER`         | `rove_user`               | PostgreSQL username        |
+| `POSTGRES_PASSWORD`     | `rove_password`           | PostgreSQL password        |
+| `POSTGRES_DB`           | `rove_hire`               | Database name              |
+| `DB_PORT`               | `5432`                    | PostgreSQL port            |
+| `API_PORT`              | `3000`                    | NestJS API port            |
+| `JWT_SECRET`            | `change-me-in-production` | Secret for JWT signing     |
+| `DATABASE_URL`          | (composed from above)     | Prisma connection string   |
+| `AWS_REGION`            | `us-east-1`               | AWS region for S3          |
+| `AWS_ACCESS_KEY_ID`     | —                         | AWS credentials for S3     |
+| `AWS_SECRET_ACCESS_KEY` | —                         | AWS credentials for S3     |
+| `S3_BUCKET_NAME`        | `rove-hire-files`         | S3 bucket for file storage |
+| `FRONTEND_URL`          | `http://localhost:3001`   | CORS allowed origin        |
 
 ---
 
@@ -265,32 +259,70 @@ Return pre-signed download URL (15-min expiry)
 
 ## Hosting & Deployment
 
-### Docker Compose Services
+### Local development (Docker Compose)
 
-The `docker-compose.yml` runs three services:
+The `docker-compose.yml` runs two services:
 
-| Service       | Image                           | Port | Purpose                        |
-| ------------- | ------------------------------- | ---- | ------------------------------ |
-| `postgres`    | `postgres:16-alpine`            | 5432 | Database with health checks    |
-| `api`         | Custom (multi-stage build)      | 3000 | NestJS API server              |
-| `cloudflared` | `cloudflare/cloudflared:latest` | —    | Tunnel for public HTTPS access |
+| Service    | Image                      | Port | Purpose                     |
+| ---------- | -------------------------- | ---- | --------------------------- |
+| `postgres` | `postgres:16-alpine`       | 5432 | Database with health checks |
+| `api`      | Custom (multi-stage build) | 3000 | NestJS API server           |
 
-### Cloudflare Tunnel
+Access the API at `http://localhost:3000` when running via Docker Compose. Run the Next.js frontend separately with `pnpm --filter web dev`.
 
-[Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) creates an outbound-only connection from your Docker host to Cloudflare's edge. No public IP or open ports required.
+### Production deploy (DietPi server + host nginx)
 
+Production runs under **`/home/dietpi/rove-hire`** using `docker-compose.prod.yml`. Docker binds the API and web apps to **localhost only**; your **existing host nginx** proxies `https://rove.kpargi.eu.org` to those ports (other apps on the server are untouched).
+
+**SSH target:** `root@192.168.10.4`  
+**Install path:** `/home/dietpi/rove-hire`  
+**Public URL:** `https://rove.kpargi.eu.org`
+
+| Component       | Purpose                                              |
+| --------------- | ---------------------------------------------------- |
+| Host nginx      | Existing server nginx → `127.0.0.1:13000` / `:13001` |
+| `web` container | Next.js frontend on localhost `${WEB_HOST_PORT}`     |
+| `api` container | NestJS GraphQL API on localhost `${API_HOST_PORT}`   |
+| `postgres`      | Database in `./data/postgres` under the install path |
+
+Default localhost ports (override in `deploy/deploy.env` if needed):
+
+| Port  | Service |
+| ----- | ------- |
+| 13000 | API     |
+| 13001 | Web     |
+
+#### First-time server setup
+
+```bash
+# On the server (once): install Docker + Compose
+ssh root@192.168.10.4 'bash -s' < deploy/bootstrap-server.sh
+
+# On your machine: configure secrets
+cp deploy/deploy.env.example deploy/deploy.env
+# Edit deploy/deploy.env — set POSTGRES_PASSWORD, JWT_SECRET, AWS keys, ports
+
+# Deploy (syncs to /home/dietpi/rove-hire, migrates, seeds, starts Docker, updates host nginx)
+pnpm deploy
 ```
-Internet → Cloudflare Edge → cloudflared container → api container (:3000)
+
+The deploy script installs nginx **snippets** under `/etc/nginx/snippets/` and, by default, does **not** create a conflicting server block (`NGINX_USE_EXISTING_SERVER=true`). Add these includes to your existing `rove.kpargi.eu.org` HTTPS server block:
+
+```nginx
+include /etc/nginx/snippets/rove-hire-upstreams.conf;
+include /etc/nginx/snippets/rove-hire-locations.conf;
 ```
 
-**Setup:**
+Set `NGINX_USE_EXISTING_SERVER=false` in `deploy/deploy.env` only if you want a standalone `:80` server block installed automatically.
 
-1. Create a tunnel in [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com) → Networks → Tunnels
-2. Configure ingress: public hostname (e.g., `api.yourdomain.com`) → service `http://api:3000`
-3. Set `TUNNEL_TOKEN` in your `.env` file
-4. Run `docker-compose up -d` — the tunnel starts automatically
+After deploy:
 
-**For local development**, the tunnel is optional. Access the API directly at `http://localhost:3000`.
+- **App:** https://rove.kpargi.eu.org
+- **GraphQL:** https://rove.kpargi.eu.org/graphql
+- **Health:** https://rove.kpargi.eu.org/api/health (public, no auth)
+- **Login:** `hr@rove.com` / `RoveHire2024!`
+
+Ensure your edge proxy sends `X-Forwarded-Proto: https` to nginx. `deploy/deploy.env` sets `COOKIE_SECURE=true` and `ENABLE_HSTS=true` for the public HTTPS URL.
 
 ### Production Considerations
 
@@ -344,7 +376,6 @@ The project uses property-based testing (PBT) to verify invariants hold across a
 | Issue                            | Impact                                                      | Workaround                                                    |
 | -------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
 | S3 requires real AWS credentials | File upload/download non-functional without valid keys      | Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `.env` |
-| Cloudflare Tunnel requires token | Public access unavailable without Cloudflare account        | Use local development (localhost) for evaluation              |
 | Puppeteer in Docker              | First PDF generation may be slow due to Chromium cold start | Subsequent generations are faster (Chromium stays warm)       |
 
 ---

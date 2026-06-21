@@ -12,12 +12,12 @@ import { graphqlClient, handleGraphQLError } from '@/lib/graphql-client';
 import { showToast } from '@/components/shared';
 
 // ---------------------------------------------------------------------------
-// GraphQL Mutation
+// GraphQL query (pre-signed URL fetch)
 // ---------------------------------------------------------------------------
 
-const GET_DOCUMENT_URL_MUTATION = gql`
-  mutation GetDocumentUrl($documentId: String!) {
-    getDocumentUrl(documentId: $documentId)
+const GET_DOCUMENT_URL_QUERY = gql`
+  query DocumentUrl($id: String!) {
+    documentUrl(id: $id)
   }
 `;
 
@@ -29,9 +29,9 @@ export function useDocumentDownload() {
   const mutation = useMutation({
     mutationFn: async (documentId: string): Promise<string> => {
       const data = await graphqlClient.request<{
-        getDocumentUrl: string;
-      }>(GET_DOCUMENT_URL_MUTATION, { documentId });
-      return data.getDocumentUrl;
+        documentUrl: string;
+      }>(GET_DOCUMENT_URL_QUERY, { id: documentId });
+      return data.documentUrl;
     },
     onSuccess: (url) => {
       // Open the pre-signed URL in a new tab for download

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@rove-hire/shared"],
+  output: 'standalone',
+  transpilePackages: ['@rove-hire/shared'],
   reactStrictMode: true,
 };
 

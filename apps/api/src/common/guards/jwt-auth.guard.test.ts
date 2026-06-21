@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import type { ExecutionContext } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { AuthService } from '../../modules/auth/auth.service';
+import type { AuthService } from '../../modules/auth/auth.service';
 
 // Mock GqlExecutionContext
 vi.mock('@nestjs/graphql', () => ({
@@ -41,6 +42,7 @@ describe('JwtAuthGuard', () => {
     const context = {
       getHandler: () => ({}),
       getClass: () => ({}),
+      getType: () => 'graphql',
       __gqlContext: { req },
     } as any;
 
@@ -116,6 +118,31 @@ describe('JwtAuthGuard', () => {
     await expect(guard.canActivate(ctx)).rejects.toThrow(UnauthorizedException);
   });
 
+  it('should allow @Public() HTTP routes without authentication', async () => {
+    vi.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
+
+    const context = {
+      getHandler: () => ({}),
+      getClass: () => ({}),
+      getType: () => 'http',
+    } as ExecutionContext;
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(authService.validateSession).not.toHaveBeenCalled();
+  });
+
+  it('should deny non-public HTTP routes', async () => {
+    vi.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+
+    const context = {
+      getHandler: () => ({}),
+      getClass: () => ({}),
+      getType: () => 'http',
+    } as ExecutionContext;
+
+    await expect(guard.canActivate(context)).resolves.toBe(false);
+  });
+
   it('should log failed auth attempts with IP and timestamp', async () => {
     const logSpy = vi.spyOn((guard as any).logger, 'warn');
 
@@ -130,11 +157,7 @@ describe('JwtAuthGuard', () => {
       // Expected to throw
     }
 
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining('192.168.1.1'),
-    );
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Missing session token'),
-    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('192.168.1.1'));
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Missing session token'));
   });
 });
