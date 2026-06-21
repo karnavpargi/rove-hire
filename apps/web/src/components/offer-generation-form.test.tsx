@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { OfferGenerationForm } from './offer-generation-form';
 
 // Mock the graphql-client
@@ -8,11 +8,11 @@ vi.mock('@/lib/graphql-client', () => ({
   graphqlClient: {
     request: vi.fn(),
   },
-  handleGraphQLError: vi.fn((error) => ({
+  handleGraphQLError: vi.fn((_error) => ({
     type: 'INTERNAL_ERROR',
     message: 'Generation failed',
   })),
-  classifyError: vi.fn((error) => ({
+  classifyError: vi.fn((_error) => ({
     type: 'INTERNAL_ERROR',
     message: 'An error occurred',
   })),

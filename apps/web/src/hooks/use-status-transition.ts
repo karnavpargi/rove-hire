@@ -10,12 +10,12 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { gql } from 'graphql-request';
-import type { CandidateStatus } from '@rove-hire/shared';
 import type { classifyError } from '@/lib/graphql-client';
 import { graphqlClient, handleGraphQLError } from '@/lib/graphql-client';
-import { registerOptimisticUpdate, type OptimisticUpdateResult } from '@/lib/optimistic-updates';
+import { registerOptimisticUpdate } from '@/lib/optimistic-updates';
+import type { CandidateStatus } from '@rove-hire/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { gql } from 'graphql-request';
 
 // ---------------------------------------------------------------------------
 // GraphQL Mutation

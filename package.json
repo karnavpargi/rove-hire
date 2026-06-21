@@ -6,7 +6,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint --filter='!@rove-hire/shared'",
+    "lint": "turbo run lint",
     "lint:root": "eslint .",
     "lint:root:fix": "eslint . --fix",
     "test": "turbo run test",
@@ -16,6 +16,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "deploy": "bash deploy/deploy.sh",
+    "deploy:help": "cat deploy/DEPLOY.md",
+    "docker:push": "bash deploy/docker-build-push.sh",
+    "deploy:registry": "bash deploy/deploy-registry.sh",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -29,5 +32,9 @@
     "turbo": "^2.3.3",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.18.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md}": "prettier --write",
+    "*.{ts,tsx}": "eslint --fix"
   }
 }

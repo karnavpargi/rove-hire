@@ -1,11 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { CsrfOriginMiddleware } from './csrf-origin.middleware';
 import type { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { GraphQlErrorBody, TestTrackedResponse } from '../../test-utils/mock-types';
+import { CsrfOriginMiddleware } from './csrf-origin.middleware';
 
 describe('CsrfOriginMiddleware', () => {
   let mockConfigService: Partial<ConfigService>;
-  let mockRes: Partial<Response>;
+  let mockRes: TestTrackedResponse & Partial<Response>;
   let mockNext: ReturnType<typeof createMockNext>;
   let jsonMock: ReturnType<typeof createJsonMock>;
 
@@ -29,11 +30,11 @@ describe('CsrfOriginMiddleware', () => {
 
   function createMiddleware(env: string = 'production') {
     mockConfigService = {
-      get: ((key: string) => {
+      get: ((key: string): string | undefined => {
         if (key === 'FRONTEND_URL') return 'https://app.rove.com';
         if (key === 'NODE_ENV') return env;
         return undefined;
-      }) as any,
+      }) as ConfigService['get'],
     };
     return new CsrfOriginMiddleware(mockConfigService as ConfigService);
   }
@@ -41,10 +42,10 @@ describe('CsrfOriginMiddleware', () => {
   beforeEach(() => {
     jsonMock = createJsonMock();
     mockRes = {
-      status: ((code: number) => {
-        (mockRes as any)._statusCode = code;
-        return { json: jsonMock } as any;
-      }) as any,
+      status: (code: number) => {
+        mockRes._statusCode = code;
+        return { json: jsonMock } as unknown as Response;
+      },
     };
     mockNext = createMockNext();
   });
@@ -93,8 +94,8 @@ describe('CsrfOriginMiddleware', () => {
       } as unknown as Request;
       middleware.use(req, mockRes as Response, mockNext);
       expect(mockNext.wasCalled()).toBe(false);
-      expect((mockRes as any)._statusCode).toBe(403);
-      const data = jsonMock.getData() as any;
+      expect(mockRes._statusCode).toBe(403);
+      const data = jsonMock.getData() as GraphQlErrorBody;
       expect(data.errors[0].extensions.code).toBe('CSRF_ERROR');
     });
 
@@ -105,7 +106,7 @@ describe('CsrfOriginMiddleware', () => {
       } as unknown as Request;
       middleware.use(req, mockRes as Response, mockNext);
       expect(mockNext.wasCalled()).toBe(false);
-      expect((mockRes as any)._statusCode).toBe(403);
+      expect(mockRes._statusCode).toBe(403);
     });
 
     it('rejects POST with mismatching referer and no origin', () => {
@@ -115,7 +116,7 @@ describe('CsrfOriginMiddleware', () => {
       } as unknown as Request;
       middleware.use(req, mockRes as Response, mockNext);
       expect(mockNext.wasCalled()).toBe(false);
-      expect((mockRes as any)._statusCode).toBe(403);
+      expect(mockRes._statusCode).toBe(403);
     });
   });
 
@@ -151,7 +152,7 @@ describe('CsrfOriginMiddleware', () => {
       } as unknown as Request;
       middleware.use(req, mockRes as Response, mockNext);
       expect(mockNext.wasCalled()).toBe(false);
-      expect((mockRes as any)._statusCode).toBe(403);
+      expect(mockRes._statusCode).toBe(403);
     });
   });
 });

@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { TimelineEvent } from '../../generated/prisma';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import type { LogEventInput } from './dto/log-event.input';
 
 /**
@@ -11,7 +11,7 @@ import type { LogEventInput } from './dto/log-event.input';
 export class TimelineService {
   private readonly logger = new Logger(TimelineService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Record a timeline event for a candidate.

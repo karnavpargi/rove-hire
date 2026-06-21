@@ -1,5 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BadRequestException } from '@nestjs/common';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
+import type { FileService } from '../file/file.service';
+import type { TimelineService } from '../timeline/timeline.service';
 import { DocumentService } from './document.service';
 import type { GenerateOfferInput } from './dto/generate-offer.input';
 
@@ -21,9 +25,9 @@ vi.mock('fs', () => ({
 
 describe('DocumentService', () => {
   let service: DocumentService;
-  let mockPrisma: any;
-  let mockFileService: any;
-  let mockTimelineService: any;
+  let mockPrisma: Record<string, unknown>;
+  let mockFileService: Record<string, unknown>;
+  let mockTimelineService: Record<string, unknown>;
 
   beforeEach(() => {
     mockPrisma = {
@@ -49,7 +53,11 @@ describe('DocumentService', () => {
       logEvent: vi.fn().mockResolvedValue({}),
     };
 
-    service = new DocumentService(mockPrisma, mockFileService, mockTimelineService);
+    service = new DocumentService(
+      asMock<PrismaService>(mockPrisma),
+      asMock<FileService>(mockFileService),
+      asMock<TimelineService>(mockTimelineService),
+    );
   });
 
   describe('validateOfferInput (via generateOfferDocuments)', () => {

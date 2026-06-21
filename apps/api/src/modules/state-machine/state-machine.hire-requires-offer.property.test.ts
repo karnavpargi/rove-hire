@@ -7,20 +7,22 @@
  * **Validates: Requirements 9.1, 10.5, 8.9**
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
-import { StateMachineService, StateMachineErrorCode } from './state-machine.service';
 import { CandidateStatus } from '@rove-hire/shared';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { type MockPrismaTransaction, type TransactionCallback } from '../../test-utils/mock-types';
+import { StateMachineErrorCode, StateMachineService } from './state-machine.service';
 
 describe('Property 3: State Machine — Hire Requires Offer Document', () => {
   let service: StateMachineService;
-  let mockPrisma: any;
+  let mockPrisma: MockPrismaTransaction;
 
   beforeEach(() => {
     mockPrisma = {
       $transaction: vi.fn(),
     };
-    service = new StateMachineService(mockPrisma);
+    service = new StateMachineService(mockPrisma as unknown as PrismaService);
   });
 
   /**
@@ -57,7 +59,7 @@ describe('Property 3: State Machine — Hire Requires Offer Document', () => {
     await fc.assert(
       fc.asyncProperty(candidateIdArb, userIdArb, async (candidateId, userId) => {
         // Mock transaction: candidate is in OfferSent, no offer doc found
-        mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+        mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
           const tx = {
             $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
             candidate: { update: vi.fn() },
@@ -104,7 +106,7 @@ describe('Property 3: State Machine — Hire Requires Offer Document', () => {
           };
 
           // Mock transaction: candidate is in OfferSent, offer doc exists
-          mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+          mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
             const tx = {
               $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
               candidate: { update: vi.fn().mockResolvedValue(updatedCandidate) },
@@ -143,7 +145,7 @@ describe('Property 3: State Machine — Hire Requires Offer Document', () => {
       fc.asyncProperty(candidateIdArb, userIdArb, async (candidateId, userId) => {
         const findFirstMock = vi.fn().mockResolvedValue(null);
 
-        mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+        mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
           const tx = {
             $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
             candidate: { update: vi.fn() },
@@ -178,7 +180,7 @@ describe('Property 3: State Machine — Hire Requires Offer Document', () => {
       fc.asyncProperty(candidateIdArb, userIdArb, async (candidateId, userId) => {
         const updateMock = vi.fn();
 
-        mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+        mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
           const tx = {
             $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
             candidate: { update: updateMock },

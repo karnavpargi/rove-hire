@@ -1,15 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ExecutionContext } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthService } from '../../modules/auth/auth.service';
+import type { GqlTestExecutionContext } from '../../test-utils/mock-types';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 // Mock GqlExecutionContext
 vi.mock('@nestjs/graphql', () => ({
   GqlExecutionContext: {
     create: (ctx: ExecutionContext) => ({
-      getContext: () => (ctx as any).__gqlContext,
+      getContext: () => (ctx as GqlTestExecutionContext).__gqlContext,
     }),
   },
 }));
@@ -32,19 +33,19 @@ describe('JwtAuthGuard', () => {
     isPublic?: boolean;
     cookies?: Record<string, string>;
     ip?: string;
-  }): ExecutionContext {
+  }): GqlTestExecutionContext {
     const { isPublic = false, cookies = {}, ip = '127.0.0.1' } = options;
 
     // Mock reflector to return isPublic
     vi.spyOn(reflector, 'getAllAndOverride').mockReturnValue(isPublic);
 
-    const req = { cookies, ip, user: undefined as any };
+    const req = { cookies, ip, user: undefined };
     const context = {
       getHandler: () => ({}),
       getClass: () => ({}),
       getType: () => 'graphql',
       __gqlContext: { req },
-    } as any;
+    } as GqlTestExecutionContext;
 
     return context;
   }
@@ -68,7 +69,7 @@ describe('JwtAuthGuard', () => {
   });
 
   it('should throw AUTHENTICATION_ERROR when token is invalid', async () => {
-    (authService.validateSession as any).mockRejectedValue(
+    vi.mocked(authService.validateSession!).mockRejectedValue(
       new UnauthorizedException('Session expired or invalid'),
     );
 
@@ -91,7 +92,7 @@ describe('JwtAuthGuard', () => {
       email: 'hr@rove.com',
       sessionId: 'session-456',
     };
-    (authService.validateSession as any).mockResolvedValue(mockPayload);
+    vi.mocked(authService.validateSession!).mockResolvedValue(mockPayload);
 
     const ctx = createMockContext({
       cookies: { rove_hire_session: 'valid-token' },
@@ -102,12 +103,11 @@ describe('JwtAuthGuard', () => {
     expect(authService.validateSession).toHaveBeenCalledWith('valid-token');
 
     // Verify user is attached to request
-    const gqlCtx = (ctx as any).__gqlContext;
-    expect(gqlCtx.req.user).toEqual(mockPayload);
+    expect(ctx.__gqlContext.req.user).toEqual(mockPayload);
   });
 
   it('should throw AUTHENTICATION_ERROR when token is expired', async () => {
-    (authService.validateSession as any).mockRejectedValue(
+    vi.mocked(authService.validateSession!).mockRejectedValue(
       new UnauthorizedException('Session expired or invalid'),
     );
 
@@ -144,7 +144,8 @@ describe('JwtAuthGuard', () => {
   });
 
   it('should log failed auth attempts with IP and timestamp', async () => {
-    const logSpy = vi.spyOn((guard as any).logger, 'warn');
+    const guardWithLogger = guard as unknown as { logger: { warn: ReturnType<typeof vi.fn> } };
+    const logSpy = vi.spyOn(guardWithLogger.logger, 'warn');
 
     const ctx = createMockContext({
       cookies: {},

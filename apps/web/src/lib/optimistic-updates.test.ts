@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CandidateStatus } from '@rove-hire/shared';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  registerOptimisticUpdate,
+  clearAllPendingUpdates,
   getOptimisticStatus,
   hasPendingUpdate,
+  registerOptimisticUpdate,
   resolveDisplayStatus,
   subscribeToOptimisticUpdates,
-  clearAllPendingUpdates,
 } from './optimistic-updates';
 
 describe('optimistic-updates', () => {

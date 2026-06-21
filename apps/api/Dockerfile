@@ -33,6 +33,9 @@ COPY turbo.json ./
 COPY apps/api/package.json apps/api/
 COPY packages/shared/package.json packages/shared/
 
+# Skip bundled Chromium download — use system Chromium from apk (see PUPPETEER_EXECUTABLE_PATH)
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
 # Install all dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile
 

@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { TransitionMeta } from '@rove-hire/shared';
 import { CandidateStatus, getValidTransitions, isValidTransition } from '@rove-hire/shared';
 import type { Candidate } from '../../generated/prisma';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * Error codes returned by the state machine on failed transitions.
@@ -41,7 +41,7 @@ export type TransitionResult =
 export class StateMachineService {
   private readonly logger = new Logger(StateMachineService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Validates whether a transition from currentStatus to targetStatus is allowed

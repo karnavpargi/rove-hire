@@ -1,9 +1,10 @@
+import { Inject } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import type { CreateJobOpeningInput } from './dto/create-job-opening.input';
-import type { UpdateJobOpeningInput } from './dto/update-job-opening.input';
-import type { UpdateJobOpeningStatusInput } from './dto/update-job-status.input';
+import { CreateJobOpeningInput } from './dto/create-job-opening.input';
+import { UpdateJobOpeningInput } from './dto/update-job-opening.input';
+import { UpdateJobOpeningStatusInput } from './dto/update-job-status.input';
 import { JobOpeningType } from './job.model';
-import type { JobService } from './job.service';
+import { JobService } from './job.service';
 
 /**
  * JobResolver exposes GraphQL queries and mutations for job openings.
@@ -22,7 +23,7 @@ import type { JobService } from './job.service';
  */
 @Resolver(() => JobOpeningType)
 export class JobResolver {
-  constructor(private readonly jobService: JobService) {}
+  constructor(@Inject(JobService) private readonly jobService: JobService) {}
 
   /**
    * Create a new job opening.
@@ -32,7 +33,9 @@ export class JobResolver {
    * Requirements: 3.1, 3.6, 3.7, 3.8, 3.9
    */
   @Mutation(() => JobOpeningType, { description: 'Create a new job opening' })
-  async createJobOpening(@Args('input') input: CreateJobOpeningInput): Promise<JobOpeningType> {
+  async createJobOpening(
+    @Args('input', { type: () => CreateJobOpeningInput }) input: CreateJobOpeningInput,
+  ): Promise<JobOpeningType> {
     const job = await this.jobService.create(input);
     return this.mapToGraphQL(job);
   }
@@ -44,7 +47,8 @@ export class JobResolver {
    */
   @Mutation(() => JobOpeningType, { description: 'Update job opening status (Open/Closed)' })
   async updateJobOpeningStatus(
-    @Args('input') input: UpdateJobOpeningStatusInput,
+    @Args('input', { type: () => UpdateJobOpeningStatusInput })
+    input: UpdateJobOpeningStatusInput,
   ): Promise<JobOpeningType> {
     const job = await this.jobService.updateStatus(input.id, input.status);
     return this.mapToGraphQL(job);
@@ -59,7 +63,9 @@ export class JobResolver {
   @Mutation(() => JobOpeningType, {
     description: 'Update a job opening (title, description, skills, status)',
   })
-  async updateJobOpening(@Args('input') input: UpdateJobOpeningInput): Promise<JobOpeningType> {
+  async updateJobOpening(
+    @Args('input', { type: () => UpdateJobOpeningInput }) input: UpdateJobOpeningInput,
+  ): Promise<JobOpeningType> {
     const job = await this.jobService.update(input.id, input);
     return this.mapToGraphQL(job);
   }

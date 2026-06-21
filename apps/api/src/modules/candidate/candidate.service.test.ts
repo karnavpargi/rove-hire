@@ -1,6 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CandidateService } from './candidate.service';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { CandidateStatus } from '@rove-hire/shared';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
+import type { FileService } from '../file/file.service';
+import type { JobService } from '../job/job.service';
+import type { MagicLinkService } from '../magic-link/magic-link.service';
+import type { StateMachineService } from '../state-machine/state-machine.service';
+import type { TimelineService } from '../timeline/timeline.service';
+import { CandidateService } from './candidate.service';
 
 /**
  * Unit tests for CandidateService.
@@ -42,12 +50,12 @@ const mockTimelineService = {
 
 function createService(): CandidateService {
   return new CandidateService(
-    mockPrisma as any,
-    mockFileService as any,
-    mockMagicLinkService as any,
-    mockJobService as any,
-    mockStateMachineService as any,
-    mockTimelineService as any,
+    asMock<PrismaService>(mockPrisma),
+    asMock<FileService>(mockFileService),
+    asMock<MagicLinkService>(mockMagicLinkService),
+    asMock<JobService>(mockJobService),
+    asMock<StateMachineService>(mockStateMachineService),
+    asMock<TimelineService>(mockTimelineService),
   );
 }
 
@@ -302,7 +310,12 @@ describe('CandidateService', () => {
         candidate: updatedCandidate,
       });
 
-      const result = await service.updateStatus('cand-1', 'FormSubmitted' as any, {}, 'user-1');
+      const result = await service.updateStatus(
+        'cand-1',
+        CandidateStatus.FormSubmitted,
+        {},
+        'user-1',
+      );
 
       expect(result.status).toBe('FormSubmitted');
       expect(mockStateMachineService.executeTransition).toHaveBeenCalledWith(
@@ -324,9 +337,9 @@ describe('CandidateService', () => {
         },
       });
 
-      await expect(service.updateStatus('cand-1', 'Hired' as any, {}, 'user-1')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.updateStatus('cand-1', CandidateStatus.Hired, {}, 'user-1'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw ConflictException on concurrent modification', async () => {
@@ -339,7 +352,7 @@ describe('CandidateService', () => {
       });
 
       await expect(
-        service.updateStatus('cand-1', 'FormSubmitted' as any, {}, 'user-1'),
+        service.updateStatus('cand-1', CandidateStatus.FormSubmitted, {}, 'user-1'),
       ).rejects.toThrow(ConflictException);
     });
   });

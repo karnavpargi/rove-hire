@@ -11,11 +11,14 @@
  * **Validates: Requirements 1.3**
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
 import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
 import { AuthService } from './auth.service';
+import type { RateLimitService } from './rate-limit.service';
 
 // Mock PrismaService
 const mockPrisma = {
@@ -63,7 +66,10 @@ describe('Property 13: Authentication Error Opacity', () => {
     vi.resetAllMocks();
     mockRateLimitService.trackLoginAttempt.mockResolvedValue(undefined);
     process.env.JWT_SECRET = 'test-secret-key-for-testing-purposes';
-    service = new AuthService(mockPrisma as any, mockRateLimitService as any);
+    service = new AuthService(
+      asMock<PrismaService>(mockPrisma),
+      asMock<RateLimitService>(mockRateLimitService),
+    );
     existingUserHash = await bcrypt.hash(existingUserPassword, 4); // Lower cost for test speed
   });
 
@@ -84,11 +90,11 @@ describe('Property 13: Authentication Error Opacity', () => {
         // Scenario 1: Email not found (unknown email)
         mockPrisma.hrUser.findUnique.mockResolvedValueOnce(null);
 
-        let errorWrongEmail: any;
+        let errorWrongEmail: UnauthorizedException | undefined;
         try {
           await service.login(randomEmail, randomPassword);
         } catch (e) {
-          errorWrongEmail = e;
+          errorWrongEmail = e as UnauthorizedException;
         }
 
         // Scenario 2: Email found but wrong password
@@ -99,11 +105,11 @@ describe('Property 13: Authentication Error Opacity', () => {
           passwordHash: existingUserHash,
         });
 
-        let errorWrongPassword: any;
+        let errorWrongPassword: UnauthorizedException | undefined;
         try {
           await service.login(existingUserEmail, randomPassword);
         } catch (e) {
-          errorWrongPassword = e;
+          errorWrongPassword = e as UnauthorizedException;
         }
 
         // Both must throw UnauthorizedException
@@ -120,11 +126,11 @@ describe('Property 13: Authentication Error Opacity', () => {
         // Scenario 1: Email not found
         mockPrisma.hrUser.findUnique.mockResolvedValueOnce(null);
 
-        let errorWrongEmail: any;
+        let errorWrongEmail: UnauthorizedException | undefined;
         try {
           await service.login(randomEmail, randomPassword);
         } catch (e) {
-          errorWrongEmail = e;
+          errorWrongEmail = e as UnauthorizedException;
         }
 
         // Scenario 2: Email found but wrong password
@@ -135,11 +141,11 @@ describe('Property 13: Authentication Error Opacity', () => {
           passwordHash: existingUserHash,
         });
 
-        let errorWrongPassword: any;
+        let errorWrongPassword: UnauthorizedException | undefined;
         try {
           await service.login(existingUserEmail, randomPassword);
         } catch (e) {
-          errorWrongPassword = e;
+          errorWrongPassword = e as UnauthorizedException;
         }
 
         // Error messages must be identical — no information leakage
@@ -156,11 +162,11 @@ describe('Property 13: Authentication Error Opacity', () => {
         // Scenario 1: Email not found (nonexistent user)
         mockPrisma.hrUser.findUnique.mockResolvedValueOnce(null);
 
-        let errorNoUser: any;
+        let errorNoUser: UnauthorizedException | undefined;
         try {
           await service.login(randomEmail, randomPassword);
         } catch (e) {
-          errorNoUser = e;
+          errorNoUser = e as UnauthorizedException;
         }
 
         // Scenario 2: Email found, wrong password
@@ -171,21 +177,21 @@ describe('Property 13: Authentication Error Opacity', () => {
           passwordHash: existingUserHash,
         });
 
-        let errorBadPass: any;
+        let errorBadPass: UnauthorizedException | undefined;
         try {
           await service.login(existingUserEmail, randomPassword);
         } catch (e) {
-          errorBadPass = e;
+          errorBadPass = e as UnauthorizedException;
         }
 
         // Scenario 3: Both email and password wrong (still user not found)
         mockPrisma.hrUser.findUnique.mockResolvedValueOnce(null);
 
-        let errorBothWrong: any;
+        let errorBothWrong: UnauthorizedException | undefined;
         try {
           await service.login(randomEmail, randomPassword);
         } catch (e) {
-          errorBothWrong = e;
+          errorBothWrong = e as UnauthorizedException;
         }
 
         // All three must have identical error structure
@@ -220,11 +226,11 @@ describe('Property 13: Authentication Error Opacity', () => {
         // Test with non-existent email
         mockPrisma.hrUser.findUnique.mockResolvedValueOnce(null);
 
-        let error: any;
+        let error: UnauthorizedException | undefined;
         try {
           await service.login(randomEmail, randomPassword);
         } catch (e) {
-          error = e;
+          error = e as UnauthorizedException;
         }
 
         expect(error).toBeInstanceOf(UnauthorizedException);

@@ -1,9 +1,8 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 /**
  * Human-readable labels for route segments.

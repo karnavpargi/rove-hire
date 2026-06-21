@@ -15,7 +15,10 @@ export default tseslint.config(
       '**/generated/**',
       '**/src/generated/**',
       'apps/api/src/generated/**',
-      'packages/**',
+      'packages/**/dist/**',
+      'packages/**/src/**/*.js',
+      'packages/**/src/**/*.js.map',
+      'packages/**/src/**/*.d.ts',
     ],
   },
   {
@@ -23,10 +26,10 @@ export default tseslint.config(
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     rules: {
       '@typescript-eslint/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports' }],
     },
   },

@@ -1,0 +1,14 @@
+# ROVE Hire — optional standalone nginx server (port 80 only).
+# Prefer NGINX_USE_EXISTING_SERVER=true and include snippets in your HTTPS block.
+
+include /etc/nginx/snippets/rove-hire-upstreams.conf;
+
+server {
+  listen 80;
+  listen [::]:80;
+  server_name rove.kpargi.eu.org;
+
+  client_max_body_size 15m;
+
+  include /etc/nginx/snippets/rove-hire-locations.conf;
+}

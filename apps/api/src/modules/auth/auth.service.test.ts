@@ -1,8 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { AuthService } from './auth.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
+import { AuthService, type JwtPayload } from './auth.service';
+import type { RateLimitService } from './rate-limit.service';
 
 // Mock PrismaService
 const mockPrisma = {
@@ -31,7 +34,10 @@ describe('AuthService', () => {
     vi.resetAllMocks();
     mockRateLimitService.trackLoginAttempt.mockResolvedValue(undefined);
     process.env.JWT_SECRET = 'test-secret-key-for-testing-purposes';
-    service = new AuthService(mockPrisma as any, mockRateLimitService as any);
+    service = new AuthService(
+      asMock<PrismaService>(mockPrisma),
+      asMock<RateLimitService>(mockRateLimitService),
+    );
   });
 
   describe('login', () => {
@@ -81,7 +87,10 @@ describe('AuthService', () => {
 
       const result = await service.login(validEmail, validPassword);
 
-      const decoded = jwt.verify(result.token, 'test-secret-key-for-testing-purposes') as any;
+      const decoded = jwt.verify(
+        result.token,
+        'test-secret-key-for-testing-purposes',
+      ) as JwtPayload;
       expect(decoded.userId).toBe(mockUser.id);
       expect(decoded.email).toBe(mockUser.email);
       expect(decoded.sessionId).toBe('session-456');
@@ -153,23 +162,23 @@ describe('AuthService', () => {
     it('should throw same error for wrong email and wrong password (no differentiation)', async () => {
       // Wrong email
       mockPrisma.hrUser.findUnique.mockResolvedValueOnce(null);
-      let wrongEmailError: any;
+      let wrongEmailError: UnauthorizedException | undefined;
       try {
         await service.login('wrong@example.com', validPassword);
       } catch (e) {
-        wrongEmailError = e;
+        wrongEmailError = e as UnauthorizedException;
       }
 
       // Wrong password
       mockPrisma.hrUser.findUnique.mockResolvedValueOnce(mockUser);
-      let wrongPasswordError: any;
+      let wrongPasswordError: UnauthorizedException | undefined;
       try {
         await service.login(validEmail, 'WrongPassword1');
       } catch (e) {
-        wrongPasswordError = e;
+        wrongPasswordError = e as UnauthorizedException;
       }
 
-      expect(wrongEmailError.message).toBe(wrongPasswordError.message);
+      expect(wrongEmailError!.message).toBe(wrongPasswordError!.message);
     });
 
     it('should throw BadRequestException for invalid email format', async () => {

@@ -1,7 +1,7 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import type { RateLimitService } from './rate-limit.service';
+import { RateLimitService } from './rate-limit.service';
 
 /**
  * Guard that enforces rate limiting on auth endpoints.
@@ -15,7 +15,7 @@ import type { RateLimitService } from './rate-limit.service';
  */
 @Injectable()
 export class RateLimitGuard implements CanActivate {
-  constructor(private readonly rateLimitService: RateLimitService) {}
+  constructor(@Inject(RateLimitService) private readonly rateLimitService: RateLimitService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);

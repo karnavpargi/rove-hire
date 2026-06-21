@@ -14,10 +14,12 @@
  * **Validates: Requirements 10.3, 10.7, 9.6**
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
-import { StateMachineService, StateMachineErrorCode } from './state-machine.service';
 import { CandidateStatus, VALID_TRANSITIONS, getValidTransitions } from '@rove-hire/shared';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { type MockPrismaTransaction, type TransactionCallback } from '../../test-utils/mock-types';
+import { StateMachineErrorCode, StateMachineService } from './state-machine.service';
 
 const ALL_STATUSES = Object.values(CandidateStatus);
 
@@ -47,13 +49,13 @@ const invalidTransitionArb = fc.constantFrom(...getInvalidPairs());
 
 describe('Property 2: State Machine — Invalid Transitions Rejected with Structured Error', () => {
   let service: StateMachineService;
-  let mockPrisma: any;
+  let mockPrisma: MockPrismaTransaction;
 
   beforeEach(() => {
     mockPrisma = {
       $transaction: vi.fn(),
     };
-    service = new StateMachineService(mockPrisma);
+    service = new StateMachineService(mockPrisma as unknown as PrismaService);
   });
 
   it('validateTransition rejects all invalid (status, target) pairs', () => {
@@ -73,7 +75,7 @@ describe('Property 2: State Machine — Invalid Transitions Rejected with Struct
         const userId = 'test-user-id';
 
         // Mock the transaction to return a candidate with the given current status
-        mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+        mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
           const tx = {
             $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: current }]),
             candidate: { update: vi.fn() },
@@ -117,7 +119,7 @@ describe('Property 2: State Machine — Invalid Transitions Rejected with Struct
         const candidateId = 'test-candidate-terminal';
         const userId = 'test-user-id';
 
-        mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+        mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
           const tx = {
             $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: terminalStatus }]),
             candidate: { update: vi.fn() },

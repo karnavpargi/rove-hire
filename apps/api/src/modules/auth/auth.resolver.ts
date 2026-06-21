@@ -1,7 +1,7 @@
-import { UseGuards } from '@nestjs/common';
+import { Inject, UseGuards } from '@nestjs/common';
 import { Args, Context, Field, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { Public } from '../../common/decorators';
-import type { AuthService } from './auth.service';
+import { AuthService } from './auth.service';
 import { RateLimitGuard } from './rate-limit.guard';
 
 @ObjectType()
@@ -27,7 +27,7 @@ class LoginResponse {
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
   /**
    * Login mutation — authenticates HR user and sets session cookie.

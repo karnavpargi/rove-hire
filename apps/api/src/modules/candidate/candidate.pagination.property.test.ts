@@ -11,11 +11,17 @@
  * **Validates: Requirements 2.1**
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
-import { CandidateService } from './candidate.service';
-import type { PrismaService } from '../../prisma/prisma.service';
 import { PAGINATION } from '@rove-hire/shared';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
+import type { FileService } from '../file/file.service';
+import type { JobService } from '../job/job.service';
+import type { MagicLinkService } from '../magic-link/magic-link.service';
+import type { StateMachineService } from '../state-machine/state-machine.service';
+import type { TimelineService } from '../timeline/timeline.service';
+import { CandidateService } from './candidate.service';
 
 /**
  * Helper: generates a mock candidate dataset of size N
@@ -53,11 +59,11 @@ describe('Property 12: Pagination Correctness', () => {
     // Create the service with only PrismaService as a real dependency — the rest are unused for findAll
     service = new CandidateService(
       mockPrisma as unknown as PrismaService,
-      {} as any, // FileService (not used by findAll)
-      {} as any, // MagicLinkService (not used by findAll)
-      {} as any, // JobService (not used by findAll)
-      {} as any, // StateMachineService (not used by findAll)
-      {} as any, // TimelineService (not used by findAll)
+      asMock<FileService>({}),
+      asMock<MagicLinkService>({}),
+      asMock<JobService>({}),
+      asMock<StateMachineService>({}),
+      asMock<TimelineService>({}),
     );
   });
 
@@ -106,7 +112,7 @@ describe('Property 12: Pagination Correctness', () => {
           const dataset = generateCandidateDataset(n);
           const totalPages = Math.ceil(n / pageSize);
 
-          let allItems: any[] = [];
+          let allItems: ReturnType<typeof generateCandidateDataset> = [];
 
           // Fetch every page and accumulate items
           for (let page = 1; page <= totalPages; page++) {

@@ -11,21 +11,20 @@
  * Validates: Requirements 3.5, 3.9, 3.10
  */
 
-import * as React from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeftIcon, BriefcaseIcon, CalendarIcon, UsersIcon } from 'lucide-react';
-import { JobOpeningStatus } from '@rove-hire/shared';
-import type { CandidateStatus } from '@rove-hire/shared';
-import { useJob, useUpdateJobStatus } from '@/hooks/use-jobs';
-import { useToast } from '@/components/shared/toast';
-import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
-import { ErrorState } from '@/components/shared/error-state';
-import { StatusBadge } from '@/components/shared/status-badge';
 import { JobStatusBadge } from '@/components/shared/entity-badges';
+import { ErrorState } from '@/components/shared/error-state';
+import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { useToast } from '@/components/shared/toast';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { useJob, useUpdateJobStatus } from '@/hooks/use-jobs';
+import type { CandidateStatus } from '@rove-hire/shared';
+import { JobOpeningStatus } from '@rove-hire/shared';
+import { ArrowLeftIcon, BriefcaseIcon, CalendarIcon, UsersIcon } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import * as React from 'react';
 
 export default function JobDetailPage() {
   const params = useParams();

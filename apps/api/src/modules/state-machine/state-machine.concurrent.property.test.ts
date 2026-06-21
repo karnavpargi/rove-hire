@@ -13,20 +13,26 @@
  * **Validates: Requirements 26.1, 26.4**
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
-import { StateMachineService, StateMachineErrorCode } from './state-machine.service';
 import { CandidateStatus, VALID_TRANSITIONS } from '@rove-hire/shared';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import {
+  createPrismaConflictError,
+  type MockPrismaTransaction,
+  type TransactionCallback,
+} from '../../test-utils/mock-types';
+import { StateMachineErrorCode, StateMachineService } from './state-machine.service';
 
 describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
   let service: StateMachineService;
-  let mockPrisma: any;
+  let mockPrisma: MockPrismaTransaction;
 
   beforeEach(() => {
     mockPrisma = {
       $transaction: vi.fn(),
     };
-    service = new StateMachineService(mockPrisma);
+    service = new StateMachineService(mockPrisma as unknown as PrismaService);
   });
 
   /**
@@ -89,7 +95,7 @@ describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
           // Mock $transaction to simulate concurrency:
           // - First invocation: succeeds (executes the callback, returns updated candidate)
           // - Second invocation: throws Prisma P2034 write conflict error
-          mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+          mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
             callCount++;
 
             if (callCount === 1) {
@@ -112,10 +118,7 @@ describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
             }
 
             // Second writer loses — Prisma throws P2034 write conflict
-            const conflictError = new Error(
-              'Transaction failed due to a write conflict or a deadlock. Please retry your transaction',
-            );
-            (conflictError as any).code = 'P2034';
+            const conflictError = createPrismaConflictError();
             throw conflictError;
           });
 
@@ -179,7 +182,7 @@ describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
 
           let callCount = 0;
 
-          mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+          mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
             callCount++;
 
             if (callCount === 1) {
@@ -201,10 +204,7 @@ describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
             }
 
             // P2034 conflict for second writer
-            const conflictError = new Error(
-              'Transaction failed due to a write conflict or a deadlock. Please retry your transaction',
-            );
-            (conflictError as any).code = 'P2034';
+            const conflictError = createPrismaConflictError();
             throw conflictError;
           });
 
@@ -254,14 +254,10 @@ describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
         candidateIdArb,
         fc.uuid(),
         validNonTerminalTransitionArb,
-        async (candidateId, userId, { current, target }) => {
+        async (candidateId, userId, { target }) => {
           // Simulate direct conflict — the $transaction throws P2034
           mockPrisma.$transaction.mockImplementation(async () => {
-            const conflictError = new Error(
-              'Transaction failed due to a write conflict or a deadlock. Please retry your transaction',
-            );
-            (conflictError as any).code = 'P2034';
-            throw conflictError;
+            throw createPrismaConflictError();
           });
 
           const result = await service.executeTransition(candidateId, target, {}, userId);

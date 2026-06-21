@@ -3,39 +3,36 @@
  * Verifies all validators work correctly for task 2.2.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  emailSchema,
-  validateEmail,
-  phoneSchema,
-  validatePhone,
-  salaryAmountSchema,
-  currencySchema,
-  salaryInputSchema,
-  validateSalaryAmount,
-  validateCurrency,
-  validateSalaryInput,
-  linkedinUrlSchema,
-  optionalLinkedinUrlSchema,
-  validateLinkedinUrl,
-  jobTitleSchema,
-  skillsTagsSchema,
-  validateJobTitle,
-  validateSkillsTags,
   candidateNameSchema,
-  rejectionReasonSchema,
-  validateCandidateName,
-  validateRejectionReason,
-  interviewNotesSchema,
+  currencySchema,
+  emailSchema,
   feedbackSchema,
-  interviewerNameSchema,
-  validateInterviewNotes,
-  validateFeedback,
-  validateInterviewerName,
-  passwordSchema,
+  interviewNotesSchema,
+  jobTitleSchema,
   loginFormSchema,
-  validatePassword,
+  optionalLinkedinUrlSchema,
+  passwordSchema,
+  phoneSchema,
+  rejectionReasonSchema,
+  salaryAmountSchema,
+  skillsTagsSchema,
+  validateCandidateName,
+  validateCurrency,
+  validateEmail,
+  validateFeedback,
+  validateInterviewNotes,
+  validateInterviewerName,
+  validateJobTitle,
+  validateLinkedinUrl,
   validateLoginForm,
+  validatePassword,
+  validatePhone,
+  validateRejectionReason,
+  validateSalaryAmount,
+  validateSalaryInput,
+  validateSkillsTags,
 } from '../index';
 
 // ===================== Email Validation =====================
@@ -126,7 +123,7 @@ describe('Salary Validation (0.01–9,999,999.99, max 2 decimals)', () => {
     expect(validateSalaryAmount(0.01).valid).toBe(true);
     expect(validateSalaryAmount(50000).valid).toBe(true);
     expect(validateSalaryAmount(9999999.99).valid).toBe(true);
-    expect(validateSalaryAmount(100.50).valid).toBe(true);
+    expect(validateSalaryAmount(100.5).valid).toBe(true);
   });
 
   it('rejects amounts below 0.01', () => {
@@ -162,7 +159,7 @@ describe('Salary Validation (0.01–9,999,999.99, max 2 decimals)', () => {
   });
 
   it('schema parses valid salary', () => {
-    expect(salaryAmountSchema.parse(100.50)).toBe(100.50);
+    expect(salaryAmountSchema.parse(100.5)).toBe(100.5);
     expect(currencySchema.parse('USD')).toBe('USD');
   });
 });
@@ -318,7 +315,9 @@ describe('Rejection Reason Validation (5-500 chars)', () => {
   });
 
   it('schema parses valid reason', () => {
-    expect(rejectionReasonSchema.parse('Does not meet requirements')).toBe('Does not meet requirements');
+    expect(rejectionReasonSchema.parse('Does not meet requirements')).toBe(
+      'Does not meet requirements',
+    );
   });
 });
 

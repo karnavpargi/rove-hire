@@ -12,16 +12,18 @@
  * **Validates: Requirements 4.12, 5.5**
  */
 
-import { describe, it, expect } from 'vitest';
+import type { ConfigService } from '@nestjs/config';
 import * as fc from 'fast-check';
+import { describe, expect, it } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
 import {
-  MagicLinkService,
   MagicLinkError,
   MagicLinkErrorCode,
+  MagicLinkService,
   type ApplicationFormInput,
 } from './magic-link.service';
-import type { PrismaService } from '../../prisma/prisma.service';
-import type { ConfigService } from '@nestjs/config';
+
+import type { TransactionCallback } from '../../test-utils/mock-types';
 
 interface MagicLinkRecord {
   id: string;
@@ -44,7 +46,10 @@ function createFreshService() {
     return store.get(args.where.tokenHash) ?? null;
   };
 
-  const updateImpl = async (args: any) => {
+  const updateImpl = async (args: {
+    where: { id: string; isConsumed: boolean };
+    data: Partial<MagicLinkRecord>;
+  }) => {
     const { id, isConsumed: isConsumedCondition } = args.where;
     for (const [hash, rec] of store.entries()) {
       if (rec.id === id && rec.isConsumed === isConsumedCondition) {
@@ -58,7 +63,14 @@ function createFreshService() {
 
   const prisma = {
     magicLink: {
-      create: async (args: any) => {
+      create: async (args: {
+        data: {
+          tokenHash: string;
+          candidateId: string;
+          isConsumed?: boolean;
+          expiresAt: Date;
+        };
+      }) => {
         const record: MagicLinkRecord = {
           id: `link-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           tokenHash: args.data.tokenHash,
@@ -73,14 +85,14 @@ function createFreshService() {
       },
       findUnique: findUniqueImpl,
     },
-    $transaction: async (fn: (tx: any) => Promise<any>) => {
+    $transaction: async (fn: TransactionCallback) => {
       const tx = {
         magicLink: {
           findUnique: findUniqueImpl,
           update: updateImpl,
         },
         candidate: {
-          update: async (args: any) => ({
+          update: async (args: { where: { id: string }; data: Record<string, unknown> }) => ({
             id: args.where.id,
             ...args.data,
           }),
@@ -179,11 +191,10 @@ describe('Property 7: Magic Link — One-Time Use', () => {
         const futureTime = RealDate.now() + delayMs;
 
         class MockDate extends RealDate {
-          constructor(...args: any[]) {
+          constructor(...args: ConstructorParameters<DateConstructor>) {
             if (args.length === 0) {
               super(futureTime);
             } else {
-              // @ts-expect-error MockDate forwards constructor args to native Date
               super(...args);
             }
           }
@@ -193,7 +204,7 @@ describe('Property 7: Magic Link — One-Time Use', () => {
           }
         }
 
-        globalThis.Date = MockDate as any;
+        globalThis.Date = MockDate as unknown as DateConstructor;
         try {
           // Regardless of how much time passes, the token stays "used"
           // because isConsumed check happens before expiry check in the service

@@ -12,10 +12,10 @@
 
 'use client';
 
+import type { ClassifiedError } from '@/lib/graphql-client';
+import { graphqlClient, handleGraphQLError } from '@/lib/graphql-client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
-import { graphqlClient, handleGraphQLError, classifyError } from '@/lib/graphql-client';
-import type { ClassifiedError } from '@/lib/graphql-client';
 
 // ---------------------------------------------------------------------------
 // GraphQL Mutation

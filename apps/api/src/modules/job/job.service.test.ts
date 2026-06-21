@@ -1,6 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { JobService } from './job.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
+import type { CreateJobOpeningInput } from './dto/create-job-opening.input';
+import { JobService } from './job.service';
 
 /**
  * Unit tests for JobService.
@@ -38,7 +41,7 @@ describe('JobService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new JobService(mockPrisma as any);
+    service = new JobService(asMock<PrismaService>(mockPrisma));
 
     // Default $transaction behaviour: execute callback with a mock transaction client
     mockPrisma.$transaction.mockImplementation(async (cb: (tx: typeof mockTx) => unknown) =>
@@ -106,7 +109,7 @@ describe('JobService', () => {
         updatedAt: new Date(),
       });
 
-      const result = await service.create(input as any);
+      const result = await service.create(input as unknown as CreateJobOpeningInput);
 
       expect(result.description).toBeNull();
       expect(mockPrisma.jobOpening.create).toHaveBeenCalledWith(
@@ -118,17 +121,23 @@ describe('JobService', () => {
 
     it('should reject empty title', async () => {
       const input = { title: '', skills: ['React'] };
-      await expect(service.create(input as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create(input as unknown as CreateJobOpeningInput)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject title exceeding 200 characters', async () => {
       const input = { title: 'x'.repeat(201), skills: ['React'] };
-      await expect(service.create(input as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create(input as unknown as CreateJobOpeningInput)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject empty skills array', async () => {
       const input = { title: 'Developer', skills: [] };
-      await expect(service.create(input as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create(input as unknown as CreateJobOpeningInput)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject more than 20 skill tags', async () => {
@@ -136,7 +145,9 @@ describe('JobService', () => {
         title: 'Developer',
         skills: Array.from({ length: 21 }, (_, i) => `skill-${i}`),
       };
-      await expect(service.create(input as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create(input as unknown as CreateJobOpeningInput)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject skill tag exceeding 50 characters', async () => {
@@ -144,7 +155,9 @@ describe('JobService', () => {
         title: 'Developer',
         skills: ['x'.repeat(51)],
       };
-      await expect(service.create(input as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create(input as unknown as CreateJobOpeningInput)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject description exceeding 5000 characters', async () => {
@@ -153,7 +166,9 @@ describe('JobService', () => {
         description: 'x'.repeat(5001),
         skills: ['React'],
       };
-      await expect(service.create(input as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create(input as unknown as CreateJobOpeningInput)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -276,9 +291,9 @@ describe('JobService', () => {
     });
 
     it('should reject invalid status value', async () => {
-      await expect(service.updateStatus('job-1', 'Invalid' as any)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.updateStatus('job-1', 'Invalid' as unknown as 'Open' | 'Closed'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

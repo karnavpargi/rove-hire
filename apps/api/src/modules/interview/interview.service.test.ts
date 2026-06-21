@@ -1,7 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { InterviewService } from './interview.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { InterviewTypeGql, RecommendationGql, InterviewStatusGql } from './interview.model';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
+import type { TimelineService } from '../timeline/timeline.service';
+import { InterviewStatusGql, InterviewTypeGql, RecommendationGql } from './interview.model';
+import { InterviewService } from './interview.service';
 
 /**
  * Unit tests for InterviewService.
@@ -32,7 +35,10 @@ describe('InterviewService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new InterviewService(mockPrisma as any, mockTimelineService as any);
+    service = new InterviewService(
+      asMock<PrismaService>(mockPrisma),
+      asMock<TimelineService>(mockTimelineService),
+    );
   });
 
   describe('schedule', () => {

@@ -1,6 +1,7 @@
-import { Injectable, Inject, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { jobTitleSchema, skillsTagsSchema } from '@rove-hire/shared';
+import { formatZodError } from '../../common/utils/zod-error.util';
+import { PrismaService } from '../../prisma/prisma.service';
 import type { CreateJobOpeningInput } from './dto/create-job-opening.input';
 import type { UpdateJobOpeningInput } from './dto/update-job-opening.input';
 
@@ -33,13 +34,13 @@ export class JobService {
     // Validate title using shared schema
     const titleResult = jobTitleSchema.safeParse(input.title);
     if (!titleResult.success) {
-      throw new BadRequestException(titleResult.error.issues.map((i) => i.message).join('; '));
+      throw new BadRequestException(formatZodError(titleResult.error));
     }
 
     // Validate skills using shared schema
     const skillsResult = skillsTagsSchema.safeParse(input.skills);
     if (!skillsResult.success) {
-      throw new BadRequestException(skillsResult.error.issues.map((i) => i.message).join('; '));
+      throw new BadRequestException(formatZodError(skillsResult.error));
     }
 
     // Validate description length
@@ -186,7 +187,7 @@ export class JobService {
     if (input.title !== undefined) {
       const titleResult = jobTitleSchema.safeParse(input.title);
       if (!titleResult.success) {
-        throw new BadRequestException(titleResult.error.issues.map((i) => i.message).join('; '));
+        throw new BadRequestException(formatZodError(titleResult.error));
       }
     }
 
@@ -194,7 +195,7 @@ export class JobService {
     if (input.skills !== undefined) {
       const skillsResult = skillsTagsSchema.safeParse(input.skills);
       if (!skillsResult.success) {
-        throw new BadRequestException(skillsResult.error.issues.map((i) => i.message).join('; '));
+        throw new BadRequestException(formatZodError(skillsResult.error));
       }
     }
 

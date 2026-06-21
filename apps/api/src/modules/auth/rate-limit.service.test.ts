@@ -1,5 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
 import { RateLimitService } from './rate-limit.service';
 
 // Mock PrismaService
@@ -17,7 +19,7 @@ describe('RateLimitService', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    service = new RateLimitService(mockPrisma as any);
+    service = new RateLimitService(asMock<PrismaService>(mockPrisma));
   });
 
   describe('trackLoginAttempt', () => {

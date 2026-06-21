@@ -9,17 +9,18 @@
  * **Validates: Requirements 20.3, 20.4**
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
-import { createHash } from 'crypto';
-import { MagicLinkService } from './magic-link.service';
 import type { ConfigService } from '@nestjs/config';
+import { createHash } from 'crypto';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { MagicLinkService } from './magic-link.service';
 
 describe('Property 6: Magic Link — Hash Round-Trip Verification', () => {
   let service: MagicLinkService;
 
   beforeEach(() => {
-    const mockPrisma = {} as any;
+    const mockPrisma = {} as unknown as PrismaService;
     const mockConfigService = {
       get: (key: string, defaultValue: string) => defaultValue,
     } as unknown as ConfigService;

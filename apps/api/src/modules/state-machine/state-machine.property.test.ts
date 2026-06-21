@@ -9,25 +9,27 @@
  * **Validates: Requirements 10.1, 10.2, 6.2, 6.9**
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
-import { StateMachineService } from './state-machine.service';
 import {
   CandidateStatus,
   VALID_TRANSITIONS,
   getValidTransitions,
   isValidTransition,
 } from '@rove-hire/shared';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { type MockPrismaTransaction } from '../../test-utils/mock-types';
+import { StateMachineService } from './state-machine.service';
 
 describe('Property 1: State Machine — Valid Transitions Accepted', () => {
   let service: StateMachineService;
-  let mockPrisma: any;
+  let mockPrisma: MockPrismaTransaction;
 
   beforeEach(() => {
     mockPrisma = {
       $transaction: vi.fn(),
     };
-    service = new StateMachineService(mockPrisma);
+    service = new StateMachineService(mockPrisma as unknown as PrismaService);
   });
 
   /**
@@ -113,7 +115,7 @@ describe('Property 1: State Machine — Valid Transitions Accepted', () => {
           interviewerName: fc.string({ minLength: 1, maxLength: 100 }),
           scheduledAt: fc.date({ min: new Date() }),
         }),
-        ({ candidateId }) => {
+        () => {
           // A candidate already in InterviewScheduled should NOT have their status
           // changed by scheduling additional interviews. The only valid forward
           // transition from InterviewScheduled is OfferSent (or Rejected).

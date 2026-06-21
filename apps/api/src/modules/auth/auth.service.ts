@@ -1,10 +1,10 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { validateLoginForm } from '@rove-hire/shared';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import type { PrismaService } from '../../prisma/prisma.service';
-import type { RateLimitService } from './rate-limit.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { RateLimitService } from './rate-limit.service';
 
 /** JWT payload contents */
 export interface JwtPayload {
@@ -29,7 +29,6 @@ export interface CookieOptions {
   maxAge: number;
 }
 
-const BCRYPT_COST = 12;
 const JWT_EXPIRY_HOURS = 8;
 const JWT_EXPIRY_MS = JWT_EXPIRY_HOURS * 60 * 60 * 1000;
 const GENERIC_AUTH_ERROR = 'Invalid email or password';
@@ -37,8 +36,8 @@ const GENERIC_AUTH_ERROR = 'Invalid email or password';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly rateLimitService: RateLimitService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(RateLimitService) private readonly rateLimitService: RateLimitService,
   ) {}
 
   /**

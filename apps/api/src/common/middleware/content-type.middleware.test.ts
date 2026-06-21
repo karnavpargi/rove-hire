@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { ContentTypeMiddleware } from './content-type.middleware';
 import type { Request, Response } from 'express';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { GraphQlErrorBody, TestTrackedResponse } from '../../test-utils/mock-types';
+import { ContentTypeMiddleware } from './content-type.middleware';
 
 describe('ContentTypeMiddleware', () => {
   let middleware: ContentTypeMiddleware;
-  let mockRes: Partial<Response>;
+  let mockRes: TestTrackedResponse & Partial<Response>;
   let mockNext: ReturnType<typeof createMockNext>;
   let jsonMock: ReturnType<typeof createJsonMock>;
 
@@ -30,10 +31,10 @@ describe('ContentTypeMiddleware', () => {
     middleware = new ContentTypeMiddleware();
     jsonMock = createJsonMock();
     mockRes = {
-      status: ((code: number) => {
-        (mockRes as any)._statusCode = code;
-        return { json: jsonMock } as any;
-      }) as any,
+      status: (code: number) => {
+        mockRes._statusCode = code;
+        return { json: jsonMock } as unknown as Response;
+      },
     };
     mockNext = createMockNext();
   });
@@ -90,8 +91,8 @@ describe('ContentTypeMiddleware', () => {
     } as unknown as Request;
     middleware.use(req, mockRes as Response, mockNext);
     expect(mockNext.wasCalled()).toBe(false);
-    expect((mockRes as any)._statusCode).toBe(415);
-    const data = jsonMock.getData() as any;
+    expect(mockRes._statusCode).toBe(415);
+    const data = jsonMock.getData() as GraphQlErrorBody;
     expect(data.errors[0].extensions.code).toBe('UNSUPPORTED_MEDIA_TYPE');
   });
 
@@ -102,7 +103,7 @@ describe('ContentTypeMiddleware', () => {
     } as unknown as Request;
     middleware.use(req, mockRes as Response, mockNext);
     expect(mockNext.wasCalled()).toBe(false);
-    expect((mockRes as any)._statusCode).toBe(415);
+    expect(mockRes._statusCode).toBe(415);
   });
 
   it('rejects POST without content-type header', () => {
@@ -112,8 +113,8 @@ describe('ContentTypeMiddleware', () => {
     } as unknown as Request;
     middleware.use(req, mockRes as Response, mockNext);
     expect(mockNext.wasCalled()).toBe(false);
-    expect((mockRes as any)._statusCode).toBe(415);
-    const data = jsonMock.getData() as any;
+    expect(mockRes._statusCode).toBe(415);
+    const data = jsonMock.getData() as GraphQlErrorBody;
     expect(data.errors[0].message).toContain('Content-Type header is required');
   });
 });

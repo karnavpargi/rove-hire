@@ -9,6 +9,8 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
@@ -21,9 +23,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@rove-hire/shared": ["../../packages/shared/dist/index.d.ts"],
-      "@rove-hire/shared/*": ["../../packages/shared/dist/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

@@ -1,6 +1,6 @@
 import type { NestMiddleware } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { NextFunction, Request, Response } from 'express';
 
 /**
@@ -26,7 +26,7 @@ export class CsrfOriginMiddleware implements NestMiddleware {
   private readonly frontendUrl: string;
   private readonly isProduction: boolean;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
     this.frontendUrl = this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
     this.isProduction = this.configService.get<string>('NODE_ENV') === 'production';
   }

@@ -1,11 +1,14 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Inject } from '@nestjs/common';
 import { Args, Field, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { optionalLinkedinUrlSchema, phoneSchema } from '@rove-hire/shared';
 import { Public } from '../../common/decorators';
-import type { MagicLinkService } from '../magic-link/magic-link.service';
-import { MagicLinkError, MagicLinkErrorCode } from '../magic-link/magic-link.service';
+import {
+  MagicLinkError,
+  MagicLinkErrorCode,
+  MagicLinkService,
+} from '../magic-link/magic-link.service';
 import { CandidateType } from './candidate.model';
-import type { SubmitApplicationInput } from './dto/submit-application.input';
+import { SubmitApplicationInput } from './dto/submit-application.input';
 
 /**
  * GraphQL type returned by validateMagicLink query.
@@ -101,7 +104,7 @@ function validateApplicationForm(input: SubmitApplicationInput): string[] {
  */
 @Resolver()
 export class ApplicationResolver {
-  constructor(private readonly magicLinkService: MagicLinkService) {}
+  constructor(@Inject(MagicLinkService) private readonly magicLinkService: MagicLinkService) {}
 
   /**
    * Validate a magic link token without consuming it.
@@ -150,7 +153,7 @@ export class ApplicationResolver {
   })
   async submitApplication(
     @Args('token', { description: 'The magic link token from the URL' }) token: string,
-    @Args('input') input: SubmitApplicationInput,
+    @Args('input', { type: () => SubmitApplicationInput }) input: SubmitApplicationInput,
   ): Promise<CandidateType> {
     // Step 1: Validate all form fields before consuming the magic link
     const validationErrors = validateApplicationForm(input);

@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createHash, randomBytes } from 'crypto';
 import { CandidateStatus } from '../../generated/prisma';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /** Magic link expiry duration: 14 days in milliseconds */
 const EXPIRY_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
@@ -74,8 +74,8 @@ export class MagicLinkService {
   private readonly frontendUrl: string;
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly configService: ConfigService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
   ) {
     this.frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
   }

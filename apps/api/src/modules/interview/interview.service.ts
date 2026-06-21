@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   CandidateStatus,
   TimelineEventType,
@@ -6,9 +6,10 @@ import {
   interviewNotesSchema,
   interviewerNameSchema,
 } from '@rove-hire/shared';
+import { formatZodError } from '../../common/utils/zod-error.util';
 import type { Interview } from '../../generated/prisma';
-import type { PrismaService } from '../../prisma/prisma.service';
-import type { TimelineService } from '../timeline/timeline.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { TimelineService } from '../timeline/timeline.service';
 import type { InterviewFiltersInput } from './dto/interview-filters.input';
 import type { RecordFeedbackInput } from './dto/record-feedback.input';
 import type { ScheduleInterviewInput } from './dto/schedule-interview.input';
@@ -36,8 +37,8 @@ export class InterviewService {
   private readonly logger = new Logger(InterviewService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly timelineService: TimelineService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(TimelineService) private readonly timelineService: TimelineService,
   ) {}
 
   /**
@@ -60,14 +61,14 @@ export class InterviewService {
     // Validate interviewer name
     const nameResult = interviewerNameSchema.safeParse(input.interviewerName);
     if (!nameResult.success) {
-      throw new BadRequestException(nameResult.error.issues.map((i) => i.message).join('; '));
+      throw new BadRequestException(formatZodError(nameResult.error));
     }
 
     // Validate notes (if provided)
     if (input.notes !== undefined && input.notes !== null) {
       const notesResult = interviewNotesSchema.safeParse(input.notes);
       if (!notesResult.success) {
-        throw new BadRequestException(notesResult.error.issues.map((i) => i.message).join('; '));
+        throw new BadRequestException(formatZodError(notesResult.error));
       }
     }
 
@@ -168,7 +169,7 @@ export class InterviewService {
     // Validate feedback text
     const feedbackResult = feedbackSchema.safeParse(input.feedback);
     if (!feedbackResult.success) {
-      throw new BadRequestException(feedbackResult.error.issues.map((i) => i.message).join('; '));
+      throw new BadRequestException(formatZodError(feedbackResult.error));
     }
 
     // Fetch interview

@@ -1,6 +1,7 @@
+import { Inject } from '@nestjs/common';
 import { Args, Int, Query, Resolver } from '@nestjs/graphql';
 import { TimelineEventType } from './timeline.model';
-import type { TimelineService } from './timeline.service';
+import { TimelineService } from './timeline.service';
 
 /**
  * TimelineResolver exposes GraphQL queries for candidate timeline events.
@@ -14,7 +15,7 @@ import type { TimelineService } from './timeline.service';
  */
 @Resolver(() => TimelineEventType)
 export class TimelineResolver {
-  constructor(private readonly timelineService: TimelineService) {}
+  constructor(@Inject(TimelineService) private readonly timelineService: TimelineService) {}
 
   /**
    * Retrieve timeline events for a candidate, ordered most-recent-first.

@@ -10,13 +10,23 @@
  * **Validates: Requirements 1.7, 13.4**
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { HttpException } from '@nestjs/common';
 import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
 import { RateLimitService } from './rate-limit.service';
 
 describe('Property 14: Rate Limiting Enforcement', () => {
   let service: RateLimitService;
-  let mockPrisma: any;
+  let mockPrisma: {
+    loginAttempt: {
+      create: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+      count: ReturnType<typeof vi.fn>;
+      findFirst: ReturnType<typeof vi.fn>;
+    };
+  };
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -28,7 +38,7 @@ describe('Property 14: Rate Limiting Enforcement', () => {
         findFirst: vi.fn(),
       },
     };
-    service = new RateLimitService(mockPrisma as any);
+    service = new RateLimitService(asMock<PrismaService>(mockPrisma));
   });
 
   /**
@@ -146,9 +156,13 @@ describe('Property 14: Rate Limiting Enforcement', () => {
           await service.enforceRateLimit(ip);
           // Should not reach here
           expect(true).toBe(false);
-        } catch (error: any) {
-          expect(error.getStatus()).toBe(429);
-          const response = error.getResponse();
+        } catch (error: unknown) {
+          expect((error as HttpException).getStatus()).toBe(429);
+          const response = (error as HttpException).getResponse() as {
+            code: string;
+            message: string;
+            retryAfter: number;
+          };
           expect(response.code).toBe('RATE_LIMIT_ERROR');
           expect(response.message).toContain('temporarily locked');
           expect(response.retryAfter).toBeGreaterThan(0);

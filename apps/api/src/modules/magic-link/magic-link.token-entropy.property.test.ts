@@ -9,11 +9,12 @@
  * **Validates: Requirements 4.6, 20.1, 20.2**
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
-import { createHash } from 'crypto';
-import { MagicLinkService } from './magic-link.service';
 import type { ConfigService } from '@nestjs/config';
+import { createHash } from 'crypto';
+import * as fc from 'fast-check';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import { MagicLinkService } from './magic-link.service';
 
 /**
  * Minimum token length: base64url encoding of 32 bytes = 43 chars (no padding)
@@ -45,7 +46,7 @@ describe('Property 5: Magic Link — Token Generation Entropy', () => {
           return { id: `mock-id-${capturedHashes.length}`, ...data };
         },
       },
-    } as any;
+    } as unknown as PrismaService;
 
     const mockConfigService = {
       get: (key: string, defaultValue: string) => defaultValue,

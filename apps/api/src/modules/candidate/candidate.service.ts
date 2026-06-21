@@ -1,18 +1,20 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import type { CandidateStatus, TransitionMeta } from '@rove-hire/shared';
 import { PAGINATION, TimelineEventType, candidateNameSchema, emailSchema } from '@rove-hire/shared';
-import type { PrismaService } from '../../prisma/prisma.service';
-import type { FileService } from '../file/file.service';
-import type { JobService } from '../job/job.service';
-import type { MagicLinkService } from '../magic-link/magic-link.service';
-import type { StateMachineService } from '../state-machine/state-machine.service';
-import type { TimelineService } from '../timeline/timeline.service';
+import { formatZodError } from '../../common/utils/zod-error.util';
+import { PrismaService } from '../../prisma/prisma.service';
+import { FileService } from '../file/file.service';
+import { JobService } from '../job/job.service';
+import { MagicLinkService } from '../magic-link/magic-link.service';
+import { StateMachineService } from '../state-machine/state-machine.service';
+import { TimelineService } from '../timeline/timeline.service';
 import type { CandidateFiltersInput } from './dto/candidate-filters.input';
 import type { CreateCandidateInput } from './dto/create-candidate.input';
 
@@ -31,12 +33,12 @@ export class CandidateService {
   private readonly logger = new Logger(CandidateService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly fileService: FileService,
-    private readonly magicLinkService: MagicLinkService,
-    private readonly jobService: JobService,
-    private readonly stateMachineService: StateMachineService,
-    private readonly timelineService: TimelineService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(FileService) private readonly fileService: FileService,
+    @Inject(MagicLinkService) private readonly magicLinkService: MagicLinkService,
+    @Inject(JobService) private readonly jobService: JobService,
+    @Inject(StateMachineService) private readonly stateMachineService: StateMachineService,
+    @Inject(TimelineService) private readonly timelineService: TimelineService,
   ) {}
 
   /**
@@ -58,13 +60,13 @@ export class CandidateService {
     // Step 1: Validate name
     const nameResult = candidateNameSchema.safeParse(input.name);
     if (!nameResult.success) {
-      throw new BadRequestException(nameResult.error.issues.map((i) => i.message).join('; '));
+      throw new BadRequestException(formatZodError(nameResult.error));
     }
 
     // Step 1: Validate email
     const emailResult = emailSchema.safeParse(input.email);
     if (!emailResult.success) {
-      throw new BadRequestException(emailResult.error.issues.map((i) => i.message).join('; '));
+      throw new BadRequestException(formatZodError(emailResult.error));
     }
 
     // Step 2: Validate job is open (throws if closed or not found)

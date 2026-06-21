@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ConfigService } from '@nestjs/config';
 import { createHash, randomBytes } from 'crypto';
-import { MagicLinkService, MagicLinkError, MagicLinkErrorCode } from './magic-link.service';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../prisma/prisma.service';
+import type { TransactionCallback } from '../../test-utils/mock-types';
+import { MagicLinkError, MagicLinkErrorCode, MagicLinkService } from './magic-link.service';
 
 // Mock PrismaService
 function createMockPrisma() {
@@ -23,7 +24,7 @@ function createMockPrisma() {
       create: vi.fn(),
       findUnique: vi.fn(),
     },
-    $transaction: vi.fn(async (fn: (prisma: any) => Promise<any>) => {
+    $transaction: vi.fn(async (fn: TransactionCallback) => {
       return fn(tx);
     }),
     _tx: tx,

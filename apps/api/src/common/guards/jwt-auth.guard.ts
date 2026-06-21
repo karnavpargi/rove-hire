@@ -1,8 +1,8 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import type { Reflector } from '@nestjs/core';
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import type { AuthService } from '../../modules/auth/auth.service';
+import { AuthService } from '../../modules/auth/auth.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
@@ -21,8 +21,8 @@ export class JwtAuthGuard implements CanActivate {
   private readonly logger = new Logger(JwtAuthGuard.name);
 
   constructor(
-    private readonly reflector: Reflector,
-    private readonly authService: AuthService,
+    @Inject(Reflector) private readonly reflector: Reflector,
+    @Inject(AuthService) private readonly authService: AuthService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

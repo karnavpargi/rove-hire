@@ -1,16 +1,16 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Inject } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import type { CandidateStatus } from '@rove-hire/shared';
-import type { FileService } from '../file/file.service';
+import { FileService } from '../file/file.service';
 import {
   CandidateType,
   CreateCandidateResultType,
   PaginatedCandidatesType,
 } from './candidate.model';
-import type { CandidateService } from './candidate.service';
-import type { CandidateFiltersInput } from './dto/candidate-filters.input';
-import type { CreateCandidateInput } from './dto/create-candidate.input';
-import type { UpdateCandidateStatusInput } from './dto/update-candidate-status.input';
+import { CandidateService } from './candidate.service';
+import { CandidateFiltersInput } from './dto/candidate-filters.input';
+import { CreateCandidateInput } from './dto/create-candidate.input';
+import { UpdateCandidateStatusInput } from './dto/update-candidate-status.input';
 
 /**
  * CandidateResolver exposes GraphQL queries and mutations for candidate management.
@@ -31,8 +31,8 @@ import type { UpdateCandidateStatusInput } from './dto/update-candidate-status.i
 @Resolver(() => CandidateType)
 export class CandidateResolver {
   constructor(
-    private readonly candidateService: CandidateService,
-    private readonly fileService: FileService,
+    @Inject(CandidateService) private readonly candidateService: CandidateService,
+    @Inject(FileService) private readonly fileService: FileService,
   ) {}
 
   /**
@@ -46,7 +46,7 @@ export class CandidateResolver {
    */
   @Mutation(() => CreateCandidateResultType, { description: 'Create a new candidate with resume' })
   async createCandidate(
-    @Args('input') input: CreateCandidateInput,
+    @Args('input', { type: () => CreateCandidateInput }) input: CreateCandidateInput,
     @Args('resumeBase64', { description: 'Resume file as base64 string' }) resumeBase64: string,
     @Args('resumeFilename', { description: 'Original filename of the resume' })
     resumeFilename: string,
@@ -86,7 +86,8 @@ export class CandidateResolver {
     description: 'List candidates with filters and pagination',
   })
   async candidates(
-    @Args('filters', { nullable: true }) filters?: CandidateFiltersInput,
+    @Args('filters', { type: () => CandidateFiltersInput, nullable: true })
+    filters?: CandidateFiltersInput,
   ): Promise<PaginatedCandidatesType> {
     const result = await this.candidateService.findAll(filters ?? {});
 
@@ -123,7 +124,8 @@ export class CandidateResolver {
     description: 'Transition candidate status',
   })
   async transitionCandidateStatus(
-    @Args('input') input: UpdateCandidateStatusInput,
+    @Args('input', { type: () => UpdateCandidateStatusInput })
+    input: UpdateCandidateStatusInput,
   ): Promise<CandidateType> {
     // TODO: Extract userId from JWT context in production
     const userId = 'system';

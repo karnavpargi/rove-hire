@@ -1,9 +1,10 @@
+import { Inject } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import type { InterviewFiltersInput } from './dto/interview-filters.input';
-import type { RecordFeedbackInput } from './dto/record-feedback.input';
-import type { ScheduleInterviewInput } from './dto/schedule-interview.input';
+import { InterviewFiltersInput } from './dto/interview-filters.input';
+import { RecordFeedbackInput } from './dto/record-feedback.input';
+import { ScheduleInterviewInput } from './dto/schedule-interview.input';
 import { InterviewObjectType } from './interview.model';
-import type { InterviewService } from './interview.service';
+import { InterviewService } from './interview.service';
 
 /**
  * InterviewResolver exposes GraphQL queries and mutations for interviews.
@@ -21,7 +22,7 @@ import type { InterviewService } from './interview.service';
  */
 @Resolver(() => InterviewObjectType)
 export class InterviewResolver {
-  constructor(private readonly interviewService: InterviewService) {}
+  constructor(@Inject(InterviewService) private readonly interviewService: InterviewService) {}
 
   /**
    * Schedule a new interview for a candidate.
@@ -33,7 +34,7 @@ export class InterviewResolver {
    */
   @Mutation(() => InterviewObjectType, { description: 'Schedule a new interview for a candidate' })
   async scheduleInterview(
-    @Args('input') input: ScheduleInterviewInput,
+    @Args('input', { type: () => ScheduleInterviewInput }) input: ScheduleInterviewInput,
   ): Promise<InterviewObjectType> {
     const interview = await this.interviewService.schedule(input);
     return this.mapToGraphQL(interview);
@@ -46,7 +47,9 @@ export class InterviewResolver {
    * Requirements: 6.4, 6.5
    */
   @Mutation(() => InterviewObjectType, { description: 'Record feedback for an interview' })
-  async recordFeedback(@Args('input') input: RecordFeedbackInput): Promise<InterviewObjectType> {
+  async recordFeedback(
+    @Args('input', { type: () => RecordFeedbackInput }) input: RecordFeedbackInput,
+  ): Promise<InterviewObjectType> {
     const interview = await this.interviewService.recordFeedback(input);
     return this.mapToGraphQL(interview);
   }
@@ -59,7 +62,8 @@ export class InterviewResolver {
    */
   @Query(() => [InterviewObjectType], { description: 'List interviews sorted by date ascending' })
   async interviews(
-    @Args('filters', { nullable: true }) filters?: InterviewFiltersInput,
+    @Args('filters', { type: () => InterviewFiltersInput, nullable: true })
+    filters?: InterviewFiltersInput,
   ): Promise<InterviewObjectType[]> {
     const interviews = await this.interviewService.findAll(filters);
     return interviews.map((i) => this.mapToGraphQL(i));

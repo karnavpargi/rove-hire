@@ -13,6 +13,7 @@ A full-stack recruitment management tool enabling ROVE's HR team to manage candi
 - [Seed Data](#seed-data)
 - [PDF Generation](#pdf-generation)
 - [Hosting & Deployment](#hosting--deployment)
+- [Production deploy cheat sheet](deploy/DEPLOY.md)
 - [Testing](#testing)
 - [Known Issues](#known-issues)
 - [What's Next](#whats-next)
@@ -259,6 +260,9 @@ Return pre-signed download URL (15-min expiry)
 
 ## Hosting & Deployment
 
+> **Production:** [`deploy/DEPLOY.md`](deploy/DEPLOY.md) — registry workflow cheat sheet.  
+> Run `pnpm deploy:help` anytime to print it.
+
 ### Local development (Docker Compose)
 
 The `docker-compose.yml` runs two services:
@@ -273,6 +277,21 @@ Access the API at `http://localhost:3000` when running via Docker Compose. Run t
 ### Production deploy (DietPi server + host nginx)
 
 Production runs under **`/home/dietpi/rove-hire`** using `docker-compose.prod.yml`. Docker binds the API and web apps to **localhost only**; your **existing host nginx** proxies `https://rove.kpargi.eu.org` to those ports (other apps on the server are untouched).
+
+#### Registry deploy (recommended for Raspberry Pi)
+
+Build on your Mac, push to GHCR/Docker Hub, pull on the server — no on-Pi compile.
+
+**Cheat sheet:** [`deploy/DEPLOY.md`](deploy/DEPLOY.md) · `pnpm deploy:help`
+
+```bash
+pnpm docker:push        # build linux/arm64 images and push
+pnpm deploy:registry    # SSH: pull images, migrate, start
+```
+
+Uses `docker-compose.registry.yml` instead of building with `--build` on the server.
+
+#### Build-on-server deploy
 
 **SSH target:** `root@192.168.10.4`  
 **Install path:** `/home/dietpi/rove-hire`  

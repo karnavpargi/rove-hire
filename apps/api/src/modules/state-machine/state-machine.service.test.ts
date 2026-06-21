@@ -1,6 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { StateMachineService, StateMachineErrorCode } from './state-machine.service';
 import { CandidateStatus } from '@rove-hire/shared';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PrismaService } from '../../prisma/prisma.service';
+import {
+  createPrismaConflictError,
+  type MockPrismaTransaction,
+  type TransactionCallback,
+} from '../../test-utils/mock-types';
+import { StateMachineErrorCode, StateMachineService } from './state-machine.service';
 
 /**
  * Unit tests for StateMachineService.
@@ -8,13 +14,13 @@ import { CandidateStatus } from '@rove-hire/shared';
  */
 describe('StateMachineService', () => {
   let service: StateMachineService;
-  let mockPrisma: any;
+  let mockPrisma: MockPrismaTransaction;
 
   beforeEach(() => {
     mockPrisma = {
       $transaction: vi.fn(),
     };
-    service = new StateMachineService(mockPrisma);
+    service = new StateMachineService(mockPrisma as unknown as PrismaService);
   });
 
   describe('validateTransition', () => {
@@ -150,7 +156,7 @@ describe('StateMachineService', () => {
 
     it('should return INVALID_TRANSITION error when transition is not allowed', async () => {
       // Mock the transaction to execute the callback
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'Hired' }]),
           candidate: { update: vi.fn() },
@@ -177,7 +183,7 @@ describe('StateMachineService', () => {
     });
 
     it('should return PREREQUISITE_FAILED when transitioning to Hired without offer doc', async () => {
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
           candidate: { update: vi.fn() },
@@ -202,7 +208,7 @@ describe('StateMachineService', () => {
     });
 
     it('should return PREREQUISITE_FAILED when rejecting without reason', async () => {
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'Applied' }]),
           candidate: { update: vi.fn() },
@@ -227,7 +233,7 @@ describe('StateMachineService', () => {
     });
 
     it('should return PREREQUISITE_FAILED when rejection reason is too short', async () => {
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'Applied' }]),
           candidate: { update: vi.fn() },
@@ -252,7 +258,7 @@ describe('StateMachineService', () => {
     });
 
     it('should return PREREQUISITE_FAILED when rejection reason is too long', async () => {
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'Applied' }]),
           candidate: { update: vi.fn() },
@@ -283,7 +289,7 @@ describe('StateMachineService', () => {
         lastActivityAt: new Date(),
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'Applied' }]),
           candidate: { update: vi.fn().mockResolvedValue(updatedCandidate) },
@@ -313,7 +319,7 @@ describe('StateMachineService', () => {
         lastActivityAt: new Date(),
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
           candidate: { update: vi.fn().mockResolvedValue(updatedCandidate) },
@@ -344,7 +350,7 @@ describe('StateMachineService', () => {
         lastActivityAt: new Date(),
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'InterviewScheduled' }]),
           candidate: { update: vi.fn().mockResolvedValue(updatedCandidate) },
@@ -368,7 +374,7 @@ describe('StateMachineService', () => {
     });
 
     it('should return PREREQUISITE_FAILED when candidate not found', async () => {
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([]),
           candidate: { update: vi.fn() },
@@ -393,8 +399,7 @@ describe('StateMachineService', () => {
     });
 
     it('should return CONFLICT_ERROR on Prisma write conflict', async () => {
-      const conflictError = new Error('Write conflict');
-      (conflictError as any).code = 'P2034';
+      const conflictError = createPrismaConflictError('Write conflict');
       mockPrisma.$transaction.mockRejectedValue(conflictError);
 
       const result = await service.executeTransition(
@@ -419,7 +424,7 @@ describe('StateMachineService', () => {
         lastActivityAt: new Date(),
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'Applied' }]),
           candidate: { update: vi.fn().mockResolvedValue(updatedCandidate) },
@@ -453,7 +458,7 @@ describe('StateMachineService', () => {
         lastActivityAt: new Date(),
       };
 
-      mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+      mockPrisma.$transaction.mockImplementation(async (fn: TransactionCallback) => {
         const tx = {
           $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
           candidate: { update: vi.fn().mockResolvedValue(updatedCandidate) },

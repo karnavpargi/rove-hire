@@ -9,10 +9,16 @@
  * **Validates: Requirements 2.2, 2.3, 2.6**
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
-import { CandidateService } from './candidate.service';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { PrismaService } from '../../prisma/prisma.service';
+import { asMock } from '../../test-utils/mock-types';
+import type { FileService } from '../file/file.service';
+import type { JobService } from '../job/job.service';
+import type { MagicLinkService } from '../magic-link/magic-link.service';
+import type { StateMachineService } from '../state-machine/state-machine.service';
+import type { TimelineService } from '../timeline/timeline.service';
+import { CandidateService } from './candidate.service';
 
 /**
  * All possible CandidateStatus values
@@ -93,11 +99,11 @@ describe('Property 11: Query Filtering and Sorting Correctness', () => {
     // Create CandidateService with only prisma mock (other deps not needed for findAll)
     service = new CandidateService(
       mockPrisma as unknown as PrismaService,
-      {} as any, // fileService
-      {} as any, // magicLinkService
-      {} as any, // jobService
-      {} as any, // stateMachineService
-      {} as any, // timelineService
+      asMock<FileService>({}),
+      asMock<MagicLinkService>({}),
+      asMock<JobService>({}),
+      asMock<StateMachineService>({}),
+      asMock<TimelineService>({}),
     );
   });
 

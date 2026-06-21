@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CandidateStatus, GraphQLErrorCode } from '@rove-hire/shared';
-import { createElement, type ReactNode } from 'react';
-import { useStatusTransition } from './use-status-transition';
 import * as graphqlClientModule from '@/lib/graphql-client';
 import * as optimisticModule from '@/lib/optimistic-updates';
+import { CandidateStatus, GraphQLErrorCode } from '@rove-hire/shared';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { createElement, type ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useStatusTransition } from './use-status-transition';
 
 // Mock the graphql client
 vi.mock('@/lib/graphql-client', async () => {
@@ -45,10 +45,7 @@ function createWrapper() {
 }
 
 describe('useStatusTransition', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mockRequest = (graphqlClientModule.graphqlClient as any).request as ReturnType<
-    typeof vi.fn
-  >;
+  const mockRequest = vi.mocked(graphqlClientModule.graphqlClient.request);
   const mockHandleError = vi.mocked(graphqlClientModule.handleGraphQLError);
 
   beforeEach(() => {

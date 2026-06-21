@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ConfigService } from '@nestjs/config';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileService, FileServiceError } from './file.service';
 
 // Mock UUID
@@ -22,7 +22,7 @@ vi.mock('@aws-sdk/client-s3', () => ({
 const mockGetSignedUrl = vi.fn().mockResolvedValue('https://s3.example.com/presigned-url');
 
 vi.mock('@aws-sdk/s3-request-presigner', () => ({
-  getSignedUrl: (...args: any[]) => mockGetSignedUrl(...args),
+  getSignedUrl: (...args: unknown[]) => mockGetSignedUrl(...args),
 }));
 
 vi.mock('@smithy/node-http-handler', () => ({

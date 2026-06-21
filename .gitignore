@@ -69,4 +69,5 @@ ltm/snapshots/*
 /playwright/.cache/
 e2e/.auth/user.json
 ltm/*
-deploy/*
+deploy/deploy.env
+deploy/nginx/rove-host.generated.conf

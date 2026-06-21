@@ -1,5 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /** Result of a rate limit check */
 export interface RateLimitResult {
@@ -16,7 +16,7 @@ const REQUEST_WINDOW_SECONDS = 60;
 
 @Injectable()
 export class RateLimitService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   /**
    * Track a login attempt (success or failure) for rate limiting purposes.
