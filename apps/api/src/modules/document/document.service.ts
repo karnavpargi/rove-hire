@@ -1,18 +1,19 @@
-import { Injectable, Inject, Logger, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  DocumentType,
+  TimelineEventType,
+  currencySchema,
+  locationSchema,
+  reportingManagerSchema,
+  salaryAmountSchema,
+} from '@rove-hire/shared';
+import * as fs from 'fs';
+import * as Handlebars from 'handlebars';
+import * as path from 'path';
+import * as puppeteer from 'puppeteer';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FileService } from '../file/file.service';
 import { TimelineService } from '../timeline/timeline.service';
-import { SUPPORTED_CURRENCIES, TimelineEventType, DocumentType } from '@rove-hire/shared';
-import {
-  salaryAmountSchema,
-  currencySchema,
-  reportingManagerSchema,
-  locationSchema,
-} from '@rove-hire/shared';
-import * as puppeteer from 'puppeteer';
-import * as Handlebars from 'handlebars';
-import * as fs from 'fs';
-import * as path from 'path';
 import type { GenerateOfferInput } from './dto/generate-offer.input';
 
 /** Currency symbols for display in PDF templates */
@@ -151,6 +152,7 @@ export class DocumentService {
     try {
       browser = await puppeteer.launch({
         headless: true,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
       });
 
