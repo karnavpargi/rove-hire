@@ -31,7 +31,10 @@ export default function SettingsPage() {
           <InfoItem label="Application" value="ROVE Hire" />
           <InfoItem label="Version" value="1.0.0" />
           <InfoItem label="Environment" value="Development" />
-          <InfoItem label="API Endpoint" value={process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3001/graphql'} />
+          <InfoItem
+            label="API Endpoint"
+            value={process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3001/graphql'}
+          />
         </div>
       </SettingsSection>
 

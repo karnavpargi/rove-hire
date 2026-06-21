@@ -15,7 +15,11 @@ import { gql } from 'graphql-request';
 
 /** Create a new candidate with resume file (base64 encoded) */
 export const CREATE_CANDIDATE_MUTATION = gql`
-  mutation CreateCandidate($input: CreateCandidateInput!, $resumeBase64: String!, $resumeFilename: String!) {
+  mutation CreateCandidate(
+    $input: CreateCandidateInput!
+    $resumeBase64: String!
+    $resumeFilename: String!
+  ) {
     createCandidate(input: $input, resumeBase64: $resumeBase64, resumeFilename: $resumeFilename) {
       candidate {
         id

@@ -1,6 +1,7 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { ConfigService } from '@nestjs/config';
+import type { NestMiddleware } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import type { Request, Response, NextFunction } from 'express';
+import type { ConfigService } from '@nestjs/config';
 
 /**
  * CSRF protection via Origin/Referer header validation.
@@ -26,10 +27,8 @@ export class CsrfOriginMiddleware implements NestMiddleware {
   private readonly isProduction: boolean;
 
   constructor(private readonly configService: ConfigService) {
-    this.frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
-    this.isProduction =
-      this.configService.get<string>('NODE_ENV') === 'production';
+    this.frontendUrl = this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+    this.isProduction = this.configService.get<string>('NODE_ENV') === 'production';
   }
 
   use(req: Request, res: Response, next: NextFunction): void {
@@ -69,8 +68,7 @@ export class CsrfOriginMiddleware implements NestMiddleware {
           message: 'Forbidden: CSRF validation failed',
           extensions: {
             code: 'CSRF_ERROR',
-            details:
-              'Request origin does not match the allowed frontend application',
+            details: 'Request origin does not match the allowed frontend application',
           },
         },
       ],

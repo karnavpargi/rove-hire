@@ -47,7 +47,12 @@ function enforceMaxToasts() {
  * - Errors use 'assertive' politeness (Requirements: 15.6)
  * - Status/success/info use 'polite' politeness (Requirements: 15.6)
  */
-export function showToast({ message, description, type = 'info', duration = AUTO_DISMISS_MS }: ToastOptions) {
+export function showToast({
+  message,
+  description,
+  type = 'info',
+  duration = AUTO_DISMISS_MS,
+}: ToastOptions) {
   enforceMaxToasts();
 
   // Announce to screen readers via ARIA live region
@@ -55,13 +60,14 @@ export function showToast({ message, description, type = 'info', duration = AUTO
   const politeness = type === 'error' ? 'assertive' : 'polite';
   announceToScreenReader(fullMessage, politeness);
 
-  const toastFn = type === 'success'
-    ? sonnerToast.success
-    : type === 'error'
-    ? sonnerToast.error
-    : type === 'warning'
-    ? sonnerToast.warning
-    : sonnerToast.info;
+  const toastFn =
+    type === 'success'
+      ? sonnerToast.success
+      : type === 'error'
+        ? sonnerToast.error
+        : type === 'warning'
+          ? sonnerToast.warning
+          : sonnerToast.info;
 
   const id = toastFn(message, {
     description,
@@ -86,26 +92,22 @@ export function useToast() {
   const toast = React.useCallback((options: ToastOptions) => showToast(options), []);
 
   const success = React.useCallback(
-    (message: string, description?: string) =>
-      showToast({ message, description, type: 'success' }),
+    (message: string, description?: string) => showToast({ message, description, type: 'success' }),
     [],
   );
 
   const error = React.useCallback(
-    (message: string, description?: string) =>
-      showToast({ message, description, type: 'error' }),
+    (message: string, description?: string) => showToast({ message, description, type: 'error' }),
     [],
   );
 
   const warning = React.useCallback(
-    (message: string, description?: string) =>
-      showToast({ message, description, type: 'warning' }),
+    (message: string, description?: string) => showToast({ message, description, type: 'warning' }),
     [],
   );
 
   const info = React.useCallback(
-    (message: string, description?: string) =>
-      showToast({ message, description, type: 'info' }),
+    (message: string, description?: string) => showToast({ message, description, type: 'info' }),
     [],
   );
 

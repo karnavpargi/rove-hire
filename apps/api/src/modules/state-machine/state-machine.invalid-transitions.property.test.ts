@@ -17,11 +17,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
 import { StateMachineService, StateMachineErrorCode } from './state-machine.service';
-import {
-  CandidateStatus,
-  VALID_TRANSITIONS,
-  getValidTransitions,
-} from '@rove-hire/shared';
+import { CandidateStatus, VALID_TRANSITIONS, getValidTransitions } from '@rove-hire/shared';
 
 const ALL_STATUSES = Object.values(CandidateStatus);
 
@@ -87,12 +83,7 @@ describe('Property 2: State Machine — Invalid Transitions Rejected with Struct
           return fn(tx);
         });
 
-        const result = await service.executeTransition(
-          candidateId,
-          target,
-          {},
-          userId,
-        );
+        const result = await service.executeTransition(candidateId, target, {}, userId);
 
         // The transition must be rejected
         expect(result.success).toBe(false);
@@ -136,12 +127,7 @@ describe('Property 2: State Machine — Invalid Transitions Rejected with Struct
           return fn(tx);
         });
 
-        const result = await service.executeTransition(
-          candidateId,
-          target,
-          {},
-          userId,
-        );
+        const result = await service.executeTransition(candidateId, target, {}, userId);
 
         // ALL transitions from terminal statuses must be rejected
         expect(result.success).toBe(false);

@@ -1,14 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  CandidateStatus,
-  TransitionMeta,
-  VALID_TRANSITIONS,
-  getValidTransitions,
-  isValidTransition,
-  isTerminalStatus,
-} from '@rove-hire/shared';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Candidate } from '../../generated/prisma';
+import type { TransitionMeta } from '@rove-hire/shared';
+import { CandidateStatus, getValidTransitions, isValidTransition } from '@rove-hire/shared';
+import type { Candidate } from '../../generated/prisma';
+import type { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * Error codes returned by the state machine on failed transitions.
@@ -128,8 +122,7 @@ export class StateMachineService {
             if (!offerDoc) {
               throw new StateMachineException({
                 code: StateMachineErrorCode.PREREQUISITE_FAILED,
-                message:
-                  'An offer letter document must exist before transitioning to Hired status',
+                message: 'An offer letter document must exist before transitioning to Hired status',
               });
             }
           }
@@ -139,8 +132,7 @@ export class StateMachineService {
             if (!reason || reason.length < 5 || reason.length > 500) {
               throw new StateMachineException({
                 code: StateMachineErrorCode.PREREQUISITE_FAILED,
-                message:
-                  'A rejection reason between 5 and 500 characters is required',
+                message: 'A rejection reason between 5 and 500 characters is required',
               });
             }
           }
@@ -167,10 +159,7 @@ export class StateMachineService {
               eventType: 'status_change',
               previousStatus: currentStatus,
               newStatus: targetStatus,
-              details:
-                targetStatus === CandidateStatus.Rejected
-                  ? meta?.rejectionReason
-                  : null,
+              details: targetStatus === CandidateStatus.Rejected ? meta?.rejectionReason : null,
               ...(userId !== 'system' ? { actorId: userId } : {}),
             },
           });

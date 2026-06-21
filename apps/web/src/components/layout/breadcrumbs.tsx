@@ -66,10 +66,7 @@ export function Breadcrumbs() {
             aria-hidden="true"
           />
           {item.isLast ? (
-            <span
-              className="font-medium text-[hsl(var(--foreground))]"
-              aria-current="page"
-            >
+            <span className="font-medium text-[hsl(var(--foreground))]" aria-current="page">
               {item.label}
             </span>
           ) : (
@@ -97,7 +94,5 @@ function formatSegment(segment: string): string {
   }
 
   // Convert hyphenated/underscored words to title case
-  return segment
-    .replace(/[-_]/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return segment.replace(/[-_]/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }

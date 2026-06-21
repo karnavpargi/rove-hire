@@ -91,59 +91,53 @@ export function StatusFilter({ selectedStatuses, onChange }: StatusFilterProps) 
   }, [onChange]);
 
   // Keyboard navigation within the dropdown (Requirements: 15.2)
-  const handleDropdownKeyDown = React.useCallback(
-    (e: React.KeyboardEvent) => {
-      switch (e.key) {
-        case 'Escape':
-          e.preventDefault();
-          setIsOpen(false);
-          triggerRef.current?.focus();
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          setFocusedIndex((prev) => {
-            const next = prev < STATUS_OPTIONS.length - 1 ? prev + 1 : 0;
-            optionRefs.current[next]?.focus();
-            return next;
-          });
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          setFocusedIndex((prev) => {
-            const next = prev > 0 ? prev - 1 : STATUS_OPTIONS.length - 1;
-            optionRefs.current[next]?.focus();
-            return next;
-          });
-          break;
-        case 'Home':
-          e.preventDefault();
-          setFocusedIndex(0);
-          optionRefs.current[0]?.focus();
-          break;
-        case 'End':
-          e.preventDefault();
-          setFocusedIndex(STATUS_OPTIONS.length - 1);
-          optionRefs.current[STATUS_OPTIONS.length - 1]?.focus();
-          break;
-        case 'Tab':
-          // Allow Tab to close dropdown and move focus naturally
-          setIsOpen(false);
-          break;
-      }
-    },
-    [],
-  );
+  const handleDropdownKeyDown = React.useCallback((e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case 'Escape':
+        e.preventDefault();
+        setIsOpen(false);
+        triggerRef.current?.focus();
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedIndex((prev) => {
+          const next = prev < STATUS_OPTIONS.length - 1 ? prev + 1 : 0;
+          optionRefs.current[next]?.focus();
+          return next;
+        });
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedIndex((prev) => {
+          const next = prev > 0 ? prev - 1 : STATUS_OPTIONS.length - 1;
+          optionRefs.current[next]?.focus();
+          return next;
+        });
+        break;
+      case 'Home':
+        e.preventDefault();
+        setFocusedIndex(0);
+        optionRefs.current[0]?.focus();
+        break;
+      case 'End':
+        e.preventDefault();
+        setFocusedIndex(STATUS_OPTIONS.length - 1);
+        optionRefs.current[STATUS_OPTIONS.length - 1]?.focus();
+        break;
+      case 'Tab':
+        // Allow Tab to close dropdown and move focus naturally
+        setIsOpen(false);
+        break;
+    }
+  }, []);
 
   // Trigger key handling
-  const handleTriggerKeyDown = React.useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        setIsOpen(true);
-      }
-    },
-    [],
-  );
+  const handleTriggerKeyDown = React.useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setIsOpen(true);
+    }
+  }, []);
 
   const activeCount = selectedStatuses.length;
 
@@ -203,7 +197,9 @@ export function StatusFilter({ selectedStatuses, onChange }: StatusFilterProps) 
             return (
               <button
                 key={option.value}
-                ref={(el) => { optionRefs.current[index] = el; }}
+                ref={(el) => {
+                  optionRefs.current[index] = el;
+                }}
                 type="button"
                 role="option"
                 aria-selected={isSelected}

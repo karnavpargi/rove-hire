@@ -34,12 +34,14 @@ describe('Property 14: Rate Limiting Enforcement', () => {
   /**
    * Arbitrary for generating a valid IP address (source identifier).
    */
-  const ipArbitrary = fc.tuple(
-    fc.integer({ min: 1, max: 255 }),
-    fc.integer({ min: 0, max: 255 }),
-    fc.integer({ min: 0, max: 255 }),
-    fc.integer({ min: 1, max: 254 }),
-  ).map(([a, b, c, d]) => `${a}.${b}.${c}.${d}`);
+  const ipArbitrary = fc
+    .tuple(
+      fc.integer({ min: 1, max: 255 }),
+      fc.integer({ min: 0, max: 255 }),
+      fc.integer({ min: 0, max: 255 }),
+      fc.integer({ min: 1, max: 254 }),
+    )
+    .map(([a, b, c, d]) => `${a}.${b}.${c}.${d}`);
 
   /**
    * Arbitrary for generating a count of failures that triggers blocking (N >= 5).
@@ -71,29 +73,25 @@ describe('Property 14: Rate Limiting Enforcement', () => {
    */
   it('blocks access after N >= 5 consecutive failures from same IP within 15-minute window', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        ipArbitrary,
-        blockingFailureCountArbitrary,
-        async (ip, failureCount) => {
-          vi.resetAllMocks();
-          mockPrisma.loginAttempt.count.mockResolvedValue(0);
+      fc.asyncProperty(ipArbitrary, blockingFailureCountArbitrary, async (ip, failureCount) => {
+        vi.resetAllMocks();
+        mockPrisma.loginAttempt.count.mockResolvedValue(0);
 
-          const now = new Date();
-          // The service only looks at the last 5 attempts (take: MAX_CONSECUTIVE_FAILURES)
-          // So we return min(failureCount, 5) records — all failures, all within window
-          const returnedAttempts = createConsecutiveFailures(ip, Math.min(failureCount, 5), now);
+        const now = new Date();
+        // The service only looks at the last 5 attempts (take: MAX_CONSECUTIVE_FAILURES)
+        // So we return min(failureCount, 5) records — all failures, all within window
+        const returnedAttempts = createConsecutiveFailures(ip, Math.min(failureCount, 5), now);
 
-          mockPrisma.loginAttempt.findMany.mockResolvedValue(returnedAttempts);
+        mockPrisma.loginAttempt.findMany.mockResolvedValue(returnedAttempts);
 
-          const result = await service.checkConsecutiveFailures(ip);
+        const result = await service.checkConsecutiveFailures(ip);
 
-          // Must be blocked
-          expect(result.allowed).toBe(false);
-          expect(result.reason).toBe('consecutive_failures');
-          expect(result.retryAfterSeconds).toBeGreaterThan(0);
-          expect(result.retryAfterSeconds).toBeLessThanOrEqual(15 * 60); // Max 15 min
-        },
-      ),
+        // Must be blocked
+        expect(result.allowed).toBe(false);
+        expect(result.reason).toBe('consecutive_failures');
+        expect(result.retryAfterSeconds).toBeGreaterThan(0);
+        expect(result.retryAfterSeconds).toBeLessThanOrEqual(15 * 60); // Max 15 min
+      }),
       { numRuns: 100 },
     );
   });
@@ -103,26 +101,22 @@ describe('Property 14: Rate Limiting Enforcement', () => {
    */
   it('allows access when fewer than 5 consecutive failures from same IP', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        ipArbitrary,
-        allowedFailureCountArbitrary,
-        async (ip, failureCount) => {
-          vi.resetAllMocks();
-          mockPrisma.loginAttempt.count.mockResolvedValue(0);
+      fc.asyncProperty(ipArbitrary, allowedFailureCountArbitrary, async (ip, failureCount) => {
+        vi.resetAllMocks();
+        mockPrisma.loginAttempt.count.mockResolvedValue(0);
 
-          const now = new Date();
-          const returnedAttempts = createConsecutiveFailures(ip, failureCount, now);
+        const now = new Date();
+        const returnedAttempts = createConsecutiveFailures(ip, failureCount, now);
 
-          mockPrisma.loginAttempt.findMany.mockResolvedValue(returnedAttempts);
+        mockPrisma.loginAttempt.findMany.mockResolvedValue(returnedAttempts);
 
-          const result = await service.checkConsecutiveFailures(ip);
+        const result = await service.checkConsecutiveFailures(ip);
 
-          // Must be allowed
-          expect(result.allowed).toBe(true);
-          expect(result.retryAfterSeconds).toBeUndefined();
-          expect(result.reason).toBeUndefined();
-        },
-      ),
+        // Must be allowed
+        expect(result.allowed).toBe(true);
+        expect(result.retryAfterSeconds).toBeUndefined();
+        expect(result.reason).toBeUndefined();
+      }),
       { numRuns: 100 },
     );
   });
@@ -136,34 +130,30 @@ describe('Property 14: Rate Limiting Enforcement', () => {
    */
   it('blocks even valid credential attempts when rate limit is active', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        ipArbitrary,
-        blockingFailureCountArbitrary,
-        async (ip, failureCount) => {
-          vi.resetAllMocks();
+      fc.asyncProperty(ipArbitrary, blockingFailureCountArbitrary, async (ip, failureCount) => {
+        vi.resetAllMocks();
 
-          const now = new Date();
-          const returnedAttempts = createConsecutiveFailures(ip, Math.min(failureCount, 5), now);
+        const now = new Date();
+        const returnedAttempts = createConsecutiveFailures(ip, Math.min(failureCount, 5), now);
 
-          // Request rate passes (not exceeding per-window request count)
-          mockPrisma.loginAttempt.count.mockResolvedValue(3);
-          // Consecutive failures check — returns 5 failures
-          mockPrisma.loginAttempt.findMany.mockResolvedValue(returnedAttempts);
+        // Request rate passes (not exceeding per-window request count)
+        mockPrisma.loginAttempt.count.mockResolvedValue(3);
+        // Consecutive failures check — returns 5 failures
+        mockPrisma.loginAttempt.findMany.mockResolvedValue(returnedAttempts);
 
-          // enforceRateLimit should throw even though the request rate check passes
-          try {
-            await service.enforceRateLimit(ip);
-            // Should not reach here
-            expect(true).toBe(false);
-          } catch (error: any) {
-            expect(error.getStatus()).toBe(429);
-            const response = error.getResponse();
-            expect(response.code).toBe('RATE_LIMIT_ERROR');
-            expect(response.message).toContain('temporarily locked');
-            expect(response.retryAfter).toBeGreaterThan(0);
-          }
-        },
-      ),
+        // enforceRateLimit should throw even though the request rate check passes
+        try {
+          await service.enforceRateLimit(ip);
+          // Should not reach here
+          expect(true).toBe(false);
+        } catch (error: any) {
+          expect(error.getStatus()).toBe(429);
+          const response = error.getResponse();
+          expect(response.code).toBe('RATE_LIMIT_ERROR');
+          expect(response.message).toContain('temporarily locked');
+          expect(response.retryAfter).toBeGreaterThan(0);
+        }
+      }),
       { numRuns: 100 },
     );
   });

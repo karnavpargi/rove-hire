@@ -26,7 +26,7 @@ describe('AppShell', () => {
     render(
       <AppShell>
         <div data-testid="child">Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     expect(screen.getByTestId('child')).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe('AppShell', () => {
     render(
       <AppShell>
         <div>Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     const skipLink = screen.getByText('Skip to main content');
@@ -49,7 +49,7 @@ describe('AppShell', () => {
     render(
       <AppShell>
         <div>Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     const main = screen.getByRole('main');
@@ -60,7 +60,7 @@ describe('AppShell', () => {
     render(
       <AppShell>
         <div>Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('AppShell', () => {
     render(
       <AppShell>
         <div>Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     expect(screen.getByRole('button', { name: /open navigation menu/i })).toBeInTheDocument();
@@ -80,7 +80,7 @@ describe('AppShell', () => {
     render(
       <AppShell>
         <div>Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     const menuButton = screen.getByRole('button', { name: /open navigation menu/i });
@@ -95,7 +95,7 @@ describe('AppShell', () => {
     render(
       <AppShell>
         <div>Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     // Open sidebar
@@ -113,7 +113,7 @@ describe('AppShell', () => {
     render(
       <AppShell>
         <div>Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     expect(screen.getByRole('navigation', { name: /breadcrumb/i })).toBeInTheDocument();

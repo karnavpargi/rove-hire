@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 import { TimelineEventType } from '@rove-hire/shared';
 import type { LogEventInput } from './dto/log-event.input';
 import type { TimelineEvent } from '../../generated/prisma';
@@ -23,9 +23,7 @@ export class TimelineService {
   async logEvent(input: LogEventInput): Promise<TimelineEvent> {
     const { candidateId, eventType, previousStatus, newStatus, details, actorId } = input;
 
-    this.logger.log(
-      `Logging timeline event: type=${eventType} candidate=${candidateId}`,
-    );
+    this.logger.log(`Logging timeline event: type=${eventType} candidate=${candidateId}`);
 
     const event = await this.prisma.timelineEvent.create({
       data: {
@@ -48,10 +46,7 @@ export class TimelineService {
    * @param limit - Maximum number of events to return (default 50)
    * @returns Array of TimelineEvent records ordered by createdAt DESC
    */
-  async findByCandidateId(
-    candidateId: string,
-    limit = 50,
-  ): Promise<TimelineEvent[]> {
+  async findByCandidateId(candidateId: string, limit = 50): Promise<TimelineEvent[]> {
     return this.prisma.timelineEvent.findMany({
       where: { candidateId },
       orderBy: { createdAt: 'desc' },

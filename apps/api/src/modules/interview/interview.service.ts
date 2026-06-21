@@ -1,11 +1,6 @@
-import {
-  Injectable,
-  Logger,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { TimelineService } from '../timeline/timeline.service';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import type { PrismaService } from '../../prisma/prisma.service';
+import type { TimelineService } from '../timeline/timeline.service';
 import {
   CandidateStatus,
   TimelineEventType,
@@ -13,9 +8,9 @@ import {
   interviewNotesSchema,
   feedbackSchema,
 } from '@rove-hire/shared';
-import { ScheduleInterviewInput } from './dto/schedule-interview.input';
-import { RecordFeedbackInput } from './dto/record-feedback.input';
-import { InterviewFiltersInput } from './dto/interview-filters.input';
+import type { ScheduleInterviewInput } from './dto/schedule-interview.input';
+import type { RecordFeedbackInput } from './dto/record-feedback.input';
+import type { InterviewFiltersInput } from './dto/interview-filters.input';
 import type { Interview } from '../../generated/prisma';
 
 /**
@@ -65,18 +60,14 @@ export class InterviewService {
     // Validate interviewer name
     const nameResult = interviewerNameSchema.safeParse(input.interviewerName);
     if (!nameResult.success) {
-      throw new BadRequestException(
-        nameResult.error.issues.map((i) => i.message).join('; '),
-      );
+      throw new BadRequestException(nameResult.error.issues.map((i) => i.message).join('; '));
     }
 
     // Validate notes (if provided)
     if (input.notes !== undefined && input.notes !== null) {
       const notesResult = interviewNotesSchema.safeParse(input.notes);
       if (!notesResult.success) {
-        throw new BadRequestException(
-          notesResult.error.issues.map((i) => i.message).join('; '),
-        );
+        throw new BadRequestException(notesResult.error.issues.map((i) => i.message).join('; '));
       }
     }
 
@@ -95,16 +86,11 @@ export class InterviewService {
     });
 
     if (!candidate) {
-      throw new NotFoundException(
-        `Candidate with ID "${input.candidateId}" not found`,
-      );
+      throw new NotFoundException(`Candidate with ID "${input.candidateId}" not found`);
     }
 
     // Reject scheduling for terminal statuses (Hired/Rejected)
-    const terminalStatuses: string[] = [
-      CandidateStatus.Hired,
-      CandidateStatus.Rejected,
-    ];
+    const terminalStatuses: string[] = [CandidateStatus.Hired, CandidateStatus.Rejected];
     if (terminalStatuses.includes(candidate.status)) {
       throw new BadRequestException(
         `Cannot schedule interviews for candidates in ${candidate.status} status`,
@@ -182,9 +168,7 @@ export class InterviewService {
     // Validate feedback text
     const feedbackResult = feedbackSchema.safeParse(input.feedback);
     if (!feedbackResult.success) {
-      throw new BadRequestException(
-        feedbackResult.error.issues.map((i) => i.message).join('; '),
-      );
+      throw new BadRequestException(feedbackResult.error.issues.map((i) => i.message).join('; '));
     }
 
     // Fetch interview
@@ -193,9 +177,7 @@ export class InterviewService {
     });
 
     if (!interview) {
-      throw new NotFoundException(
-        `Interview with ID "${input.interviewId}" not found`,
-      );
+      throw new NotFoundException(`Interview with ID "${input.interviewId}" not found`);
     }
 
     if (interview.status !== 'Scheduled') {

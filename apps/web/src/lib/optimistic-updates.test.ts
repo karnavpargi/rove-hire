@@ -19,7 +19,7 @@ describe('optimistic-updates', () => {
       const result = registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.InterviewScheduled,
-        CandidateStatus.OfferSent
+        CandidateStatus.OfferSent,
       );
 
       expect(result.previousStatus).toBe(CandidateStatus.InterviewScheduled);
@@ -31,7 +31,7 @@ describe('optimistic-updates', () => {
       registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       expect(getOptimisticStatus('candidate-1')).toBe(CandidateStatus.FormSubmitted);
@@ -43,7 +43,7 @@ describe('optimistic-updates', () => {
       const { confirm } = registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       expect(hasPendingUpdate('candidate-1')).toBe(true);
@@ -58,7 +58,7 @@ describe('optimistic-updates', () => {
       const { rollback } = registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.InterviewScheduled,
-        CandidateStatus.OfferSent
+        CandidateStatus.OfferSent,
       );
 
       const previousStatus = rollback();
@@ -78,7 +78,7 @@ describe('optimistic-updates', () => {
       registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       expect(getOptimisticStatus('candidate-1')).toBe(CandidateStatus.FormSubmitted);
@@ -100,7 +100,7 @@ describe('optimistic-updates', () => {
       registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
       expect(hasPendingUpdate('candidate-1')).toBe(true);
     });
@@ -111,7 +111,7 @@ describe('optimistic-updates', () => {
       registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       vi.advanceTimersByTime(10_001);
@@ -126,7 +126,7 @@ describe('optimistic-updates', () => {
       registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       const display = resolveDisplayStatus('candidate-1', CandidateStatus.Applied);
@@ -147,7 +147,7 @@ describe('optimistic-updates', () => {
       registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       expect(listener).toHaveBeenCalledWith('candidate-1', CandidateStatus.FormSubmitted);
@@ -161,7 +161,7 @@ describe('optimistic-updates', () => {
       const { confirm } = registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       listener.mockClear();
@@ -178,7 +178,7 @@ describe('optimistic-updates', () => {
       const { rollback } = registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       listener.mockClear();
@@ -196,7 +196,7 @@ describe('optimistic-updates', () => {
       registerOptimisticUpdate(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
 
       expect(listener).not.toHaveBeenCalled();
@@ -206,7 +206,11 @@ describe('optimistic-updates', () => {
   describe('clearAllPendingUpdates', () => {
     it('removes all pending updates', () => {
       registerOptimisticUpdate('c1', CandidateStatus.Applied, CandidateStatus.FormSubmitted);
-      registerOptimisticUpdate('c2', CandidateStatus.FormSubmitted, CandidateStatus.InterviewScheduled);
+      registerOptimisticUpdate(
+        'c2',
+        CandidateStatus.FormSubmitted,
+        CandidateStatus.InterviewScheduled,
+      );
 
       expect(hasPendingUpdate('c1')).toBe(true);
       expect(hasPendingUpdate('c2')).toBe(true);

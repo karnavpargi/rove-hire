@@ -16,7 +16,7 @@ describe('ApplicationForm', () => {
         onSubmit={mockOnSubmit}
         submitting={props?.submitting ?? false}
         submitError={props?.submitError ?? null}
-      />
+      />,
     );
   }
 
@@ -57,7 +57,7 @@ describe('ApplicationForm', () => {
     fireEvent.blur(phoneInput);
 
     expect(
-      screen.getByText(/phone number may only contain digits, spaces, hyphens/i)
+      screen.getByText(/phone number may only contain digits, spaces, hyphens/i),
     ).toBeInTheDocument();
   });
 
@@ -89,9 +89,7 @@ describe('ApplicationForm', () => {
     fireEvent.change(linkedinInput, { target: { value: 'https://example.com/profile' } });
     fireEvent.blur(linkedinInput);
 
-    expect(
-      screen.getByText(/must start with https:\/\/linkedin\.com\/ or/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/must start with https:\/\/linkedin\.com\/ or/i)).toBeInTheDocument();
   });
 
   it('validates LinkedIn URL — accepts valid URL', () => {
@@ -103,9 +101,7 @@ describe('ApplicationForm', () => {
     });
     fireEvent.blur(linkedinInput);
 
-    expect(
-      screen.queryByText(/must start with https:\/\/linkedin\.com/i)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/must start with https:\/\/linkedin\.com/i)).not.toBeInTheDocument();
   });
 
   it('LinkedIn URL is optional — no error when empty', () => {
@@ -115,9 +111,7 @@ describe('ApplicationForm', () => {
     fireEvent.focus(linkedinInput);
     fireEvent.blur(linkedinInput);
 
-    expect(
-      screen.queryByText(/linkedin/i, { selector: '[role="alert"]' })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/linkedin/i, { selector: '[role="alert"]' })).not.toBeInTheDocument();
   });
 
   it('validates location max length (100 chars)', () => {

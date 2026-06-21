@@ -27,10 +27,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { showToast } from '@/components/shared';
-import {
-  useGenerateOffer,
-  type GenerateOfferResult,
-} from '@/hooks/use-generate-offer';
+import { useGenerateOffer, type GenerateOfferResult } from '@/hooks/use-generate-offer';
 import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -94,9 +91,7 @@ function validateForm(values: FormValues): FormErrors {
   // Currency: required, must be from supported list
   if (!values.salaryCurrency) {
     errors.salaryCurrency = 'Currency is required';
-  } else if (
-    !SUPPORTED_CURRENCIES.includes(values.salaryCurrency as SupportedCurrency)
-  ) {
+  } else if (!SUPPORTED_CURRENCIES.includes(values.salaryCurrency as SupportedCurrency)) {
     errors.salaryCurrency = 'Invalid currency selected';
   }
 
@@ -134,8 +129,7 @@ function validateForm(values: FormValues): FormErrors {
   if (!values.reportingManager.trim()) {
     errors.reportingManager = 'Reporting manager is required';
   } else if (values.reportingManager.trim().length > 100) {
-    errors.reportingManager =
-      'Reporting manager must be 100 characters or less';
+    errors.reportingManager = 'Reporting manager must be 100 characters or less';
   }
 
   // Location: required, max 200 chars
@@ -187,11 +181,8 @@ export function OfferGenerationForm({
 
   const [errors, setErrors] = React.useState<FormErrors>({});
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
-  const [generationResult, setGenerationResult] =
-    React.useState<GenerateOfferResult | null>(null);
-  const [generationError, setGenerationError] = React.useState<string | null>(
-    null,
-  );
+  const [generationResult, setGenerationResult] = React.useState<GenerateOfferResult | null>(null);
+  const [generationError, setGenerationError] = React.useState<string | null>(null);
 
   // Mutation hook
   const { generate, isPending, reset } = useGenerateOffer({
@@ -205,9 +196,7 @@ export function OfferGenerationForm({
       onSuccess?.();
     },
     onError: (classified) => {
-      setGenerationError(
-        classified.message || 'Failed to generate offer documents',
-      );
+      setGenerationError(classified.message || 'Failed to generate offer documents');
       setGenerationResult(null);
     },
   });
@@ -300,28 +289,21 @@ export function OfferGenerationForm({
         </CardHeader>
         <CardContent>
           <p className="mb-4 text-sm text-muted-foreground">
-            Offer documents have been generated for {candidateName}. The
-            candidate&apos;s status has been updated to Offer Sent.
+            Offer documents have been generated for {candidateName}. The candidate&apos;s status has
+            been updated to Offer Sent.
           </p>
 
           <div className="space-y-3">
             {/* Offer Letter Download */}
             <div className="flex items-center justify-between rounded-md border p-3">
               <div className="flex items-center gap-3">
-                <FileTextIcon
-                  className="h-5 w-5 text-purple-500"
-                  aria-hidden="true"
-                />
+                <FileTextIcon className="h-5 w-5 text-purple-500" aria-hidden="true" />
                 <div>
                   <p className="text-sm font-medium">Offer Letter</p>
                   <p className="text-xs text-muted-foreground">PDF Document</p>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-              >
+              <Button variant="outline" size="sm" asChild>
                 <a
                   href={generationResult.offerLetterUrl}
                   target="_blank"
@@ -337,20 +319,13 @@ export function OfferGenerationForm({
             {/* NDA Download */}
             <div className="flex items-center justify-between rounded-md border p-3">
               <div className="flex items-center gap-3">
-                <FileTextIcon
-                  className="h-5 w-5 text-amber-500"
-                  aria-hidden="true"
-                />
+                <FileTextIcon className="h-5 w-5 text-amber-500" aria-hidden="true" />
                 <div>
                   <p className="text-sm font-medium">NDA</p>
                   <p className="text-xs text-muted-foreground">PDF Document</p>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-              >
+              <Button variant="outline" size="sm" asChild>
                 <a
                   href={generationResult.ndaUrl}
                   target="_blank"
@@ -377,8 +352,7 @@ export function OfferGenerationForm({
       <CardHeader>
         <CardTitle>Generate Offer Documents</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Fill in the offer details to generate an offer letter and NDA for{' '}
-          {candidateName}.
+          Fill in the offer details to generate an offer letter and NDA for {candidateName}.
         </p>
       </CardHeader>
       <CardContent>
@@ -407,9 +381,7 @@ export function OfferGenerationForm({
               maxLength={200}
               aria-invalid={!!(touched.roleTitle && errors.roleTitle)}
               aria-describedby={
-                touched.roleTitle && errors.roleTitle
-                  ? 'offer-role-title-error'
-                  : undefined
+                touched.roleTitle && errors.roleTitle ? 'offer-role-title-error' : undefined
               }
             />
           </FormFieldWrapper>
@@ -420,9 +392,7 @@ export function OfferGenerationForm({
             <FormFieldWrapper
               id="offer-salary-currency"
               label="Currency"
-              error={
-                touched.salaryCurrency ? errors.salaryCurrency : undefined
-              }
+              error={touched.salaryCurrency ? errors.salaryCurrency : undefined}
               required
             >
               <select
@@ -434,14 +404,10 @@ export function OfferGenerationForm({
                     'border-destructive focus-visible:ring-destructive',
                 )}
                 value={values.salaryCurrency}
-                onChange={(e) =>
-                  handleChange('salaryCurrency', e.target.value)
-                }
+                onChange={(e) => handleChange('salaryCurrency', e.target.value)}
                 onBlur={() => handleBlur('salaryCurrency')}
                 disabled={isPending}
-                aria-invalid={
-                  !!(touched.salaryCurrency && errors.salaryCurrency)
-                }
+                aria-invalid={!!(touched.salaryCurrency && errors.salaryCurrency)}
                 aria-describedby={
                   touched.salaryCurrency && errors.salaryCurrency
                     ? 'offer-salary-currency-error'
@@ -513,9 +479,7 @@ export function OfferGenerationForm({
               min={getTodayISO()}
               aria-invalid={!!(touched.startDate && errors.startDate)}
               aria-describedby={
-                touched.startDate && errors.startDate
-                  ? 'offer-start-date-error'
-                  : undefined
+                touched.startDate && errors.startDate ? 'offer-start-date-error' : undefined
               }
             />
           </FormFieldWrapper>
@@ -524,9 +488,7 @@ export function OfferGenerationForm({
           <FormFieldWrapper
             id="offer-reporting-manager"
             label="Reporting Manager"
-            error={
-              touched.reportingManager ? errors.reportingManager : undefined
-            }
+            error={touched.reportingManager ? errors.reportingManager : undefined}
             required
           >
             <input
@@ -540,15 +502,11 @@ export function OfferGenerationForm({
               )}
               placeholder="e.g. Jane Smith"
               value={values.reportingManager}
-              onChange={(e) =>
-                handleChange('reportingManager', e.target.value)
-              }
+              onChange={(e) => handleChange('reportingManager', e.target.value)}
               onBlur={() => handleBlur('reportingManager')}
               disabled={isPending}
               maxLength={100}
-              aria-invalid={
-                !!(touched.reportingManager && errors.reportingManager)
-              }
+              aria-invalid={!!(touched.reportingManager && errors.reportingManager)}
               aria-describedby={
                 touched.reportingManager && errors.reportingManager
                   ? 'offer-reporting-manager-error'
@@ -581,9 +539,7 @@ export function OfferGenerationForm({
               maxLength={200}
               aria-invalid={!!(touched.location && errors.location)}
               aria-describedby={
-                touched.location && errors.location
-                  ? 'offer-location-error'
-                  : undefined
+                touched.location && errors.location ? 'offer-location-error' : undefined
               }
             />
           </FormFieldWrapper>
@@ -596,12 +552,8 @@ export function OfferGenerationForm({
             >
               <AlertCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-destructive">
-                  Generation Failed
-                </p>
-                <p className="mt-0.5 text-xs text-destructive/80">
-                  {generationError}
-                </p>
+                <p className="text-sm font-medium text-destructive">Generation Failed</p>
+                <p className="mt-0.5 text-xs text-destructive/80">{generationError}</p>
               </div>
               <Button
                 type="button"
@@ -624,9 +576,7 @@ export function OfferGenerationForm({
             >
               <Loader2Icon className="h-4 w-4 animate-spin text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium text-foreground">
-                  Generating offer documents...
-                </p>
+                <p className="text-sm font-medium text-foreground">Generating offer documents...</p>
                 <p className="text-xs text-muted-foreground">
                   This may take up to 10 seconds. Please do not close this page.
                 </p>
@@ -646,12 +596,7 @@ export function OfferGenerationForm({
                 'Generate Offer Documents'
               )}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isPending}
-            >
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
               Cancel
             </Button>
           </div>
@@ -673,13 +618,7 @@ interface FormFieldWrapperProps {
   children: React.ReactNode;
 }
 
-function FormFieldWrapper({
-  id,
-  label,
-  error,
-  required,
-  children,
-}: FormFieldWrapperProps) {
+function FormFieldWrapper({ id, label, error, required, children }: FormFieldWrapperProps) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium text-foreground">
@@ -692,11 +631,7 @@ function FormFieldWrapper({
       </label>
       {children}
       {error && (
-        <p
-          id={`${id}-error`}
-          className="text-xs text-destructive"
-          role="alert"
-        >
+        <p id={`${id}-error`} className="text-xs text-destructive" role="alert">
           {error}
         </p>
       )}

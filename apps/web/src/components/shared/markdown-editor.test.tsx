@@ -16,7 +16,7 @@ describe('MarkdownEditor', () => {
   it('calls onChange when text is entered', () => {
     const onChange = vi.fn();
     render(<MarkdownEditor value="" onChange={onChange} />);
-    
+
     const textarea = screen.getByRole('textbox');
     fireEvent.change(textarea, { target: { value: '# Hello' } });
     expect(onChange).toHaveBeenCalledWith('# Hello');
@@ -24,10 +24,10 @@ describe('MarkdownEditor', () => {
 
   it('toggles to preview mode', () => {
     render(<MarkdownEditor value="**bold text**" onChange={vi.fn()} />);
-    
+
     const previewTab = screen.getByRole('tab', { name: /Preview/i });
     fireEvent.click(previewTab);
-    
+
     // Textarea should not be visible in preview mode
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     // Bold text should be rendered
@@ -54,14 +54,14 @@ describe('MarkdownEditor', () => {
 
   it('shows empty preview message when content is empty', () => {
     render(<MarkdownEditor value="" onChange={vi.fn()} />);
-    
+
     fireEvent.click(screen.getByRole('tab', { name: /Preview/i }));
     expect(screen.getByText('Nothing to preview')).toBeInTheDocument();
   });
 
   it('renders markdown headings in preview', () => {
     render(<MarkdownEditor value="# Heading 1" onChange={vi.fn()} />);
-    
+
     fireEvent.click(screen.getByRole('tab', { name: /Preview/i }));
     const heading = screen.getByText('Heading 1');
     expect(heading.tagName).toBe('H1');

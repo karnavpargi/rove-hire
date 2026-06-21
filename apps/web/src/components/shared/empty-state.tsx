@@ -34,10 +34,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={cn(
-        'flex flex-col items-center justify-center py-12 px-6 text-center',
-        className,
-      )}
+      className={cn('flex flex-col items-center justify-center py-12 px-6 text-center', className)}
       role="status"
       aria-label={title || 'No content available'}
       {...props}
@@ -48,23 +45,21 @@ export function EmptyState({
       </div>
 
       {/* Title */}
-      {title && (
-        <h3 className="mb-1 text-lg font-semibold text-foreground">{title}</h3>
-      )}
+      {title && <h3 className="mb-1 text-lg font-semibold text-foreground">{title}</h3>}
 
       {/* Description */}
       <p className="mb-6 max-w-sm text-sm text-muted-foreground">{description}</p>
 
       {/* CTA */}
-      {(actionHref || onAction) && actionLabel && (
-        actionHref ? (
+      {(actionHref || onAction) &&
+        actionLabel &&
+        (actionHref ? (
           <Button asChild>
             <a href={actionHref}>{actionLabel}</a>
           </Button>
         ) : (
           <Button onClick={onAction}>{actionLabel}</Button>
-        )
-      )}
+        ))}
     </div>
   );
 }

@@ -55,35 +55,31 @@ describe('Property 3: State Machine — Hire Requires Offer Document', () => {
      * transitioning to Hired must fail with PREREQUISITE_FAILED error.
      */
     await fc.assert(
-      fc.asyncProperty(
-        candidateIdArb,
-        userIdArb,
-        async (candidateId, userId) => {
-          // Mock transaction: candidate is in OfferSent, no offer doc found
-          mockPrisma.$transaction.mockImplementation(async (fn: any) => {
-            const tx = {
-              $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
-              candidate: { update: vi.fn() },
-              document: { findFirst: vi.fn().mockResolvedValue(null) },
-              timelineEvent: { create: vi.fn() },
-            };
-            return fn(tx);
-          });
+      fc.asyncProperty(candidateIdArb, userIdArb, async (candidateId, userId) => {
+        // Mock transaction: candidate is in OfferSent, no offer doc found
+        mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+          const tx = {
+            $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
+            candidate: { update: vi.fn() },
+            document: { findFirst: vi.fn().mockResolvedValue(null) },
+            timelineEvent: { create: vi.fn() },
+          };
+          return fn(tx);
+        });
 
-          const result = await service.executeTransition(
-            candidateId,
-            CandidateStatus.Hired,
-            {},
-            userId,
-          );
+        const result = await service.executeTransition(
+          candidateId,
+          CandidateStatus.Hired,
+          {},
+          userId,
+        );
 
-          expect(result.success).toBe(false);
-          if (!result.success) {
-            expect(result.error.code).toBe(StateMachineErrorCode.PREREQUISITE_FAILED);
-            expect(result.error.message).toContain('offer letter');
-          }
-        },
-      ),
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.code).toBe(StateMachineErrorCode.PREREQUISITE_FAILED);
+          expect(result.error.message).toContain('offer letter');
+        }
+      }),
       { numRuns: 50 },
     );
   });
@@ -144,38 +140,29 @@ describe('Property 3: State Machine — Hire Requires Offer Document', () => {
      * attempting transition to Hired.
      */
     await fc.assert(
-      fc.asyncProperty(
-        candidateIdArb,
-        userIdArb,
-        async (candidateId, userId) => {
-          const findFirstMock = vi.fn().mockResolvedValue(null);
+      fc.asyncProperty(candidateIdArb, userIdArb, async (candidateId, userId) => {
+        const findFirstMock = vi.fn().mockResolvedValue(null);
 
-          mockPrisma.$transaction.mockImplementation(async (fn: any) => {
-            const tx = {
-              $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
-              candidate: { update: vi.fn() },
-              document: { findFirst: findFirstMock },
-              timelineEvent: { create: vi.fn() },
-            };
-            return fn(tx);
-          });
+        mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+          const tx = {
+            $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
+            candidate: { update: vi.fn() },
+            document: { findFirst: findFirstMock },
+            timelineEvent: { create: vi.fn() },
+          };
+          return fn(tx);
+        });
 
-          await service.executeTransition(
+        await service.executeTransition(candidateId, CandidateStatus.Hired, {}, userId);
+
+        // Verify the document query uses the correct candidateId and type
+        expect(findFirstMock).toHaveBeenCalledWith({
+          where: {
             candidateId,
-            CandidateStatus.Hired,
-            {},
-            userId,
-          );
-
-          // Verify the document query uses the correct candidateId and type
-          expect(findFirstMock).toHaveBeenCalledWith({
-            where: {
-              candidateId,
-              type: 'OfferLetter',
-            },
-          });
-        },
-      ),
+            type: 'OfferLetter',
+          },
+        });
+      }),
       { numRuns: 50 },
     );
   });
@@ -188,33 +175,24 @@ describe('Property 3: State Machine — Hire Requires Offer Document', () => {
      * the candidate record must NOT be modified (status stays OfferSent).
      */
     await fc.assert(
-      fc.asyncProperty(
-        candidateIdArb,
-        userIdArb,
-        async (candidateId, userId) => {
-          const updateMock = vi.fn();
+      fc.asyncProperty(candidateIdArb, userIdArb, async (candidateId, userId) => {
+        const updateMock = vi.fn();
 
-          mockPrisma.$transaction.mockImplementation(async (fn: any) => {
-            const tx = {
-              $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
-              candidate: { update: updateMock },
-              document: { findFirst: vi.fn().mockResolvedValue(null) },
-              timelineEvent: { create: vi.fn() },
-            };
-            return fn(tx);
-          });
+        mockPrisma.$transaction.mockImplementation(async (fn: any) => {
+          const tx = {
+            $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: 'OfferSent' }]),
+            candidate: { update: updateMock },
+            document: { findFirst: vi.fn().mockResolvedValue(null) },
+            timelineEvent: { create: vi.fn() },
+          };
+          return fn(tx);
+        });
 
-          await service.executeTransition(
-            candidateId,
-            CandidateStatus.Hired,
-            {},
-            userId,
-          );
+        await service.executeTransition(candidateId, CandidateStatus.Hired, {}, userId);
 
-          // candidate.update should NOT have been called
-          expect(updateMock).not.toHaveBeenCalled();
-        },
-      ),
+        // candidate.update should NOT have been called
+        expect(updateMock).not.toHaveBeenCalled();
+      }),
       { numRuns: 50 },
     );
   });

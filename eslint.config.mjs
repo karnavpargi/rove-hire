@@ -14,6 +14,7 @@ export default tseslint.config(
       '**/.turbo/**',
       '**/generated/**',
       '**/src/generated/**',
+      'packages/**',
     ],
   },
   {

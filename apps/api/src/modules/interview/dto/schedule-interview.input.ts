@@ -23,7 +23,9 @@ export class ScheduleInterviewInput {
   @IsEnum(InterviewTypeGql, { message: 'Interview type must be Screening or Technical' })
   type!: InterviewTypeGql;
 
-  @Field(() => String, { description: 'Scheduled date/time in ISO 8601 format (must be in the future)' })
+  @Field(() => String, {
+    description: 'Scheduled date/time in ISO 8601 format (must be in the future)',
+  })
   @IsDateString({}, { message: 'Scheduled date must be a valid ISO 8601 date string' })
   scheduledAt!: string;
 

@@ -64,9 +64,7 @@ export function useJobs() {
   return useQuery({
     queryKey: jobKeys.lists(),
     queryFn: async () => {
-      const data = await graphqlClient.request<{ jobOpenings: JobOpening[] }>(
-        JOB_OPENINGS_QUERY,
-      );
+      const data = await graphqlClient.request<{ jobOpenings: JobOpening[] }>(JOB_OPENINGS_QUERY);
       return data.jobOpenings;
     },
   });

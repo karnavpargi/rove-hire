@@ -98,11 +98,13 @@ describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
                 $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: current }]),
                 candidate: { update: vi.fn().mockResolvedValue(updatedCandidate) },
                 document: {
-                  findFirst: vi.fn().mockResolvedValue(
-                    target === CandidateStatus.Hired
-                      ? { id: 'doc-1', type: 'OfferLetter' }
-                      : null,
-                  ),
+                  findFirst: vi
+                    .fn()
+                    .mockResolvedValue(
+                      target === CandidateStatus.Hired
+                        ? { id: 'doc-1', type: 'OfferLetter' }
+                        : null,
+                    ),
                 },
                 timelineEvent: { create: vi.fn().mockResolvedValue({}) },
               };
@@ -185,11 +187,13 @@ describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
                 $queryRaw: vi.fn().mockResolvedValue([{ id: candidateId, status: current }]),
                 candidate: { update: vi.fn().mockResolvedValue(updatedCandidate) },
                 document: {
-                  findFirst: vi.fn().mockResolvedValue(
-                    target === CandidateStatus.Hired
-                      ? { id: 'doc-1', type: 'OfferLetter' }
-                      : null,
-                  ),
+                  findFirst: vi
+                    .fn()
+                    .mockResolvedValue(
+                      target === CandidateStatus.Hired
+                        ? { id: 'doc-1', type: 'OfferLetter' }
+                        : null,
+                    ),
                 },
                 timelineEvent: { create: vi.fn().mockResolvedValue({}) },
               };
@@ -260,12 +264,7 @@ describe('Property 15: Concurrent Status Change — First Writer Wins', () => {
             throw conflictError;
           });
 
-          const result = await service.executeTransition(
-            candidateId,
-            target,
-            {},
-            userId,
-          );
+          const result = await service.executeTransition(candidateId, target, {}, userId);
 
           // Must be a failure with CONFLICT_ERROR
           expect(result.success).toBe(false);

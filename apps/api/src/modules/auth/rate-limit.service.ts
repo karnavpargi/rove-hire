@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 
 /** Result of a rate limit check */
 export interface RateLimitResult {
@@ -145,7 +145,8 @@ export class RateLimitService {
       throw new HttpException(
         {
           code: 'RATE_LIMIT_ERROR',
-          message: 'Account temporarily locked due to too many failed login attempts. Please try again later.',
+          message:
+            'Account temporarily locked due to too many failed login attempts. Please try again later.',
           retryAfter: lockoutResult.retryAfterSeconds,
         },
         HttpStatus.TOO_MANY_REQUESTS,

@@ -12,12 +12,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
-import { CandidateStatus } from '@rove-hire/shared';
-import { graphqlClient, handleGraphQLError, classifyError } from '@/lib/graphql-client';
-import {
-  registerOptimisticUpdate,
-  type OptimisticUpdateResult,
-} from '@/lib/optimistic-updates';
+import type { CandidateStatus } from '@rove-hire/shared';
+import type { classifyError } from '@/lib/graphql-client';
+import { graphqlClient, handleGraphQLError } from '@/lib/graphql-client';
+import { registerOptimisticUpdate, type OptimisticUpdateResult } from '@/lib/optimistic-updates';
 
 // ---------------------------------------------------------------------------
 // GraphQL Mutation
@@ -94,7 +92,7 @@ export function useStatusTransition(options?: UseStatusTransitionOptions) {
       const optimistic = registerOptimisticUpdate(
         input.candidateId,
         input.currentStatus,
-        input.targetStatus
+        input.targetStatus,
       );
 
       return { optimistic };

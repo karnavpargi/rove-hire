@@ -1,4 +1,4 @@
-import { TimelineEventType } from '@rove-hire/shared';
+import type { TimelineEventType } from '@rove-hire/shared';
 
 /**
  * Input DTO for logging a timeline event.

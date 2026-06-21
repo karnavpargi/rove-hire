@@ -10,12 +10,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
 import { graphqlClient } from '@/lib/graphql-client';
-import type {
-  Candidate,
-  TimelineEvent,
-  Document,
-  Interview,
-} from '@rove-hire/shared';
+import type { Candidate, TimelineEvent, Document, Interview } from '@rove-hire/shared';
 
 // ---------------------------------------------------------------------------
 // GraphQL Query

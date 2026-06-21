@@ -47,17 +47,14 @@ export function FocusTrap({
   // Store the previously focused element on activation
   React.useEffect(() => {
     if (active) {
-      previousFocusRef.current =
-        returnFocusTo || (document.activeElement as HTMLElement);
+      previousFocusRef.current = returnFocusTo || (document.activeElement as HTMLElement);
 
       // Auto-focus first focusable element within 100ms
       if (autoFocus) {
         const timer = setTimeout(() => {
           const container = containerRef.current;
           if (!container) return;
-          const firstFocusable = container.querySelector<HTMLElement>(
-            FOCUSABLE_SELECTOR,
-          );
+          const firstFocusable = container.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
           if (firstFocusable) {
             firstFocusable.focus();
           }
@@ -88,9 +85,7 @@ export function FocusTrap({
         const container = containerRef.current;
         if (!container) return;
 
-        const focusable = Array.from(
-          container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-        );
+        const focusable = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
 
         if (focusable.length === 0) {
           e.preventDefault();
@@ -119,11 +114,7 @@ export function FocusTrap({
   );
 
   return (
-    <div
-      ref={containerRef}
-      onKeyDown={handleKeyDown}
-      role="presentation"
-    >
+    <div ref={containerRef} onKeyDown={handleKeyDown} role="presentation">
       {children}
     </div>
   );

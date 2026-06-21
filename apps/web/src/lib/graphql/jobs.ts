@@ -94,7 +94,10 @@ export const UPDATE_JOB_OPENING_MUTATION = gql`
       id
       title
       description
-      skills { id tag }
+      skills {
+        id
+        tag
+      }
       status
       candidateCount
       createdAt

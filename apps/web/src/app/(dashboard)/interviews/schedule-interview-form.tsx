@@ -17,11 +17,7 @@
  */
 
 import * as React from 'react';
-import {
-  InterviewType,
-  validateInterviewerName,
-  validateInterviewNotes,
-} from '@rove-hire/shared';
+import { InterviewType, validateInterviewerName, validateInterviewNotes } from '@rove-hire/shared';
 import { FormField } from '@/components/shared/form-field';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -84,50 +80,47 @@ export function ScheduleInterviewForm({
   // Validation
   // -------------------------------------------------------------------------
 
-  const validateField = React.useCallback(
-    (field: string, value: string): string | undefined => {
-      switch (field) {
-        case 'candidateId':
-          if (!value.trim()) return 'Candidate ID is required';
-          return undefined;
+  const validateField = React.useCallback((field: string, value: string): string | undefined => {
+    switch (field) {
+      case 'candidateId':
+        if (!value.trim()) return 'Candidate ID is required';
+        return undefined;
 
-        case 'date': {
-          if (!value) return 'Date is required';
-          const selectedDate = new Date(value);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          if (selectedDate < today) return 'Date must be in the future';
-          return undefined;
-        }
-
-        case 'time':
-          if (!value) return 'Time is required';
-          return undefined;
-
-        case 'type':
-          if (!value) return 'Interview type is required';
-          return undefined;
-
-        case 'interviewerName': {
-          const result = validateInterviewerName(value);
-          if (!result.valid) return result.error;
-          return undefined;
-        }
-
-        case 'notes': {
-          if (value && value.length > 0) {
-            const result = validateInterviewNotes(value);
-            if (!result.valid) return result.error;
-          }
-          return undefined;
-        }
-
-        default:
-          return undefined;
+      case 'date': {
+        if (!value) return 'Date is required';
+        const selectedDate = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) return 'Date must be in the future';
+        return undefined;
       }
-    },
-    [],
-  );
+
+      case 'time':
+        if (!value) return 'Time is required';
+        return undefined;
+
+      case 'type':
+        if (!value) return 'Interview type is required';
+        return undefined;
+
+      case 'interviewerName': {
+        const result = validateInterviewerName(value);
+        if (!result.valid) return result.error;
+        return undefined;
+      }
+
+      case 'notes': {
+        if (value && value.length > 0) {
+          const result = validateInterviewNotes(value);
+          if (!result.valid) return result.error;
+        }
+        return undefined;
+      }
+
+      default:
+        return undefined;
+    }
+  }, []);
 
   const validateAll = React.useCallback((): boolean => {
     const newErrors: FormErrors = {};
@@ -215,7 +208,10 @@ export function ScheduleInterviewForm({
       {/* Candidate ID */}
       <div className="space-y-1.5">
         <Label htmlFor="candidate-id" className="text-sm font-medium">
-          Candidate ID<span className="ml-0.5 text-destructive" aria-hidden="true">*</span>
+          Candidate ID
+          <span className="ml-0.5 text-destructive" aria-hidden="true">
+            *
+          </span>
         </Label>
         <Select
           value={candidateId}
@@ -257,7 +253,10 @@ export function ScheduleInterviewForm({
       {/* Date */}
       <div className="space-y-1.5">
         <Label htmlFor="schedule-date" className="text-sm font-medium">
-          Date<span className="ml-0.5 text-destructive" aria-hidden="true">*</span>
+          Date
+          <span className="ml-0.5 text-destructive" aria-hidden="true">
+            *
+          </span>
         </Label>
         <input
           id="schedule-date"
@@ -289,7 +288,10 @@ export function ScheduleInterviewForm({
       {/* Time */}
       <div className="space-y-1.5">
         <Label htmlFor="schedule-time" className="text-sm font-medium">
-          Time<span className="ml-0.5 text-destructive" aria-hidden="true">*</span>
+          Time
+          <span className="ml-0.5 text-destructive" aria-hidden="true">
+            *
+          </span>
         </Label>
         <input
           id="schedule-time"
@@ -320,7 +322,10 @@ export function ScheduleInterviewForm({
       {/* Interview Type */}
       <div className="space-y-1.5">
         <Label htmlFor="schedule-type" className="text-sm font-medium">
-          Type<span className="ml-0.5 text-destructive" aria-hidden="true">*</span>
+          Type
+          <span className="ml-0.5 text-destructive" aria-hidden="true">
+            *
+          </span>
         </Label>
         <Select
           value={type}
@@ -404,9 +409,7 @@ export function ScheduleInterviewForm({
           ) : (
             <span />
           )}
-          <span className="text-xs text-muted-foreground">
-            {notes.length}/1000
-          </span>
+          <span className="text-xs text-muted-foreground">{notes.length}/1000</span>
         </div>
       </div>
 

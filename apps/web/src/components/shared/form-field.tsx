@@ -5,7 +5,10 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export interface FormFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+export interface FormFieldProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'onChange'
+> {
   /** Unique field identifier */
   name: string;
   /** Visible label text */
@@ -77,18 +80,19 @@ export function FormField({
     }
   }, [validate, value]);
 
-  const describedBy = [
-    displayError ? errorId : undefined,
-    hint ? hintId : undefined,
-  ]
-    .filter(Boolean)
-    .join(' ') || undefined;
+  const describedBy =
+    [displayError ? errorId : undefined, hint ? hintId : undefined].filter(Boolean).join(' ') ||
+    undefined;
 
   return (
     <div className={cn('space-y-1.5', className)}>
       <Label htmlFor={name} className="text-sm font-medium">
         {label}
-        {required && <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>}
+        {required && (
+          <span className="ml-0.5 text-destructive" aria-hidden="true">
+            *
+          </span>
+        )}
       </Label>
 
       <Input
@@ -113,12 +117,7 @@ export function FormField({
 
       {/* Error message */}
       {displayError && (
-        <p
-          id={errorId}
-          className="text-xs text-destructive"
-          role="alert"
-          aria-live="assertive"
-        >
+        <p id={errorId} className="text-xs text-destructive" role="alert" aria-live="assertive">
           {displayError}
         </p>
       )}

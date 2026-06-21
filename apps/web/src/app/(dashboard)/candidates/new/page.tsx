@@ -20,11 +20,7 @@
 import * as React from 'react';
 import { ArrowLeftIcon, CopyIcon, CheckIcon, LinkIcon } from 'lucide-react';
 import Link from 'next/link';
-import {
-  validateCandidateName,
-  validateEmail,
-  JobOpeningStatus,
-} from '@rove-hire/shared';
+import { validateCandidateName, validateEmail, JobOpeningStatus } from '@rove-hire/shared';
 import { useJobs } from '@/hooks/use-jobs';
 import { useToast } from '@/components/shared/toast';
 import { FormField } from '@/components/shared/form-field';
@@ -312,7 +308,10 @@ export default function CreateCandidatePage() {
           if (classified.fieldErrors) {
             const newErrors: FormErrors = {};
             for (const fe of classified.fieldErrors) {
-              if (fe.field in newErrors || ['name', 'email', 'resume', 'jobOpeningId'].includes(fe.field)) {
+              if (
+                fe.field in newErrors ||
+                ['name', 'email', 'resume', 'jobOpeningId'].includes(fe.field)
+              ) {
                 (newErrors as Record<string, string>)[fe.field] = fe.message;
               }
             }
@@ -405,7 +404,8 @@ export default function CreateCandidatePage() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              This link expires in 14 days. The candidate can use it to submit their full application.
+              This link expires in 14 days. The candidate can use it to submit their full
+              application.
             </p>
           </div>
 
@@ -475,7 +475,9 @@ export default function CreateCandidatePage() {
         <div className="space-y-1.5" onBlur={() => handleBlur('resume')}>
           <Label className="text-sm font-medium">
             Resume (PDF)
-            <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>
+            <span className="ml-0.5 text-destructive" aria-hidden="true">
+              *
+            </span>
           </Label>
           <FileUpload
             label="Upload resume PDF"
@@ -490,7 +492,9 @@ export default function CreateCandidatePage() {
         <div className="space-y-1.5">
           <Label htmlFor="job-opening" className="text-sm font-medium">
             Job Opening
-            <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>
+            <span className="ml-0.5 text-destructive" aria-hidden="true">
+              *
+            </span>
           </Label>
           <Select
             value={jobOpeningId}

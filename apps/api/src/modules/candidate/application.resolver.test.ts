@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ApplicationResolver } from './application.resolver';
-import { MagicLinkService, MagicLinkError, MagicLinkErrorCode } from '../magic-link/magic-link.service';
+import type { MagicLinkService } from '../magic-link/magic-link.service';
+import { MagicLinkError, MagicLinkErrorCode } from '../magic-link/magic-link.service';
 import { BadRequestException } from '@nestjs/common';
 
 /**
@@ -100,67 +101,93 @@ describe('ApplicationResolver', () => {
     describe('field validation', () => {
       it('should reject phone with invalid characters', async () => {
         const input = { ...validInput, phone: 'abc-invalid' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject phone shorter than 7 chars', async () => {
         const input = { ...validInput, phone: '12345' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject phone longer than 20 chars', async () => {
         const input = { ...validInput, phone: '+1 234 567 890 123 456' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject empty location', async () => {
         const input = { ...validInput, location: '' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject location exceeding 100 characters', async () => {
         const input = { ...validInput, location: 'A'.repeat(101) };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject empty currentRole', async () => {
         const input = { ...validInput, currentRole: '' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject currentRole exceeding 100 characters', async () => {
         const input = { ...validInput, currentRole: 'R'.repeat(101) };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject empty noticePeriod', async () => {
         const input = { ...validInput, noticePeriod: '' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject noticePeriod exceeding 50 characters', async () => {
         const input = { ...validInput, noticePeriod: 'N'.repeat(51) };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject empty salaryExpectation', async () => {
         const input = { ...validInput, salaryExpectation: '' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject salaryExpectation exceeding 50 characters', async () => {
         const input = { ...validInput, salaryExpectation: 'S'.repeat(51) };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject invalid LinkedIn URL format', async () => {
         const input = { ...validInput, linkedinUrl: 'http://linkedin.com/in/test' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should reject LinkedIn URL not starting with approved prefix', async () => {
         const input = { ...validInput, linkedinUrl: 'https://example.com/profile' };
-        await expect(resolver.submitApplication('token', input)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', input)).rejects.toThrow(
+          BadRequestException,
+        );
       });
 
       it('should accept valid input without LinkedIn URL', async () => {
@@ -219,7 +246,10 @@ describe('ApplicationResolver', () => {
     describe('concurrent submission (first writer wins)', () => {
       it('should throw "already used" when magic link was already consumed', async () => {
         mockMagicLinkService.consume.mockRejectedValue(
-          new MagicLinkError('Magic link has already been used', MagicLinkErrorCode.ALREADY_CONSUMED),
+          new MagicLinkError(
+            'Magic link has already been used',
+            MagicLinkErrorCode.ALREADY_CONSUMED,
+          ),
         );
 
         try {
@@ -274,7 +304,10 @@ describe('ApplicationResolver', () => {
 
         // Second call with different data is rejected
         mockMagicLinkService.consume.mockRejectedValueOnce(
-          new MagicLinkError('Magic link has already been used', MagicLinkErrorCode.ALREADY_CONSUMED),
+          new MagicLinkError(
+            'Magic link has already been used',
+            MagicLinkErrorCode.ALREADY_CONSUMED,
+          ),
         );
 
         const differentInput = {
@@ -283,7 +316,9 @@ describe('ApplicationResolver', () => {
           location: 'London, UK',
         };
 
-        await expect(resolver.submitApplication('token', differentInput)).rejects.toThrow(BadRequestException);
+        await expect(resolver.submitApplication('token', differentInput)).rejects.toThrow(
+          BadRequestException,
+        );
 
         // The first result's data was preserved (the magic link service handles this atomically)
         expect(firstResult.phone).toBe('+1 555-1234');

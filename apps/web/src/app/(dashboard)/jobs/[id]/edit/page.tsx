@@ -112,7 +112,8 @@ export default function EditJobPage() {
     (value: string) => {
       setDescription(value);
       if (touched.description) {
-        const error = value.length > 5000 ? 'Description must not exceed 5000 characters' : undefined;
+        const error =
+          value.length > 5000 ? 'Description must not exceed 5000 characters' : undefined;
         setErrors((prev) => ({ ...prev, description: error }));
       }
     },
@@ -193,9 +194,7 @@ export default function EditJobPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Edit Job Opening</h1>
-          <p className="text-sm text-muted-foreground">
-            Update the details for {job.title}
-          </p>
+          <p className="text-sm text-muted-foreground">Update the details for {job.title}</p>
         </div>
       </div>
 

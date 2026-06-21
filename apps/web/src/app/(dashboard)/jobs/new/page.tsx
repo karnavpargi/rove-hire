@@ -118,7 +118,8 @@ export default function CreateJobPage() {
     (value: string) => {
       setDescription(value);
       if (touched.description) {
-        const error = value.length > 5000 ? 'Description must not exceed 5000 characters' : undefined;
+        const error =
+          value.length > 5000 ? 'Description must not exceed 5000 characters' : undefined;
         setErrors((prev) => ({ ...prev, description: error }));
       }
     },

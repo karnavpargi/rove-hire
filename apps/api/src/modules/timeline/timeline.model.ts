@@ -37,16 +37,28 @@ export class TimelineEventType {
   @Field(() => String, { description: 'Type of event (status_change, interview_scheduled, etc.)' })
   eventType!: string;
 
-  @Field(() => String, { nullable: true, description: 'Previous candidate status (for status change events)' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Previous candidate status (for status change events)',
+  })
   previousStatus?: string | null;
 
-  @Field(() => String, { nullable: true, description: 'New candidate status (for status change events)' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'New candidate status (for status change events)',
+  })
   newStatus?: string | null;
 
-  @Field(() => String, { nullable: true, description: 'Additional details about the event (max 2000 chars)' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Additional details about the event (max 2000 chars)',
+  })
   details?: string | null;
 
-  @Field(() => String, { nullable: true, description: 'ID of the HR user who performed the action' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'ID of the HR user who performed the action',
+  })
   actorId?: string | null;
 
   @Field(() => Date, { description: 'Timestamp when the event occurred' })

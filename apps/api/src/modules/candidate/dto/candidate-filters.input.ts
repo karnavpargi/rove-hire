@@ -21,18 +21,28 @@ export class CandidateFiltersInput {
   @Min(1)
   page?: number;
 
-  @Field(() => Int, { nullable: true, defaultValue: 20, description: 'Items per page (default 20)' })
+  @Field(() => Int, {
+    nullable: true,
+    defaultValue: 20,
+    description: 'Items per page (default 20)',
+  })
   @IsOptional()
   @IsInt()
   @Min(1)
   pageSize?: number;
 
-  @Field(() => [CandidateStatusGql], { nullable: true, description: 'Filter by status (multi-select)' })
+  @Field(() => [CandidateStatusGql], {
+    nullable: true,
+    description: 'Filter by status (multi-select)',
+  })
   @IsOptional()
   @IsArray()
   statuses?: string[];
 
-  @Field(() => String, { nullable: true, description: 'Search by name or role (min 2 chars, case-insensitive)' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Search by name or role (min 2 chars, case-insensitive)',
+  })
   @IsOptional()
   @IsString()
   @MinLength(2, { message: 'Search query must be at least 2 characters' })

@@ -17,7 +17,7 @@ import {
 
 // Helper to create a mock ClientError
 function createClientError(
-  errors: Array<{ message: string; extensions?: Record<string, unknown> }>
+  errors: Array<{ message: string; extensions?: Record<string, unknown> }>,
 ): ClientError {
   // ClientError expects a GraphQLResponse; cast to satisfy the constructor
   const response = {
@@ -25,7 +25,9 @@ function createClientError(
     data: null,
     status: 200,
     headers: new Map(),
-  } as unknown as Parameters<typeof ClientError extends new (r: infer R, ...a: unknown[]) => unknown ? (r: R) => void : never>[0];
+  } as unknown as Parameters<
+    typeof ClientError extends new (r: infer R, ...a: unknown[]) => unknown ? (r: R) => void : never
+  >[0];
   const error = new ClientError(response as never, { query: '' });
   return error;
 }
@@ -56,8 +58,18 @@ describe('graphql-client error handling', () => {
 
     it('classifies VALIDATION_ERROR with field errors', () => {
       const error = createClientError([
-        { message: 'Email is invalid', extensions: { code: 'VALIDATION_ERROR', field: 'email', details: 'Must be a valid email' } },
-        { message: 'Name too long', extensions: { code: 'VALIDATION_ERROR', field: 'name', details: 'Max 100 chars' } },
+        {
+          message: 'Email is invalid',
+          extensions: {
+            code: 'VALIDATION_ERROR',
+            field: 'email',
+            details: 'Must be a valid email',
+          },
+        },
+        {
+          message: 'Name too long',
+          extensions: { code: 'VALIDATION_ERROR', field: 'name', details: 'Max 100 chars' },
+        },
       ]);
       const result = classifyError(error);
       expect(result.type).toBe(GraphQLErrorCode.VALIDATION_ERROR);
@@ -215,7 +227,10 @@ describe('graphql-client error handling', () => {
 
     it('dispatches toast on CONFLICT_ERROR', () => {
       const error = createClientError([
-        { message: 'Conflict', extensions: { code: 'CONFLICT_ERROR', details: 'Updated by another user' } },
+        {
+          message: 'Conflict',
+          extensions: { code: 'CONFLICT_ERROR', details: 'Updated by another user' },
+        },
       ]);
       handleGraphQLError(error);
       expect(dispatchedEvents).toHaveLength(1);

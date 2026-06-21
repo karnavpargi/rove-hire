@@ -21,11 +21,7 @@ interface LiveRegionProps {
  *
  * Requirements: 15.6
  */
-export function LiveRegion({
-  message,
-  politeness = 'polite',
-  className,
-}: LiveRegionProps) {
+export function LiveRegion({ message, politeness = 'polite', className }: LiveRegionProps) {
   return (
     <div
       role={politeness === 'assertive' ? 'alert' : 'status'}
@@ -116,8 +112,7 @@ export function announceToScreenReader(
 ) {
   if (typeof document === 'undefined') return;
 
-  const regionId =
-    politeness === 'assertive' ? 'live-region-assertive' : 'live-region-polite';
+  const regionId = politeness === 'assertive' ? 'live-region-assertive' : 'live-region-polite';
   const region = document.getElementById(regionId);
   if (region) {
     // Clear then set to ensure re-announcement of same message

@@ -19,46 +19,90 @@ describe('StateMachineService', () => {
 
   describe('validateTransition', () => {
     it('should allow Applied → FormSubmitted', () => {
-      expect(service.validateTransition(CandidateStatus.Applied, CandidateStatus.FormSubmitted)).toBe(true);
+      expect(
+        service.validateTransition(CandidateStatus.Applied, CandidateStatus.FormSubmitted),
+      ).toBe(true);
     });
 
     it('should allow FormSubmitted → InterviewScheduled', () => {
-      expect(service.validateTransition(CandidateStatus.FormSubmitted, CandidateStatus.InterviewScheduled)).toBe(true);
+      expect(
+        service.validateTransition(
+          CandidateStatus.FormSubmitted,
+          CandidateStatus.InterviewScheduled,
+        ),
+      ).toBe(true);
     });
 
     it('should allow InterviewScheduled → OfferSent', () => {
-      expect(service.validateTransition(CandidateStatus.InterviewScheduled, CandidateStatus.OfferSent)).toBe(true);
+      expect(
+        service.validateTransition(CandidateStatus.InterviewScheduled, CandidateStatus.OfferSent),
+      ).toBe(true);
     });
 
     it('should allow OfferSent → Hired', () => {
-      expect(service.validateTransition(CandidateStatus.OfferSent, CandidateStatus.Hired)).toBe(true);
+      expect(service.validateTransition(CandidateStatus.OfferSent, CandidateStatus.Hired)).toBe(
+        true,
+      );
     });
 
     it('should allow any non-terminal → Rejected', () => {
-      expect(service.validateTransition(CandidateStatus.Applied, CandidateStatus.Rejected)).toBe(true);
-      expect(service.validateTransition(CandidateStatus.FormSubmitted, CandidateStatus.Rejected)).toBe(true);
-      expect(service.validateTransition(CandidateStatus.InterviewScheduled, CandidateStatus.Rejected)).toBe(true);
-      expect(service.validateTransition(CandidateStatus.OfferSent, CandidateStatus.Rejected)).toBe(true);
+      expect(service.validateTransition(CandidateStatus.Applied, CandidateStatus.Rejected)).toBe(
+        true,
+      );
+      expect(
+        service.validateTransition(CandidateStatus.FormSubmitted, CandidateStatus.Rejected),
+      ).toBe(true);
+      expect(
+        service.validateTransition(CandidateStatus.InterviewScheduled, CandidateStatus.Rejected),
+      ).toBe(true);
+      expect(service.validateTransition(CandidateStatus.OfferSent, CandidateStatus.Rejected)).toBe(
+        true,
+      );
     });
 
     it('should reject transitions from terminal statuses', () => {
-      expect(service.validateTransition(CandidateStatus.Hired, CandidateStatus.Applied)).toBe(false);
-      expect(service.validateTransition(CandidateStatus.Hired, CandidateStatus.Rejected)).toBe(false);
-      expect(service.validateTransition(CandidateStatus.Rejected, CandidateStatus.Applied)).toBe(false);
-      expect(service.validateTransition(CandidateStatus.Rejected, CandidateStatus.Hired)).toBe(false);
+      expect(service.validateTransition(CandidateStatus.Hired, CandidateStatus.Applied)).toBe(
+        false,
+      );
+      expect(service.validateTransition(CandidateStatus.Hired, CandidateStatus.Rejected)).toBe(
+        false,
+      );
+      expect(service.validateTransition(CandidateStatus.Rejected, CandidateStatus.Applied)).toBe(
+        false,
+      );
+      expect(service.validateTransition(CandidateStatus.Rejected, CandidateStatus.Hired)).toBe(
+        false,
+      );
     });
 
     it('should reject skipping states in forward chain', () => {
-      expect(service.validateTransition(CandidateStatus.Applied, CandidateStatus.InterviewScheduled)).toBe(false);
-      expect(service.validateTransition(CandidateStatus.Applied, CandidateStatus.OfferSent)).toBe(false);
-      expect(service.validateTransition(CandidateStatus.Applied, CandidateStatus.Hired)).toBe(false);
-      expect(service.validateTransition(CandidateStatus.FormSubmitted, CandidateStatus.Hired)).toBe(false);
+      expect(
+        service.validateTransition(CandidateStatus.Applied, CandidateStatus.InterviewScheduled),
+      ).toBe(false);
+      expect(service.validateTransition(CandidateStatus.Applied, CandidateStatus.OfferSent)).toBe(
+        false,
+      );
+      expect(service.validateTransition(CandidateStatus.Applied, CandidateStatus.Hired)).toBe(
+        false,
+      );
+      expect(service.validateTransition(CandidateStatus.FormSubmitted, CandidateStatus.Hired)).toBe(
+        false,
+      );
     });
 
     it('should reject backward transitions', () => {
-      expect(service.validateTransition(CandidateStatus.FormSubmitted, CandidateStatus.Applied)).toBe(false);
-      expect(service.validateTransition(CandidateStatus.InterviewScheduled, CandidateStatus.FormSubmitted)).toBe(false);
-      expect(service.validateTransition(CandidateStatus.OfferSent, CandidateStatus.InterviewScheduled)).toBe(false);
+      expect(
+        service.validateTransition(CandidateStatus.FormSubmitted, CandidateStatus.Applied),
+      ).toBe(false);
+      expect(
+        service.validateTransition(
+          CandidateStatus.InterviewScheduled,
+          CandidateStatus.FormSubmitted,
+        ),
+      ).toBe(false);
+      expect(
+        service.validateTransition(CandidateStatus.OfferSent, CandidateStatus.InterviewScheduled),
+      ).toBe(false);
     });
   });
 
@@ -385,12 +429,7 @@ describe('StateMachineService', () => {
         return fn(tx);
       });
 
-      await service.executeTransition(
-        candidateId,
-        CandidateStatus.FormSubmitted,
-        {},
-        userId,
-      );
+      await service.executeTransition(candidateId, CandidateStatus.FormSubmitted, {}, userId);
 
       expect(timelineCreateMock).toHaveBeenCalledWith({
         data: {

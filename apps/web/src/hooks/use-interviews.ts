@@ -18,11 +18,7 @@ import {
   SCHEDULE_INTERVIEW_MUTATION,
   RECORD_FEEDBACK_MUTATION,
 } from '@/lib/graphql/interviews';
-import type {
-  Interview,
-  ScheduleInterviewInput,
-  RecordFeedbackInput,
-} from '@rove-hire/shared';
+import type { Interview, ScheduleInterviewInput, RecordFeedbackInput } from '@rove-hire/shared';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,8 +54,7 @@ export function useInterviews() {
       }>(INTERVIEWS_QUERY);
       // Sort by scheduledAt ascending (ensure client-side sort for safety)
       return [...data.interviews].sort(
-        (a, b) =>
-          new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
+        (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
       );
     },
   });

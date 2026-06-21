@@ -40,12 +40,7 @@ export function RouteChangeAnnouncer() {
   }, [pathname]);
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      className="sr-only"
-    >
+    <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
       {announcement}
     </div>
   );
@@ -63,16 +58,12 @@ function getPageName(pathname: string): string {
   // Handle dynamic segments (UUIDs) — use the parent segment
   if (lastSegment && /^[0-9a-f-]{36}$/i.test(lastSegment)) {
     const parentSegment = segments[segments.length - 2];
-    return parentSegment
-      ? `${formatSegment(parentSegment)} detail`
-      : 'Detail page';
+    return parentSegment ? `${formatSegment(parentSegment)} detail` : 'Detail page';
   }
 
   return formatSegment(lastSegment || 'page');
 }
 
 function formatSegment(segment: string): string {
-  return segment
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return segment.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }

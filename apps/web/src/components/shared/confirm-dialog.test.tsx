@@ -38,13 +38,7 @@ describe('ConfirmDialog', () => {
   });
 
   it('uses custom confirm and cancel labels', () => {
-    render(
-      <ConfirmDialog
-        {...defaultProps}
-        confirmLabel="Delete"
-        cancelLabel="Keep"
-      />,
-    );
+    render(<ConfirmDialog {...defaultProps} confirmLabel="Delete" cancelLabel="Keep" />);
     expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Keep' })).toBeInTheDocument();
   });

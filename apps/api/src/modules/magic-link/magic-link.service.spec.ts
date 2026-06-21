@@ -1,12 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { createHash, randomBytes } from 'crypto';
-import {
-  MagicLinkService,
-  MagicLinkError,
-  MagicLinkErrorCode,
-} from './magic-link.service';
-import { PrismaService } from '../../prisma/prisma.service';
+import { MagicLinkService, MagicLinkError, MagicLinkErrorCode } from './magic-link.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 
 // Mock PrismaService
 function createMockPrisma() {
@@ -54,10 +50,7 @@ describe('MagicLinkService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma = createMockPrisma();
-    service = new MagicLinkService(
-      mockPrisma as unknown as PrismaService,
-      createConfigService(),
-    );
+    service = new MagicLinkService(mockPrisma as unknown as PrismaService, createConfigService());
   });
 
   describe('generate', () => {
@@ -90,9 +83,7 @@ describe('MagicLinkService', () => {
       });
 
       const result = await service.generate('candidate-1');
-      const expectedHash = createHash('sha256')
-        .update(result.token)
-        .digest('hex');
+      const expectedHash = createHash('sha256').update(result.token).digest('hex');
 
       // Verify the hash passed to create matches SHA-256 of the token
       expect(mockPrisma.magicLink.create).toHaveBeenCalledWith(
@@ -143,9 +134,7 @@ describe('MagicLinkService', () => {
 
       const result = await service.generate('candidate-1');
 
-      expect(result.url).toBe(
-        `http://localhost:3001/candidate-application/${result.token}`,
-      );
+      expect(result.url).toBe(`http://localhost:3001/candidate-application/${result.token}`);
     });
 
     it('should generate unique tokens on consecutive calls', async () => {
@@ -166,13 +155,9 @@ describe('MagicLinkService', () => {
     });
 
     it('should throw MagicLinkError on database failure', async () => {
-      mockPrisma.magicLink.create.mockRejectedValue(
-        new Error('Database connection lost'),
-      );
+      mockPrisma.magicLink.create.mockRejectedValue(new Error('Database connection lost'));
 
-      await expect(service.generate('candidate-1')).rejects.toThrow(
-        MagicLinkError,
-      );
+      await expect(service.generate('candidate-1')).rejects.toThrow(MagicLinkError);
       await expect(service.generate('candidate-1')).rejects.toMatchObject({
         code: MagicLinkErrorCode.GENERATION_FAILED,
       });
@@ -357,9 +342,7 @@ describe('MagicLinkService', () => {
     it('should throw INVALID_TOKEN for non-existent token', async () => {
       mockPrisma._txMagicLink.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.consume('non-existent', { phone: '555-0000' }),
-      ).rejects.toMatchObject({
+      await expect(service.consume('non-existent', { phone: '555-0000' })).rejects.toMatchObject({
         code: MagicLinkErrorCode.INVALID_TOKEN,
       });
     });
@@ -378,9 +361,7 @@ describe('MagicLinkService', () => {
         createdAt: new Date(),
       });
 
-      await expect(
-        service.consume(token, { phone: '555-0000' }),
-      ).rejects.toMatchObject({
+      await expect(service.consume(token, { phone: '555-0000' })).rejects.toMatchObject({
         code: MagicLinkErrorCode.ALREADY_CONSUMED,
       });
     });
@@ -399,9 +380,7 @@ describe('MagicLinkService', () => {
         createdAt: new Date(),
       });
 
-      await expect(
-        service.consume(token, { phone: '555-0000' }),
-      ).rejects.toMatchObject({
+      await expect(service.consume(token, { phone: '555-0000' })).rejects.toMatchObject({
         code: MagicLinkErrorCode.EXPIRED,
       });
     });
@@ -445,9 +424,7 @@ describe('MagicLinkService', () => {
     it('should wrap unexpected errors as CONSUMPTION_FAILED', async () => {
       mockPrisma.$transaction.mockRejectedValue(new Error('Database crash'));
 
-      await expect(
-        service.consume('some-token', { phone: '555-0000' }),
-      ).rejects.toMatchObject({
+      await expect(service.consume('some-token', { phone: '555-0000' })).rejects.toMatchObject({
         code: MagicLinkErrorCode.CONSUMPTION_FAILED,
       });
     });

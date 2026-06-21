@@ -13,11 +13,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
 import { GraphQLErrorCode } from '@rove-hire/shared';
-import {
-  isClientError,
-  extractErrorExtensions,
-  handleGraphQLError,
-} from '@/lib/graphql-client';
+import { isClientError, extractErrorExtensions, handleGraphQLError } from '@/lib/graphql-client';
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -48,10 +44,8 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             },
           },
         },
-      })
+      }),
   );
 
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

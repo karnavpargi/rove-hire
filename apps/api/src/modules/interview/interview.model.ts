@@ -75,16 +75,25 @@ export class InterviewObjectType {
   @Field(() => String, { description: 'Name of the interviewer (1-100 chars)' })
   interviewerName!: string;
 
-  @Field(() => String, { nullable: true, description: 'Interview scheduling notes (max 1000 chars)' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Interview scheduling notes (max 1000 chars)',
+  })
   notes?: string | null;
 
   @Field(() => InterviewStatusGql, { description: 'Current status of the interview' })
   status!: InterviewStatusGql;
 
-  @Field(() => RecommendationGql, { nullable: true, description: 'Recommendation after completion' })
+  @Field(() => RecommendationGql, {
+    nullable: true,
+    description: 'Recommendation after completion',
+  })
   recommendation?: RecommendationGql | null;
 
-  @Field(() => String, { nullable: true, description: 'Feedback text after completion (1-2000 chars)' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Feedback text after completion (1-2000 chars)',
+  })
   feedback?: string | null;
 
   @Field(() => Date, { nullable: true, description: 'Date when the interview was completed' })

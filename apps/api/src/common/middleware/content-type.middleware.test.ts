@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ContentTypeMiddleware } from './content-type.middleware';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 describe('ContentTypeMiddleware', () => {
   let middleware: ContentTypeMiddleware;

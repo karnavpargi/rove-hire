@@ -1,5 +1,13 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, MinLength, MaxLength, IsArray, ArrayMinSize, ArrayMaxSize, IsOptional } from 'class-validator';
+import {
+  IsString,
+  MinLength,
+  MaxLength,
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  IsOptional,
+} from 'class-validator';
 
 /**
  * Input DTO for creating a new job opening.

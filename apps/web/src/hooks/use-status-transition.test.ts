@@ -46,7 +46,9 @@ function createWrapper() {
 
 describe('useStatusTransition', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mockRequest = (graphqlClientModule.graphqlClient as any).request as ReturnType<typeof vi.fn>;
+  const mockRequest = (graphqlClientModule.graphqlClient as any).request as ReturnType<
+    typeof vi.fn
+  >;
   const mockHandleError = vi.mocked(graphqlClientModule.handleGraphQLError);
 
   beforeEach(() => {
@@ -91,16 +93,13 @@ describe('useStatusTransition', () => {
     });
 
     await waitFor(() => {
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.any(String),
-        {
-          input: {
-            candidateId: 'candidate-1',
-            targetStatus: CandidateStatus.FormSubmitted,
-            rejectionReason: undefined,
-          },
-        }
-      );
+      expect(mockRequest).toHaveBeenCalledWith(expect.any(String), {
+        input: {
+          candidateId: 'candidate-1',
+          targetStatus: CandidateStatus.FormSubmitted,
+          rejectionReason: undefined,
+        },
+      });
     });
   });
 
@@ -118,9 +117,9 @@ describe('useStatusTransition', () => {
                   lastActivityAt: '2024-01-15T12:00:00Z',
                 },
               }),
-            50
-          )
-        )
+            50,
+          ),
+        ),
     );
 
     const { result } = renderHook(() => useStatusTransition(), {
@@ -140,7 +139,7 @@ describe('useStatusTransition', () => {
       expect(optimisticModule.registerOptimisticUpdate).toHaveBeenCalledWith(
         'candidate-1',
         CandidateStatus.Applied,
-        CandidateStatus.FormSubmitted
+        CandidateStatus.FormSubmitted,
       );
     });
   });
@@ -157,10 +156,9 @@ describe('useStatusTransition', () => {
     });
 
     const onSuccess = vi.fn();
-    const { result } = renderHook(
-      () => useStatusTransition({ onSuccess }),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useStatusTransition({ onSuccess }), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.transition({
@@ -186,10 +184,9 @@ describe('useStatusTransition', () => {
     });
 
     const onError = vi.fn();
-    const { result } = renderHook(
-      () => useStatusTransition({ onError }),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useStatusTransition({ onError }), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.transition({
@@ -205,7 +202,7 @@ describe('useStatusTransition', () => {
         currentPath: undefined,
       });
       expect(onError).toHaveBeenCalledWith(
-        expect.objectContaining({ type: GraphQLErrorCode.CONFLICT_ERROR })
+        expect.objectContaining({ type: GraphQLErrorCode.CONFLICT_ERROR }),
       );
     });
   });
@@ -226,7 +223,7 @@ describe('useStatusTransition', () => {
           formData,
           currentPath: '/candidates/123',
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper() },
     );
 
     act(() => {
@@ -268,16 +265,13 @@ describe('useStatusTransition', () => {
     });
 
     await waitFor(() => {
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.any(String),
-        {
-          input: {
-            candidateId: 'candidate-1',
-            targetStatus: CandidateStatus.Rejected,
-            rejectionReason: 'Not qualified for the position',
-          },
-        }
-      );
+      expect(mockRequest).toHaveBeenCalledWith(expect.any(String), {
+        input: {
+          candidateId: 'candidate-1',
+          targetStatus: CandidateStatus.Rejected,
+          rejectionReason: 'Not qualified for the position',
+        },
+      });
     });
   });
 });

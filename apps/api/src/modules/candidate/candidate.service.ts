@@ -5,22 +5,16 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { FileService } from '../file/file.service';
-import { MagicLinkService } from '../magic-link/magic-link.service';
-import { JobService } from '../job/job.service';
-import { StateMachineService } from '../state-machine/state-machine.service';
-import { TimelineService } from '../timeline/timeline.service';
-import {
-  candidateNameSchema,
-  emailSchema,
-  CandidateStatus,
-  TransitionMeta,
-  TimelineEventType,
-  PAGINATION,
-} from '@rove-hire/shared';
-import { CreateCandidateInput } from './dto/create-candidate.input';
-import { CandidateFiltersInput } from './dto/candidate-filters.input';
+import type { PrismaService } from '../../prisma/prisma.service';
+import type { FileService } from '../file/file.service';
+import type { MagicLinkService } from '../magic-link/magic-link.service';
+import type { JobService } from '../job/job.service';
+import type { StateMachineService } from '../state-machine/state-machine.service';
+import type { TimelineService } from '../timeline/timeline.service';
+import type { CandidateStatus, TransitionMeta } from '@rove-hire/shared';
+import { candidateNameSchema, emailSchema, TimelineEventType, PAGINATION } from '@rove-hire/shared';
+import type { CreateCandidateInput } from './dto/create-candidate.input';
+import type { CandidateFiltersInput } from './dto/candidate-filters.input';
 
 /**
  * CandidateService handles CRUD operations and pipeline management for candidates.
@@ -60,25 +54,17 @@ export class CandidateService {
    *
    * Requirements: 4.1, 4.2, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11
    */
-  async create(
-    input: CreateCandidateInput,
-    resumeBuffer: Buffer,
-    resumeFilename: string,
-  ) {
+  async create(input: CreateCandidateInput, resumeBuffer: Buffer, resumeFilename: string) {
     // Step 1: Validate name
     const nameResult = candidateNameSchema.safeParse(input.name);
     if (!nameResult.success) {
-      throw new BadRequestException(
-        nameResult.error.issues.map((i) => i.message).join('; '),
-      );
+      throw new BadRequestException(nameResult.error.issues.map((i) => i.message).join('; '));
     }
 
     // Step 1: Validate email
     const emailResult = emailSchema.safeParse(input.email);
     if (!emailResult.success) {
-      throw new BadRequestException(
-        emailResult.error.issues.map((i) => i.message).join('; '),
-      );
+      throw new BadRequestException(emailResult.error.issues.map((i) => i.message).join('; '));
     }
 
     // Step 2: Validate job is open (throws if closed or not found)
@@ -103,14 +89,8 @@ export class CandidateService {
     // Step 4: Upload resume to S3
     let uploadedFile: { s3Key: string; size: number } | null = null;
     try {
-      uploadedFile = await this.fileService.upload(
-        resumeBuffer,
-        'resumes',
-        resumeFilename,
-      );
-      this.logger.log(
-        `Resume uploaded to S3: ${uploadedFile.s3Key} for candidate "${input.name}"`,
-      );
+      uploadedFile = await this.fileService.upload(resumeBuffer, 'resumes', resumeFilename);
+      this.logger.log(`Resume uploaded to S3: ${uploadedFile.s3Key} for candidate "${input.name}"`);
     } catch (err) {
       this.logger.warn(
         `Resume upload failed for candidate "${input.name}": ${err instanceof Error ? err.message : String(err)} — proceeding without document`,

@@ -1,5 +1,5 @@
 import { Resolver, Query, Args, Int } from '@nestjs/graphql';
-import { TimelineService } from './timeline.service';
+import type { TimelineService } from './timeline.service';
 import { TimelineEventType } from './timeline.model';
 
 /**
@@ -22,15 +22,20 @@ export class TimelineResolver {
    *
    * Requirements: 7.2
    */
-  @Query(() => [TimelineEventType], { description: 'Get timeline events for a candidate (most recent first)' })
+  @Query(() => [TimelineEventType], {
+    description: 'Get timeline events for a candidate (most recent first)',
+  })
   async timelineEvents(
-    @Args('candidateId', { description: 'ID of the candidate to fetch events for' }) candidateId: string,
-    @Args('limit', { type: () => Int, nullable: true, description: 'Max events to return (default 50)' }) limit?: number,
+    @Args('candidateId', { description: 'ID of the candidate to fetch events for' })
+    candidateId: string,
+    @Args('limit', {
+      type: () => Int,
+      nullable: true,
+      description: 'Max events to return (default 50)',
+    })
+    limit?: number,
   ): Promise<TimelineEventType[]> {
-    const events = await this.timelineService.findByCandidateId(
-      candidateId,
-      limit ?? 50,
-    );
+    const events = await this.timelineService.findByCandidateId(candidateId, limit ?? 50);
 
     return events.map((event) => ({
       id: event.id,

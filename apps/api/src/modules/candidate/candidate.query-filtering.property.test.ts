@@ -12,7 +12,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
 import { CandidateService } from './candidate.service';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * All possible CandidateStatus values
@@ -108,9 +108,7 @@ describe('Property 11: Query Filtering and Sorting Correctness', () => {
         statusFilterArbitrary,
         async (candidates, statuses) => {
           // Simulate what Prisma would return: only candidates whose status is in the filter
-          const filtered = candidates.filter((c) =>
-            statuses.includes(c.status as CandidateStatus),
-          );
+          const filtered = candidates.filter((c) => statuses.includes(c.status as CandidateStatus));
           const sorted = [...filtered].sort(
             (a, b) => b.lastActivityAt.getTime() - a.lastActivityAt.getTime(),
           );
@@ -183,9 +181,9 @@ describe('Property 11: Query Filtering and Sorting Correctness', () => {
           fc.constant(null),
         ),
         status: fc.constantFrom(...ALL_STATUSES),
-        lastActivityAt: fc.integer({ min: 1672531200000, max: 1767139200000 }).map(
-          (ts) => new Date(ts),
-        ),
+        lastActivityAt: fc
+          .integer({ min: 1672531200000, max: 1767139200000 })
+          .map((ts) => new Date(ts)),
         jobOpeningId: fc.uuid(),
         createdAt: fc.constant(new Date('2024-01-01')),
         updatedAt: fc.constant(new Date('2024-01-01')),

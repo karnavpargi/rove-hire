@@ -81,7 +81,10 @@ export class JobOpeningType {
   @Field(() => Int, { description: 'Number of candidates associated with this job' })
   candidateCount!: number;
 
-  @Field(() => [JobOpeningCandidateType], { nullable: true, description: 'Associated candidates (only on detail view)' })
+  @Field(() => [JobOpeningCandidateType], {
+    nullable: true,
+    description: 'Associated candidates (only on detail view)',
+  })
   candidates?: JobOpeningCandidateType[] | null;
 
   @Field(() => Date)

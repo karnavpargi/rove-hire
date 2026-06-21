@@ -12,9 +12,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fc from 'fast-check';
 import { createHash, randomBytes } from 'crypto';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { MagicLinkService } from './magic-link.service';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 
 /** 14 days in milliseconds — the magic link expiry duration */
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
@@ -45,10 +45,7 @@ describe('Property 8: Magic Link — Time-Based Expiry', () => {
     vi.useFakeTimers();
     vi.clearAllMocks();
     mockPrisma = createMockPrisma();
-    service = new MagicLinkService(
-      mockPrisma as unknown as PrismaService,
-      createConfigService(),
-    );
+    service = new MagicLinkService(mockPrisma as unknown as PrismaService, createConfigService());
   });
 
   afterEach(() => {

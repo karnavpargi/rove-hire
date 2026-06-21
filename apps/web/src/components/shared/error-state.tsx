@@ -28,10 +28,7 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div
-      className={cn(
-        'flex flex-col items-center justify-center py-12 px-6 text-center',
-        className,
-      )}
+      className={cn('flex flex-col items-center justify-center py-12 px-6 text-center', className)}
       role="alert"
       aria-live="assertive"
       {...props}
@@ -45,9 +42,7 @@ export function ErrorState({
       <h3 className="mb-1 text-lg font-semibold text-foreground">{message}</h3>
 
       {/* Description */}
-      {description && (
-        <p className="mb-6 max-w-sm text-sm text-muted-foreground">{description}</p>
-      )}
+      {description && <p className="mb-6 max-w-sm text-sm text-muted-foreground">{description}</p>}
 
       {/* Retry button */}
       {onRetry && (

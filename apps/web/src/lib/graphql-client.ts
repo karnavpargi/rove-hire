@@ -14,7 +14,8 @@
  * Validates: Requirements 17.3, 17.6, 12.5, 12.6, 28.1
  */
 
-import { GraphQLClient, ClientError } from 'graphql-request';
+import type { ClientError } from 'graphql-request';
+import { GraphQLClient } from 'graphql-request';
 import { GraphQLErrorCode } from '@rove-hire/shared';
 import type { GraphQLErrorExtensions } from '@rove-hire/shared';
 import { saveFormData } from './form-persistence';
@@ -23,8 +24,7 @@ import { saveFormData } from './form-persistence';
 // Client Setup
 // ---------------------------------------------------------------------------
 
-const GRAPHQL_ENDPOINT =
-  process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3001/graphql';
+const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3001/graphql';
 
 /**
  * Configured GraphQL client with cookie-based authentication.
@@ -71,9 +71,7 @@ interface GqlResponseError {
 /**
  * Extract GraphQL error extensions from a graphql-request ClientError.
  */
-export function extractErrorExtensions(
-  error: unknown
-): GraphQLErrorExtensions | null {
+export function extractErrorExtensions(error: unknown): GraphQLErrorExtensions | null {
   if (!isClientError(error)) return null;
 
   const response = error.response as { errors?: GqlResponseError[] };
@@ -86,9 +84,7 @@ export function extractErrorExtensions(
 /**
  * Extract all GraphQL error extensions from a ClientError (multiple errors).
  */
-export function extractAllErrorExtensions(
-  error: unknown
-): GraphQLErrorExtensions[] {
+export function extractAllErrorExtensions(error: unknown): GraphQLErrorExtensions[] {
   if (!isClientError(error)) return [];
 
   const response = error.response as { errors?: GqlResponseError[] };
@@ -164,8 +160,7 @@ export function classifyError(error: unknown): ClassifiedError {
       return {
         type: GraphQLErrorCode.CONFLICT_ERROR,
         message:
-          extensions.details ??
-          'A conflict occurred. The data has been updated by another user.',
+          extensions.details ?? 'A conflict occurred. The data has been updated by another user.',
         validTransitions: extensions.validTransitions,
       };
 
@@ -253,14 +248,14 @@ export function isValidationError(error: unknown): boolean {
 export function dispatchToast(
   message: string,
   type: 'success' | 'error' | 'warning' | 'info' = 'error',
-  options?: { retryAfter?: number }
+  options?: { retryAfter?: number },
 ): void {
   if (typeof window === 'undefined') return;
 
   window.dispatchEvent(
     new CustomEvent('rove-hire:toast', {
       detail: { message, type, ...options },
-    })
+    }),
   );
 }
 
@@ -282,7 +277,7 @@ export function handleGraphQLError(
     formData?: Record<string, unknown>;
     /** Current path for form data persistence */
     currentPath?: string;
-  }
+  },
 ): ClassifiedError {
   const classified = classifyError(error);
 

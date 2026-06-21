@@ -6,7 +6,10 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
-export interface MarkdownEditorProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'onChange'> {
+export interface MarkdownEditorProps extends Omit<
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  'onChange'
+> {
   /** Field label */
   label?: string;
   /** Controlled value */
@@ -177,7 +180,10 @@ function renderMarkdown(md: string): string {
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
 
   // Links [text](url)
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary underline" target="_blank" rel="noopener noreferrer">$1</a>');
+  html = html.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" class="text-primary underline" target="_blank" rel="noopener noreferrer">$1</a>',
+  );
 
   // Unordered lists
   html = html.replace(/^[-*] (.+)$/gm, '<li class="ml-4 list-disc">$1</li>');

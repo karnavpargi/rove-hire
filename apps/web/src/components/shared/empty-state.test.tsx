@@ -29,11 +29,7 @@ describe('EmptyState', () => {
   it('renders CTA button when onAction provided', () => {
     const handler = vi.fn();
     render(
-      <EmptyState
-        description="No candidates yet"
-        onAction={handler}
-        actionLabel="Add Candidate"
-      />,
+      <EmptyState description="No candidates yet" onAction={handler} actionLabel="Add Candidate" />,
     );
     const button = screen.getByRole('button', { name: 'Add Candidate' });
     fireEvent.click(button);

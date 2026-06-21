@@ -45,14 +45,8 @@ interface FormErrors {
 // Component
 // ---------------------------------------------------------------------------
 
-export function RecordFeedbackForm({
-  onSubmit,
-  isPending,
-  onCancel,
-}: RecordFeedbackFormProps) {
-  const [recommendation, setRecommendation] = React.useState<
-    Recommendation | ''
-  >('');
+export function RecordFeedbackForm({ onSubmit, isPending, onCancel }: RecordFeedbackFormProps) {
+  const [recommendation, setRecommendation] = React.useState<Recommendation | ''>('');
   const [feedback, setFeedback] = React.useState('');
   const [errors, setErrors] = React.useState<FormErrors>({});
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
@@ -61,25 +55,22 @@ export function RecordFeedbackForm({
   // Validation
   // -------------------------------------------------------------------------
 
-  const validateField = React.useCallback(
-    (field: string, value: string): string | undefined => {
-      switch (field) {
-        case 'recommendation':
-          if (!value) return 'Recommendation is required';
-          return undefined;
+  const validateField = React.useCallback((field: string, value: string): string | undefined => {
+    switch (field) {
+      case 'recommendation':
+        if (!value) return 'Recommendation is required';
+        return undefined;
 
-        case 'feedback': {
-          const result = validateFeedback(value);
-          if (!result.valid) return result.error;
-          return undefined;
-        }
-
-        default:
-          return undefined;
+      case 'feedback': {
+        const result = validateFeedback(value);
+        if (!result.valid) return result.error;
+        return undefined;
       }
-    },
-    [],
-  );
+
+      default:
+        return undefined;
+    }
+  }, []);
 
   const validateAll = React.useCallback((): boolean => {
     const newErrors: FormErrors = {};
@@ -136,7 +127,9 @@ export function RecordFeedbackForm({
       <div className="space-y-1.5">
         <Label htmlFor="feedback-recommendation" className="text-sm font-medium">
           Recommendation
-          <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>
+          <span className="ml-0.5 text-destructive" aria-hidden="true">
+            *
+          </span>
         </Label>
         <Select
           value={recommendation}
@@ -150,11 +143,7 @@ export function RecordFeedbackForm({
           <SelectTrigger
             id="feedback-recommendation"
             aria-invalid={!!(touched.recommendation && errors.recommendation)}
-            aria-describedby={
-              errors.recommendation
-                ? 'feedback-recommendation-error'
-                : undefined
-            }
+            aria-describedby={errors.recommendation ? 'feedback-recommendation-error' : undefined}
             aria-required="true"
           >
             <SelectValue placeholder="Select recommendation" />
@@ -181,7 +170,9 @@ export function RecordFeedbackForm({
       <div className="space-y-1.5">
         <Label htmlFor="feedback-notes" className="text-sm font-medium">
           Feedback Notes
-          <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>
+          <span className="ml-0.5 text-destructive" aria-hidden="true">
+            *
+          </span>
         </Label>
         <Textarea
           id="feedback-notes"
@@ -195,9 +186,7 @@ export function RecordFeedbackForm({
           maxLength={2000}
           rows={5}
           aria-invalid={!!(touched.feedback && errors.feedback)}
-          aria-describedby={
-            errors.feedback ? 'feedback-notes-error' : undefined
-          }
+          aria-describedby={errors.feedback ? 'feedback-notes-error' : undefined}
           aria-required="true"
         />
         <div className="flex justify-between">
@@ -213,9 +202,7 @@ export function RecordFeedbackForm({
           ) : (
             <span />
           )}
-          <span className="text-xs text-muted-foreground">
-            {feedback.length}/2000
-          </span>
+          <span className="text-xs text-muted-foreground">{feedback.length}/2000</span>
         </div>
       </div>
 

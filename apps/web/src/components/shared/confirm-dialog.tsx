@@ -93,9 +93,7 @@ export function ConfirmDialog({
             )}
             <div>
               <DialogTitle id="confirm-dialog-title">{title}</DialogTitle>
-              <DialogDescription id="confirm-dialog-description">
-                {description}
-              </DialogDescription>
+              <DialogDescription id="confirm-dialog-description">{description}</DialogDescription>
             </div>
           </div>
         </DialogHeader>

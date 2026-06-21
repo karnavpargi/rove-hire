@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
 import { BadRequestException } from '@nestjs/common';
 import { JobService } from './job.service';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 
 describe('Property 16: Closed Job Rejects New Candidates', () => {
   let service: JobService;
@@ -47,9 +47,7 @@ describe('Property 16: Closed Job Rejects New Candidates', () => {
         });
 
         // validateJobOpen should throw BadRequestException for closed jobs
-        await expect(service.validateJobOpen(jobId)).rejects.toThrow(
-          BadRequestException,
-        );
+        await expect(service.validateJobOpen(jobId)).rejects.toThrow(BadRequestException);
 
         // Verify the call was made with the correct job ID
         expect(mockPrisma.jobOpening.findUnique).toHaveBeenCalledWith({
@@ -120,9 +118,7 @@ describe('Property 16: Closed Job Rejects New Candidates', () => {
           title: jobTitle,
         });
 
-        await expect(service.validateJobOpen(jobId)).rejects.toThrow(
-          BadRequestException,
-        );
+        await expect(service.validateJobOpen(jobId)).rejects.toThrow(BadRequestException);
       }),
       { numRuns: 200 },
     );

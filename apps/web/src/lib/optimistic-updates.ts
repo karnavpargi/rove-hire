@@ -7,7 +7,7 @@
  * Validates: Requirements 12.5, 12.6
  */
 
-import { CandidateStatus } from '@rove-hire/shared';
+import type { CandidateStatus } from '@rove-hire/shared';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -66,7 +66,7 @@ const listeners = new Set<OptimisticListener>();
 export function registerOptimisticUpdate(
   candidateId: string,
   previousStatus: CandidateStatus,
-  targetStatus: CandidateStatus
+  targetStatus: CandidateStatus,
 ): OptimisticUpdateResult {
   const update: OptimisticStatusUpdate = {
     candidateId,
@@ -96,9 +96,7 @@ export function registerOptimisticUpdate(
  * Get the optimistic status for a candidate if an update is in-flight.
  * Returns undefined if no pending update exists or if it's expired.
  */
-export function getOptimisticStatus(
-  candidateId: string
-): CandidateStatus | undefined {
+export function getOptimisticStatus(candidateId: string): CandidateStatus | undefined {
   const update = pendingUpdates.get(candidateId);
   if (!update) return undefined;
 
@@ -132,7 +130,7 @@ export function hasPendingUpdate(candidateId: string): boolean {
  */
 export function resolveDisplayStatus(
   candidateId: string,
-  actualStatus: CandidateStatus
+  actualStatus: CandidateStatus,
 ): CandidateStatus {
   return getOptimisticStatus(candidateId) ?? actualStatus;
 }
@@ -145,19 +143,14 @@ export function resolveDisplayStatus(
  * Subscribe to optimistic status changes.
  * Returns an unsubscribe function.
  */
-export function subscribeToOptimisticUpdates(
-  listener: OptimisticListener
-): () => void {
+export function subscribeToOptimisticUpdates(listener: OptimisticListener): () => void {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
   };
 }
 
-function notifyListeners(
-  candidateId: string,
-  status: CandidateStatus | null
-): void {
+function notifyListeners(candidateId: string, status: CandidateStatus | null): void {
   listeners.forEach((listener) => listener(candidateId, status));
 }
 

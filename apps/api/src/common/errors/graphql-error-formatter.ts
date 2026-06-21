@@ -1,4 +1,4 @@
-import { GraphQLFormattedError } from 'graphql';
+import type { GraphQLFormattedError } from 'graphql';
 import { Logger } from '@nestjs/common';
 
 /**
@@ -57,9 +57,7 @@ const logger = new Logger('GraphQLErrorFormatter');
  *
  * Requirements: 23.4, 23.5, 23.6
  */
-export function formatGraphQLError(
-  formattedError: GraphQLFormattedError,
-): GraphQLFormattedError {
+export function formatGraphQLError(formattedError: GraphQLFormattedError): GraphQLFormattedError {
   const message = formattedError.message ?? 'An unexpected error occurred';
   const originalExtensions = formattedError.extensions ?? {};
 
@@ -115,10 +113,7 @@ export function formatGraphQLError(
 /**
  * Classify error by examining the error message and existing extensions.
  */
-function classifyError(
-  message: string,
-  extensions: Record<string, unknown>,
-): ErrorCode {
+function classifyError(message: string, extensions: Record<string, unknown>): ErrorCode {
   // Check if there's already a code set from NestJS exception filters
   const existingCode = extensions['code'] as string | undefined;
 
@@ -130,10 +125,12 @@ function classifyError(
   }
 
   // Check for original NestJS exception status codes
-  const originalError = extensions['originalError'] as {
-    statusCode?: number;
-    code?: string;
-  } | undefined;
+  const originalError = extensions['originalError'] as
+    | {
+        statusCode?: number;
+        code?: string;
+      }
+    | undefined;
 
   if (originalError?.code) {
     const oCode = originalError.code.toUpperCase();
@@ -143,17 +140,26 @@ function classifyError(
   }
 
   // Classify by HTTP-like status code
-  const statusCode = (originalError?.statusCode ?? extensions['status'] ?? extensions['statusCode']) as number | undefined;
+  const statusCode = (originalError?.statusCode ??
+    extensions['status'] ??
+    extensions['statusCode']) as number | undefined;
 
   if (statusCode) {
     switch (statusCode) {
-      case 400: return 'VALIDATION_ERROR';
-      case 401: return 'AUTHENTICATION_ERROR';
-      case 403: return 'AUTHORIZATION_ERROR';
-      case 404: return 'NOT_FOUND';
-      case 409: return 'CONFLICT_ERROR';
-      case 429: return 'RATE_LIMIT_ERROR';
-      default: return 'INTERNAL_ERROR';
+      case 400:
+        return 'VALIDATION_ERROR';
+      case 401:
+        return 'AUTHENTICATION_ERROR';
+      case 403:
+        return 'AUTHORIZATION_ERROR';
+      case 404:
+        return 'NOT_FOUND';
+      case 409:
+        return 'CONFLICT_ERROR';
+      case 429:
+        return 'RATE_LIMIT_ERROR';
+      default:
+        return 'INTERNAL_ERROR';
     }
   }
 
@@ -168,11 +174,20 @@ function classifyError(
     return 'COMPLEXITY_ERROR';
   }
 
-  if (lowerMessage.includes('validation') || lowerMessage.includes('invalid') || lowerMessage.includes('must be') || lowerMessage.includes('required')) {
+  if (
+    lowerMessage.includes('validation') ||
+    lowerMessage.includes('invalid') ||
+    lowerMessage.includes('must be') ||
+    lowerMessage.includes('required')
+  ) {
     return 'VALIDATION_ERROR';
   }
 
-  if (lowerMessage.includes('authentication') || lowerMessage.includes('unauthorized') || lowerMessage.includes('not authenticated')) {
+  if (
+    lowerMessage.includes('authentication') ||
+    lowerMessage.includes('unauthorized') ||
+    lowerMessage.includes('not authenticated')
+  ) {
     return 'AUTHENTICATION_ERROR';
   }
 
@@ -188,7 +203,11 @@ function classifyError(
     return 'CONFLICT_ERROR';
   }
 
-  if (lowerMessage.includes('rate limit') || lowerMessage.includes('too many requests') || lowerMessage.includes('temporarily locked')) {
+  if (
+    lowerMessage.includes('rate limit') ||
+    lowerMessage.includes('too many requests') ||
+    lowerMessage.includes('temporarily locked')
+  ) {
     return 'RATE_LIMIT_ERROR';
   }
 

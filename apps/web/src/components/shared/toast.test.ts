@@ -71,7 +71,7 @@ describe('showToast', () => {
     showToast({ message: 'First', type: 'info' });
     showToast({ message: 'Second', type: 'info' });
     showToast({ message: 'Third', type: 'info' });
-    
+
     // Fourth toast should trigger dismissal of the oldest
     showToast({ message: 'Fourth', type: 'info' });
     expect(sonnerToast.dismiss).toHaveBeenCalled();

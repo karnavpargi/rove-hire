@@ -22,7 +22,10 @@ export class UpdateCandidateStatusInput {
   @IsEnum(CandidateStatusGql, { message: 'Invalid target status' })
   targetStatus!: string;
 
-  @Field(() => String, { nullable: true, description: 'Reason for rejection (5-500 chars, required for Rejected)' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Reason for rejection (5-500 chars, required for Rejected)',
+  })
   @IsOptional()
   @IsString()
   rejectionReason?: string;

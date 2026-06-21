@@ -1,5 +1,6 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import type { NestMiddleware } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import type { Request, Response, NextFunction } from 'express';
 
 /**
  * Middleware that rejects requests with unsupported Content-Type headers.
@@ -15,10 +16,7 @@ import { Request, Response, NextFunction } from 'express';
  */
 @Injectable()
 export class ContentTypeMiddleware implements NestMiddleware {
-  private static readonly ACCEPTED_TYPES = [
-    'application/json',
-    'multipart/form-data',
-  ];
+  private static readonly ACCEPTED_TYPES = ['application/json', 'multipart/form-data'];
 
   use(req: Request, res: Response, next: NextFunction): void {
     // Allow requests that typically don't have a body
@@ -36,8 +34,7 @@ export class ContentTypeMiddleware implements NestMiddleware {
             message: 'Unsupported Media Type: Content-Type header is required',
             extensions: {
               code: 'UNSUPPORTED_MEDIA_TYPE',
-              details:
-                'Accepted content types: application/json, multipart/form-data',
+              details: 'Accepted content types: application/json, multipart/form-data',
             },
           },
         ],
@@ -57,8 +54,7 @@ export class ContentTypeMiddleware implements NestMiddleware {
             message: `Unsupported Media Type: ${contentType}`,
             extensions: {
               code: 'UNSUPPORTED_MEDIA_TYPE',
-              details:
-                'Accepted content types: application/json, multipart/form-data',
+              details: 'Accepted content types: application/json, multipart/form-data',
             },
           },
         ],

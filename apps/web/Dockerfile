@@ -6,6 +6,8 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+ENV HUSKY=0
+
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./

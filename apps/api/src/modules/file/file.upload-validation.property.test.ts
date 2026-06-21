@@ -13,7 +13,7 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { FileService } from './file.service';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 
 const MAX_FILE_SIZE = 10_485_760; // 10MB in bytes
 const ACCEPTED_MIME = 'application/pdf';

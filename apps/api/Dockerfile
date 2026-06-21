@@ -39,7 +39,7 @@ COPY packages/shared/ packages/shared/
 COPY apps/api/ apps/api/
 
 # Build the shared package first, then the API
-RUN pnpm --filter @rove-hire/shared build 2>/dev/null || true
+RUN pnpm --filter @rove-hire/shared build
 RUN cd apps/api && pnpm exec prisma generate
 RUN pnpm --filter @rove-hire/api build
 
@@ -71,6 +71,8 @@ RUN addgroup -g 1001 -S nestjs && \
 
 WORKDIR /app
 
+ENV HUSKY=0
+
 # Install pnpm for production dependency installation
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
@@ -79,16 +81,15 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/
 COPY packages/shared/package.json packages/shared/
 
-# Install production dependencies and Prisma CLI for runtime migrations
-RUN pnpm install --frozen-lockfile --prod && \
-    pnpm add prisma@6.8.2 --filter @rove-hire/api
+# Install production dependencies (prisma CLI included for runtime migrations)
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Copy built artifacts from build stage
 COPY --from=build /app/apps/api/dist apps/api/dist
-COPY --from=build /app/packages/shared/dist packages/shared/dist 2>/dev/null || true
-COPY --from=build /app/packages/shared/src packages/shared/src
+COPY --from=build /app/packages/shared/dist packages/shared/dist
 COPY --from=build /app/apps/api/prisma apps/api/prisma
-COPY --from=build /app/apps/api/templates /app/templates
+COPY --from=build /app/apps/api/src/generated apps/api/src/generated
+COPY --from=build /app/apps/api/templates apps/api/templates
 
 # Generate Prisma client for production runtime
 RUN cd apps/api && pnpm exec prisma generate

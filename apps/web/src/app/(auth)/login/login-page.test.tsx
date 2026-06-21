@@ -62,7 +62,7 @@ describe('LoginPage', () => {
 
     expect(screen.getByText('Sign in to ROVE Hire')).toBeInTheDocument();
     expect(
-      screen.getByText('Enter your credentials to access the recruitment dashboard')
+      screen.getByText('Enter your credentials to access the recruitment dashboard'),
     ).toBeInTheDocument();
   });
 
@@ -212,9 +212,10 @@ describe('LoginPage', () => {
 
   it('disables submit button while submitting', async () => {
     mockLogin.mockImplementation(
-      () => new Promise((resolve) => {
-        setTimeout(() => resolve({ success: true }), 100);
-      })
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve({ success: true }), 100);
+        }),
     );
 
     render(<LoginPage />);

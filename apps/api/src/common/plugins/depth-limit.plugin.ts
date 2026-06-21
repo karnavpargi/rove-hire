@@ -1,7 +1,7 @@
-import { ApolloServerPlugin, BaseContext, GraphQLRequestListener } from '@apollo/server';
+import type { ApolloServerPlugin, BaseContext, GraphQLRequestListener } from '@apollo/server';
 import depthLimit from 'graphql-depth-limit';
 import { validate } from 'graphql';
-import { GraphQLSchema } from 'graphql';
+import type { GraphQLSchema } from 'graphql';
 
 /**
  * Apollo Server plugin that enforces a maximum query nesting depth.
@@ -23,11 +23,7 @@ export function createDepthLimitPlugin(maxDepth = 7): ApolloServerPlugin<BaseCon
             return;
           }
 
-          const errors = validate(
-            schema as GraphQLSchema,
-            document,
-            [depthLimit(maxDepth)],
-          );
+          const errors = validate(schema as GraphQLSchema, document, [depthLimit(maxDepth)]);
 
           if (errors.length > 0) {
             const error = errors[0];

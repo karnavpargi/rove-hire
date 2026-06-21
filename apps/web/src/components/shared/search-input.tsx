@@ -5,7 +5,10 @@ import { SearchIcon, XIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/hooks/use-debounce';
 
-export interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+export interface SearchInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'onChange'
+> {
   /** Callback with the debounced search value */
   onSearch: (value: string) => void;
   /** Debounce delay in milliseconds (default: 300ms) */

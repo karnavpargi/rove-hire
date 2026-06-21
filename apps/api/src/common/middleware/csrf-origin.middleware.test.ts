@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CsrfOriginMiddleware } from './csrf-origin.middleware';
-import { ConfigService } from '@nestjs/config';
-import { Request, Response } from 'express';
+import type { ConfigService } from '@nestjs/config';
+import type { Request, Response } from 'express';
 
 describe('CsrfOriginMiddleware', () => {
   let mockConfigService: Partial<ConfigService>;

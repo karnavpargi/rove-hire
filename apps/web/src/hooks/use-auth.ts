@@ -11,11 +11,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { gql } from 'graphql-request';
 import { useSessionStore } from '@/stores/session-store';
-import {
-  graphqlClient,
-  isAuthenticationError,
-  classifyError,
-} from '@/lib/graphql-client';
+import { graphqlClient, isAuthenticationError, classifyError } from '@/lib/graphql-client';
 import { saveFormData, cleanupExpiredFormData } from '@/lib/form-persistence';
 import { GraphQLErrorCode } from '@rove-hire/shared';
 import type { HrUserPayload } from '@rove-hire/shared';
@@ -111,10 +107,7 @@ export function useAuth(): UseAuth {
 
   // Login handler
   const login = useCallback(
-    async (
-      email: string,
-      password: string,
-    ): Promise<{ success: boolean; error?: LoginError }> => {
+    async (email: string, password: string): Promise<{ success: boolean; error?: LoginError }> => {
       try {
         const data = await graphqlClient.request<{
           login: { user: HrUserPayload };
@@ -195,7 +188,12 @@ export function useAuth(): UseAuth {
 
   // Redirect unauthenticated users from protected routes
   useEffect(() => {
-    if (isInitialized && !isAuthenticated && pathname !== '/login' && !pathname.startsWith('/candidate-application')) {
+    if (
+      isInitialized &&
+      !isAuthenticated &&
+      pathname !== '/login' &&
+      !pathname.startsWith('/candidate-application')
+    ) {
       handleUnauthorized();
     }
   }, [isInitialized, isAuthenticated, pathname, handleUnauthorized]);

@@ -19,13 +19,13 @@ describe('SearchInput', () => {
   it('debounces search by 300ms', () => {
     const onSearch = vi.fn();
     render(<SearchInput onSearch={onSearch} />);
-    
+
     const input = screen.getByRole('searchbox');
     fireEvent.change(input, { target: { value: 'John' } });
-    
+
     // Not called immediately
     expect(onSearch).not.toHaveBeenCalledWith('John');
-    
+
     // Called after 300ms
     act(() => {
       vi.advanceTimersByTime(300);
@@ -46,7 +46,7 @@ describe('SearchInput', () => {
   it('clears value when clear button is clicked', () => {
     const onChange = vi.fn();
     render(<SearchInput onSearch={vi.fn()} value="test" onChange={onChange} />);
-    
+
     fireEvent.click(screen.getByLabelText('Clear search'));
     expect(onChange).toHaveBeenCalledWith('');
   });
@@ -59,15 +59,15 @@ describe('SearchInput', () => {
   it('supports custom debounce delay', () => {
     const onSearch = vi.fn();
     render(<SearchInput onSearch={onSearch} debounceMs={500} />);
-    
+
     const input = screen.getByRole('searchbox');
     fireEvent.change(input, { target: { value: 'test' } });
-    
+
     act(() => {
       vi.advanceTimersByTime(300);
     });
     expect(onSearch).not.toHaveBeenCalledWith('test');
-    
+
     act(() => {
       vi.advanceTimersByTime(200);
     });

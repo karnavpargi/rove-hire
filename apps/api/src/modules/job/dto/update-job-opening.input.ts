@@ -1,5 +1,15 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, MinLength, MaxLength, IsArray, ArrayMinSize, ArrayMaxSize, IsOptional, IsUUID, IsEnum } from 'class-validator';
+import {
+  IsString,
+  MinLength,
+  MaxLength,
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  IsOptional,
+  IsUUID,
+  IsEnum,
+} from 'class-validator';
 import { JobOpeningStatusGql } from '../job.model';
 
 @InputType()
@@ -22,7 +32,10 @@ export class UpdateJobOpeningInput {
   @MaxLength(5000, { message: 'Description must not exceed 5000 characters' })
   description?: string | null;
 
-  @Field(() => [String], { nullable: true, description: 'Skill tags (1-20 tags, each max 50 chars)' })
+  @Field(() => [String], {
+    nullable: true,
+    description: 'Skill tags (1-20 tags, each max 50 chars)',
+  })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1, { message: 'At least 1 skill tag is required' })

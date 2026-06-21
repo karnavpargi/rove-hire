@@ -1,17 +1,11 @@
 import { Resolver, Query, Mutation, Args, ObjectType, Field } from '@nestjs/graphql';
 import { BadRequestException } from '@nestjs/common';
 import { Public } from '../../common/decorators';
-import {
-  MagicLinkService,
-  MagicLinkError,
-  MagicLinkErrorCode,
-} from '../magic-link/magic-link.service';
+import type { MagicLinkService } from '../magic-link/magic-link.service';
+import { MagicLinkError, MagicLinkErrorCode } from '../magic-link/magic-link.service';
 import { CandidateType } from './candidate.model';
-import { SubmitApplicationInput } from './dto/submit-application.input';
-import {
-  phoneSchema,
-  optionalLinkedinUrlSchema,
-} from '@rove-hire/shared';
+import type { SubmitApplicationInput } from './dto/submit-application.input';
+import { phoneSchema, optionalLinkedinUrlSchema } from '@rove-hire/shared';
 
 /**
  * GraphQL type returned by validateMagicLink query.
@@ -22,7 +16,10 @@ export class MagicLinkValidationType {
   @Field(() => Boolean, { description: 'Whether the magic link is valid and can be used' })
   valid!: boolean;
 
-  @Field(() => String, { nullable: true, description: 'Reason for invalidity: expired | used | invalid' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Reason for invalidity: expired | used | invalid',
+  })
   reason?: string;
 
   @Field(() => String, { nullable: true, description: 'Candidate ID (only when valid)' })
@@ -148,7 +145,9 @@ export class ApplicationResolver {
    * Requirements: 5.1, 5.2, 5.7, 5.8, 5.9, 20.5, 26.2
    */
   @Public()
-  @Mutation(() => CandidateType, { description: 'Submit candidate application form via magic link' })
+  @Mutation(() => CandidateType, {
+    description: 'Submit candidate application form via magic link',
+  })
   async submitApplication(
     @Args('token', { description: 'The magic link token from the URL' }) token: string,
     @Args('input') input: SubmitApplicationInput,

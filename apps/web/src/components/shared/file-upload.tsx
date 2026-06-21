@@ -171,30 +171,21 @@ export function FileUpload({
           )}
         >
           <UploadCloudIcon
-            className={cn(
-              'mb-3 h-10 w-10',
-              isDragging ? 'text-primary' : 'text-muted-foreground',
-            )}
+            className={cn('mb-3 h-10 w-10', isDragging ? 'text-primary' : 'text-muted-foreground')}
             aria-hidden="true"
           />
           <p className="mb-1 text-sm font-medium text-foreground">
             {isDragging ? 'Drop your PDF here' : 'Drag & drop your PDF here'}
           </p>
-          <p className="text-xs text-muted-foreground">
-            or click to browse (max 10MB)
-          </p>
+          <p className="text-xs text-muted-foreground">or click to browse (max 10MB)</p>
         </div>
       ) : (
         /* Selected file display */
         <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-4">
           <FileIcon className="h-8 w-8 text-primary" aria-hidden="true" />
           <div className="flex-1 min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">
-              {value.name}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {formatFileSize(value.size)}
-            </p>
+            <p className="truncate text-sm font-medium text-foreground">{value.name}</p>
+            <p className="text-xs text-muted-foreground">{formatFileSize(value.size)}</p>
           </div>
           <Button
             variant="ghost"

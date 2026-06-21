@@ -13,9 +13,33 @@ import CreateCandidatePage from './page';
 // ---------------------------------------------------------------------------
 
 const mockJobs = [
-  { id: 'job-1', title: 'Senior Engineer', status: 'Open', skills: ['TypeScript'], candidateCount: 2, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
-  { id: 'job-2', title: 'Product Manager', status: 'Open', skills: ['Product'], candidateCount: 1, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
-  { id: 'job-3', title: 'Junior Designer', status: 'Closed', skills: ['Design'], candidateCount: 3, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
+  {
+    id: 'job-1',
+    title: 'Senior Engineer',
+    status: 'Open',
+    skills: ['TypeScript'],
+    candidateCount: 2,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-01-01',
+  },
+  {
+    id: 'job-2',
+    title: 'Product Manager',
+    status: 'Open',
+    skills: ['Product'],
+    candidateCount: 1,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-01-01',
+  },
+  {
+    id: 'job-3',
+    title: 'Junior Designer',
+    status: 'Closed',
+    skills: ['Design'],
+    candidateCount: 3,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-01-01',
+  },
 ];
 
 const mockGraphqlRequest = vi.fn();
@@ -42,7 +66,8 @@ vi.mock('@/lib/graphql-client', () => ({
 }));
 
 vi.mock('@/lib/graphql/candidates', () => ({
-  CREATE_CANDIDATE_MUTATION: 'mutation CreateCandidate($input: CreateCandidateInput!) { createCandidate(input: $input) { id name email status magicLinkUrl createdAt } }',
+  CREATE_CANDIDATE_MUTATION:
+    'mutation CreateCandidate($input: CreateCandidateInput!) { createCandidate(input: $input) { id name email status magicLinkUrl createdAt } }',
 }));
 
 vi.mock('@/components/shared/toast', () => ({
@@ -163,16 +188,23 @@ describe('CreateCandidatePage', () => {
   it('disables submit button during submission', async () => {
     // Mock a delayed response
     mockGraphqlRequest.mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({
-        createCandidate: {
-          id: '123',
-          name: 'Jane',
-          email: 'jane@test.com',
-          status: 'Applied',
-          magicLinkUrl: 'https://example.com/apply/abc123',
-          createdAt: '2024-01-01',
-        },
-      }), 100)),
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                createCandidate: {
+                  id: '123',
+                  name: 'Jane',
+                  email: 'jane@test.com',
+                  status: 'Applied',
+                  magicLinkUrl: 'https://example.com/apply/abc123',
+                  createdAt: '2024-01-01',
+                },
+              }),
+            100,
+          ),
+        ),
     );
 
     render(<CreateCandidatePage />);

@@ -244,11 +244,7 @@ describe('Property 4: State Machine — Rejection Reason Validation', () => {
      * When rejection fails due to invalid reason length, the candidate
      * record must NOT be modified (status remains unchanged).
      */
-    const invalidReasonArb = fc.oneof(
-      tooShortReasonArb,
-      tooLongReasonArb,
-      fc.constant(''),
-    );
+    const invalidReasonArb = fc.oneof(tooShortReasonArb, tooLongReasonArb, fc.constant(''));
 
     await fc.assert(
       fc.asyncProperty(

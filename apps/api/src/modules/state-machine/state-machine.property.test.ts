@@ -130,7 +130,9 @@ describe('Property 1: State Machine — Valid Transitions Accepted', () => {
           expect(validTargets).toHaveLength(2);
 
           // Trying to "re-transition" to InterviewScheduled is invalid
-          expect(service.validateTransition(currentStatus, CandidateStatus.InterviewScheduled)).toBe(false);
+          expect(
+            service.validateTransition(currentStatus, CandidateStatus.InterviewScheduled),
+          ).toBe(false);
         },
       ),
       { numRuns: 20 },

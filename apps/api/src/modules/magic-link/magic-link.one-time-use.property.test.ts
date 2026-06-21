@@ -20,8 +20,8 @@ import {
   MagicLinkErrorCode,
   type ApplicationFormInput,
 } from './magic-link.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ConfigService } from '@nestjs/config';
+import type { PrismaService } from '../../prisma/prisma.service';
+import type { ConfigService } from '@nestjs/config';
 
 interface MagicLinkRecord {
   id: string;
@@ -94,10 +94,7 @@ function createFreshService() {
     get: (_key: string, defaultValue?: string) => defaultValue ?? 'http://localhost:3001',
   } as unknown as ConfigService;
 
-  const service = new MagicLinkService(
-    prisma as unknown as PrismaService,
-    configService,
-  );
+  const service = new MagicLinkService(prisma as unknown as PrismaService, configService);
 
   return { service, store };
 }
@@ -111,10 +108,7 @@ const formDataArbitrary: fc.Arbitrary<ApplicationFormInput> = fc.record({
   currentRole: fc.option(fc.string({ minLength: 1, maxLength: 100 }), { nil: undefined }),
   noticePeriod: fc.option(fc.string({ minLength: 1, maxLength: 50 }), { nil: undefined }),
   salaryExpectation: fc.option(fc.string({ minLength: 1, maxLength: 50 }), { nil: undefined }),
-  linkedinUrl: fc.option(
-    fc.constant('https://www.linkedin.com/in/test-user'),
-    { nil: undefined },
-  ),
+  linkedinUrl: fc.option(fc.constant('https://www.linkedin.com/in/test-user'), { nil: undefined }),
 });
 
 /**
@@ -189,7 +183,7 @@ describe('Property 7: Magic Link — One-Time Use', () => {
             if (args.length === 0) {
               super(futureTime);
             } else {
-              // @ts-expect-error
+              // @ts-expect-error MockDate forwards constructor args to native Date
               super(...args);
             }
           }

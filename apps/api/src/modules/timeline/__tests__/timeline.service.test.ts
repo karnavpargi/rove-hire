@@ -161,8 +161,18 @@ describe('TimelineService', () => {
   describe('findByCandidateId', () => {
     it('should return events ordered by createdAt DESC with default limit of 50', async () => {
       const mockEvents = [
-        { id: 'evt-2', candidateId: 'cand-1', eventType: 'status_change', createdAt: new Date('2024-02-01') },
-        { id: 'evt-1', candidateId: 'cand-1', eventType: 'application_submitted', createdAt: new Date('2024-01-01') },
+        {
+          id: 'evt-2',
+          candidateId: 'cand-1',
+          eventType: 'status_change',
+          createdAt: new Date('2024-02-01'),
+        },
+        {
+          id: 'evt-1',
+          candidateId: 'cand-1',
+          eventType: 'application_submitted',
+          createdAt: new Date('2024-01-01'),
+        },
       ];
 
       (prisma.timelineEvent.findMany as ReturnType<typeof vi.fn>).mockResolvedValue(mockEvents);

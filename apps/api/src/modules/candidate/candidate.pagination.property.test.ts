@@ -14,7 +14,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
 import { CandidateService } from './candidate.service';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 import { PAGINATION } from '@rove-hire/shared';
 
 /**

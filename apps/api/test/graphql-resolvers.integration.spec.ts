@@ -27,9 +27,10 @@ process.env.S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || 'rove-hire-test-bucke
 process.env.AWS_REGION = process.env.AWS_REGION || 'us-east-1';
 process.env.AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || 'test-access-key';
 process.env.AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || 'test-secret-key';
-process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://rove_user:rove_password@localhost:5432/rove_hire';
+process.env.DATABASE_URL =
+  process.env.DATABASE_URL || 'postgresql://rove_user:rove_password@localhost:5432/rove_hire';
 
-import { INestApplication } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -698,9 +699,7 @@ describe('GraphQL Resolvers Integration Tests', () => {
       }
 
       // Verify rate limit service blocks this source
-      const { RateLimitService } = await import(
-        '../src/modules/auth/rate-limit.service'
-      );
+      const { RateLimitService } = await import('../src/modules/auth/rate-limit.service');
       const rateLimitService = app.get(RateLimitService);
       const result = await rateLimitService.checkConsecutiveFailures(testSource);
 
@@ -723,9 +722,7 @@ describe('GraphQL Resolvers Integration Tests', () => {
         });
       }
 
-      const { RateLimitService } = await import(
-        '../src/modules/auth/rate-limit.service'
-      );
+      const { RateLimitService } = await import('../src/modules/auth/rate-limit.service');
       const rateLimitService = app.get(RateLimitService);
       const result = await rateLimitService.checkConsecutiveFailures(testSource);
 
@@ -746,9 +743,7 @@ describe('GraphQL Resolvers Integration Tests', () => {
         });
       }
 
-      const { RateLimitService } = await import(
-        '../src/modules/auth/rate-limit.service'
-      );
+      const { RateLimitService } = await import('../src/modules/auth/rate-limit.service');
       const rateLimitService = app.get(RateLimitService);
       const result = await rateLimitService.checkRequestRate(testSource);
 
@@ -777,9 +772,7 @@ describe('GraphQL Resolvers Integration Tests', () => {
         },
       });
 
-      const { RateLimitService } = await import(
-        '../src/modules/auth/rate-limit.service'
-      );
+      const { RateLimitService } = await import('../src/modules/auth/rate-limit.service');
       const rateLimitService = app.get(RateLimitService);
       const result = await rateLimitService.checkConsecutiveFailures(testSource);
 

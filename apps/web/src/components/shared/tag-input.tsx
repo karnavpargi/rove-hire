@@ -172,12 +172,7 @@ export function TagInput({
 
       {/* Error message */}
       {displayError && (
-        <p
-          id={errorId}
-          className="text-xs text-destructive"
-          role="alert"
-          aria-live="assertive"
-        >
+        <p id={errorId} className="text-xs text-destructive" role="alert" aria-live="assertive">
           {displayError}
         </p>
       )}

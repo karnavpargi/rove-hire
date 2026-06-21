@@ -320,7 +320,10 @@ describe('InterviewService', () => {
     it('should apply type and status filters', async () => {
       mockPrisma.interview.findMany.mockResolvedValue([]);
 
-      await service.findAll({ type: InterviewTypeGql.Technical, status: InterviewStatusGql.Scheduled });
+      await service.findAll({
+        type: InterviewTypeGql.Technical,
+        status: InterviewStatusGql.Scheduled,
+      });
 
       expect(mockPrisma.interview.findMany).toHaveBeenCalledWith({
         where: { type: 'Technical', status: 'Scheduled' },

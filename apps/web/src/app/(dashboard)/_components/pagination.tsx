@@ -120,10 +120,7 @@ export function Pagination({
               onClick={() => onPageChange(page)}
               aria-label={`Page ${page}${page === currentPage ? ', current page' : ''}`}
               aria-current={page === currentPage ? 'page' : undefined}
-              className={cn(
-                'h-11 w-11 p-0',
-                page === currentPage && 'pointer-events-none',
-              )}
+              className={cn('h-11 w-11 p-0', page === currentPage && 'pointer-events-none')}
             >
               {page}
             </Button>

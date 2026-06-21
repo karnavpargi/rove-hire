@@ -13,7 +13,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
 import { createHash } from 'crypto';
 import { MagicLinkService } from './magic-link.service';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 
 describe('Property 6: Magic Link — Hash Round-Trip Verification', () => {
   let service: MagicLinkService;
@@ -30,9 +30,9 @@ describe('Property 6: Magic Link — Hash Round-Trip Verification', () => {
    * Arbitrary: URL-safe base64 tokens (simulating generated tokens)
    * Generated tokens are 32 random bytes encoded as base64url (43 chars)
    */
-  const tokenArbitrary = fc.uint8Array({ minLength: 32, maxLength: 32 }).map(
-    (bytes) => Buffer.from(bytes).toString('base64url'),
-  );
+  const tokenArbitrary = fc
+    .uint8Array({ minLength: 32, maxLength: 32 })
+    .map((bytes) => Buffer.from(bytes).toString('base64url'));
 
   /**
    * Arbitrary: random strings of varying lengths (non-token inputs)
@@ -101,20 +101,16 @@ describe('Property 6: Magic Link — Hash Round-Trip Verification', () => {
 
   it('random non-token strings do not match any generated token hash', () => {
     fc.assert(
-      fc.property(
-        tokenArbitrary,
-        randomStringArbitrary,
-        (token, randomStr) => {
-          // Skip when the random string happens to be the same as the token
-          fc.pre(randomStr !== token);
+      fc.property(tokenArbitrary, randomStringArbitrary, (token, randomStr) => {
+        // Skip when the random string happens to be the same as the token
+        fc.pre(randomStr !== token);
 
-          const storedHash = service.hashToken(token);
-          const randomHash = service.hashToken(randomStr);
+        const storedHash = service.hashToken(token);
+        const randomHash = service.hashToken(randomStr);
 
-          // The hash of a random string must not match the stored hash of the token
-          expect(randomHash).not.toBe(storedHash);
-        },
-      ),
+        // The hash of a random string must not match the stored hash of the token
+        expect(randomHash).not.toBe(storedHash);
+      }),
       { numRuns: 500 },
     );
   });

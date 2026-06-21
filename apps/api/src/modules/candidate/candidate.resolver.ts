@@ -1,16 +1,16 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { BadRequestException } from '@nestjs/common';
-import { CandidateService } from './candidate.service';
+import type { CandidateService } from './candidate.service';
 import {
   CandidateType,
   CreateCandidateResultType,
   PaginatedCandidatesType,
 } from './candidate.model';
-import { CreateCandidateInput } from './dto/create-candidate.input';
-import { CandidateFiltersInput } from './dto/candidate-filters.input';
-import { UpdateCandidateStatusInput } from './dto/update-candidate-status.input';
-import { CandidateStatus } from '@rove-hire/shared';
-import { FileService } from '../file/file.service';
+import type { CreateCandidateInput } from './dto/create-candidate.input';
+import type { CandidateFiltersInput } from './dto/candidate-filters.input';
+import type { UpdateCandidateStatusInput } from './dto/update-candidate-status.input';
+import type { CandidateStatus } from '@rove-hire/shared';
+import type { FileService } from '../file/file.service';
 
 /**
  * CandidateResolver exposes GraphQL queries and mutations for candidate management.
@@ -48,7 +48,8 @@ export class CandidateResolver {
   async createCandidate(
     @Args('input') input: CreateCandidateInput,
     @Args('resumeBase64', { description: 'Resume file as base64 string' }) resumeBase64: string,
-    @Args('resumeFilename', { description: 'Original filename of the resume' }) resumeFilename: string,
+    @Args('resumeFilename', { description: 'Original filename of the resume' })
+    resumeFilename: string,
   ): Promise<CreateCandidateResultType> {
     // Decode base64 resume
     const resumeBuffer = Buffer.from(resumeBase64, 'base64');
@@ -81,7 +82,9 @@ export class CandidateResolver {
    *
    * Requirements: 2.1, 2.2, 2.3, 2.6
    */
-  @Query(() => PaginatedCandidatesType, { description: 'List candidates with filters and pagination' })
+  @Query(() => PaginatedCandidatesType, {
+    description: 'List candidates with filters and pagination',
+  })
   async candidates(
     @Args('filters', { nullable: true }) filters?: CandidateFiltersInput,
   ): Promise<PaginatedCandidatesType> {
@@ -115,7 +118,10 @@ export class CandidateResolver {
    *
    * Requirements: 10.1, 10.3, 10.6
    */
-  @Mutation(() => CandidateType, { name: 'transitionCandidateStatus', description: 'Transition candidate status' })
+  @Mutation(() => CandidateType, {
+    name: 'transitionCandidateStatus',
+    description: 'Transition candidate status',
+  })
   async transitionCandidateStatus(
     @Args('input') input: UpdateCandidateStatusInput,
   ): Promise<CandidateType> {
