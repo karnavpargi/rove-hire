@@ -11,6 +11,10 @@ dist/
 .env
 .env.local
 .env.*.local
+deploy/deploy.env
+
+# Production data (server only)
+data/
 
 # IDE
 .vscode/
@@ -32,7 +36,16 @@ tmp/
 .temp/
 
 # Graphify analysis (generated)
-graphify-out/*
+graphify-out/
+**/graphify-out/
+
+# AI / agent tooling artifacts
+.playwright-mcp/
+AGENTS.md
+SUMMARY.md
+design-system/
+.planning/
+.taskmaster/
 
 # Prisma generated client
 apps/api/src/generated/
@@ -41,3 +54,19 @@ apps/api/src/generated/
 requirements/*
 .kiro/*
 .agents/*
+
+# --- ltm-power ---
+ltm/store/*.jsonl
+ltm/runtime/*
+ltm/reports/*
+ltm/snapshots/*
+# --- /ltm-power ---
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+e2e/.auth/user.json
+ltm/*
+deploy/*

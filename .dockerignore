@@ -1,0 +1,46 @@
+# Dependencies
+**/node_modules
+.pnpm-store
+
+# Build output
+**/dist
+**/.turbo
+**/*.tsbuildinfo
+
+# Testing
+**/coverage
+**/.nyc_output
+
+# IDE
+.vscode
+.idea
+**/*.swp
+**/*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Env files (secrets — never bake into image)
+.env
+.env.*
+!.env.example
+
+# Non-source directories
+graphify-out
+raw
+.taskmaster
+.agent
+.kiro
+
+# Frontend (not needed for API build)
+apps/web/node_modules
+apps/web/.next
+
+# Documentation
+*.md
+LICENSE
