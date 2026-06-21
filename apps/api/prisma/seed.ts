@@ -13,17 +13,17 @@
  * Idempotent: uses upsert pattern so it can be re-run safely.
  */
 
+import * as bcrypt from 'bcrypt';
 import { createHash } from 'crypto';
 import {
-  PrismaClient,
   CandidateStatus,
-  JobOpeningStatus,
-  InterviewType,
-  InterviewStatus,
   DocumentType,
+  InterviewStatus,
+  InterviewType,
+  JobOpeningStatus,
+  PrismaClient,
   Recommendation,
-} from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+} from '../src/generated/prisma';
 
 /** Deterministic tokens for Playwright E2E — plaintext never stored, only SHA-256 hash. */
 const E2E_MAGIC_LINK_TOKENS = {
