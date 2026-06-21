@@ -1,9 +1,9 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import type { JobService } from './job.service';
-import { JobOpeningType } from './job.model';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import type { CreateJobOpeningInput } from './dto/create-job-opening.input';
-import type { UpdateJobOpeningStatusInput } from './dto/update-job-status.input';
 import type { UpdateJobOpeningInput } from './dto/update-job-opening.input';
+import type { UpdateJobOpeningStatusInput } from './dto/update-job-status.input';
+import { JobOpeningType } from './job.model';
+import type { JobService } from './job.service';
 
 /**
  * JobResolver exposes GraphQL queries and mutations for job openings.

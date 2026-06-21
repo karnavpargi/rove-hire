@@ -1,11 +1,11 @@
-import { Resolver, Query, Mutation, Args, ObjectType, Field } from '@nestjs/graphql';
 import { BadRequestException } from '@nestjs/common';
+import { Args, Field, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
+import { optionalLinkedinUrlSchema, phoneSchema } from '@rove-hire/shared';
 import { Public } from '../../common/decorators';
 import type { MagicLinkService } from '../magic-link/magic-link.service';
 import { MagicLinkError, MagicLinkErrorCode } from '../magic-link/magic-link.service';
 import { CandidateType } from './candidate.model';
 import type { SubmitApplicationInput } from './dto/submit-application.input';
-import { phoneSchema, optionalLinkedinUrlSchema } from '@rove-hire/shared';
 
 /**
  * GraphQL type returned by validateMagicLink query.

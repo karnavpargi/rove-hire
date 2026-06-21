@@ -1,6 +1,6 @@
-import { Resolver, Query, Args, Int } from '@nestjs/graphql';
-import type { TimelineService } from './timeline.service';
+import { Args, Int, Query, Resolver } from '@nestjs/graphql';
 import { TimelineEventType } from './timeline.model';
+import type { TimelineService } from './timeline.service';
 
 /**
  * TimelineResolver exposes GraphQL queries for candidate timeline events.

@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import { createHash, randomBytes } from 'crypto';
-import type { PrismaService } from '../../prisma/prisma.service';
 import { CandidateStatus } from '../../generated/prisma';
+import type { PrismaService } from '../../prisma/prisma.service';
 
 /** Magic link expiry duration: 14 days in milliseconds */
 const EXPIRY_DURATION_MS = 14 * 24 * 60 * 60 * 1000;

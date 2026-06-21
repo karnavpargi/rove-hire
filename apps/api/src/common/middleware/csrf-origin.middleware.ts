@@ -1,7 +1,7 @@
 import type { NestMiddleware } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import type { Request, Response, NextFunction } from 'express';
 import type { ConfigService } from '@nestjs/config';
+import type { NextFunction, Request, Response } from 'express';
 
 /**
  * CSRF protection via Origin/Referer header validation.

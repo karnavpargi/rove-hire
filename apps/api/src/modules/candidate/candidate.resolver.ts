@@ -1,16 +1,16 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { BadRequestException } from '@nestjs/common';
-import type { CandidateService } from './candidate.service';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import type { CandidateStatus } from '@rove-hire/shared';
+import type { FileService } from '../file/file.service';
 import {
   CandidateType,
   CreateCandidateResultType,
   PaginatedCandidatesType,
 } from './candidate.model';
-import type { CreateCandidateInput } from './dto/create-candidate.input';
+import type { CandidateService } from './candidate.service';
 import type { CandidateFiltersInput } from './dto/candidate-filters.input';
+import type { CreateCandidateInput } from './dto/create-candidate.input';
 import type { UpdateCandidateStatusInput } from './dto/update-candidate-status.input';
-import type { CandidateStatus } from '@rove-hire/shared';
-import type { FileService } from '../file/file.service';
 
 /**
  * CandidateResolver exposes GraphQL queries and mutations for candidate management.

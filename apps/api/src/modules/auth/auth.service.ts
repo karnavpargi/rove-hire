@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
-import * as crypto from 'crypto';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { validateLoginForm } from '@rove-hire/shared';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import * as jwt from 'jsonwebtoken';
+import type { PrismaService } from '../../prisma/prisma.service';
 import type { RateLimitService } from './rate-limit.service';
 
 /** JWT payload contents */

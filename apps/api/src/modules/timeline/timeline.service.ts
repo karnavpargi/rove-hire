@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { PrismaService } from '../../prisma/prisma.service';
-import { TimelineEventType } from '@rove-hire/shared';
-import type { LogEventInput } from './dto/log-event.input';
 import type { TimelineEvent } from '../../generated/prisma';
+import type { PrismaService } from '../../prisma/prisma.service';
+import type { LogEventInput } from './dto/log-event.input';
 
 /**
  * TimelineService records and retrieves chronological events for candidates.

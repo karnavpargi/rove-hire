@@ -1,5 +1,5 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import type { RateLimitService } from './rate-limit.service';
 

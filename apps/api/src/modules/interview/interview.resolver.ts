@@ -1,9 +1,9 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import type { InterviewService } from './interview.service';
-import { InterviewObjectType } from './interview.model';
-import type { ScheduleInterviewInput } from './dto/schedule-interview.input';
-import type { RecordFeedbackInput } from './dto/record-feedback.input';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import type { InterviewFiltersInput } from './dto/interview-filters.input';
+import type { RecordFeedbackInput } from './dto/record-feedback.input';
+import type { ScheduleInterviewInput } from './dto/schedule-interview.input';
+import { InterviewObjectType } from './interview.model';
+import type { InterviewService } from './interview.service';
 
 /**
  * InterviewResolver exposes GraphQL queries and mutations for interviews.

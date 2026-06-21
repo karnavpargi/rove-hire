@@ -1,17 +1,17 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
-import type { PrismaService } from '../../prisma/prisma.service';
-import type { TimelineService } from '../timeline/timeline.service';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   CandidateStatus,
   TimelineEventType,
-  interviewerNameSchema,
-  interviewNotesSchema,
   feedbackSchema,
+  interviewNotesSchema,
+  interviewerNameSchema,
 } from '@rove-hire/shared';
-import type { ScheduleInterviewInput } from './dto/schedule-interview.input';
-import type { RecordFeedbackInput } from './dto/record-feedback.input';
-import type { InterviewFiltersInput } from './dto/interview-filters.input';
 import type { Interview } from '../../generated/prisma';
+import type { PrismaService } from '../../prisma/prisma.service';
+import type { TimelineService } from '../timeline/timeline.service';
+import type { InterviewFiltersInput } from './dto/interview-filters.input';
+import type { RecordFeedbackInput } from './dto/record-feedback.input';
+import type { ScheduleInterviewInput } from './dto/schedule-interview.input';
 
 /**
  * InterviewService handles scheduling interviews, recording feedback,

@@ -1,20 +1,20 @@
 import {
+  BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
-  BadRequestException,
   NotFoundException,
-  ConflictException,
 } from '@nestjs/common';
+import type { CandidateStatus, TransitionMeta } from '@rove-hire/shared';
+import { PAGINATION, TimelineEventType, candidateNameSchema, emailSchema } from '@rove-hire/shared';
 import type { PrismaService } from '../../prisma/prisma.service';
 import type { FileService } from '../file/file.service';
-import type { MagicLinkService } from '../magic-link/magic-link.service';
 import type { JobService } from '../job/job.service';
+import type { MagicLinkService } from '../magic-link/magic-link.service';
 import type { StateMachineService } from '../state-machine/state-machine.service';
 import type { TimelineService } from '../timeline/timeline.service';
-import type { CandidateStatus, TransitionMeta } from '@rove-hire/shared';
-import { candidateNameSchema, emailSchema, TimelineEventType, PAGINATION } from '@rove-hire/shared';
-import type { CreateCandidateInput } from './dto/create-candidate.input';
 import type { CandidateFiltersInput } from './dto/candidate-filters.input';
+import type { CreateCandidateInput } from './dto/create-candidate.input';
 
 /**
  * CandidateService handles CRUD operations and pipeline management for candidates.

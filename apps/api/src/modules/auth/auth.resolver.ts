@@ -1,8 +1,8 @@
-import { Resolver, Mutation, Query, Args, Context, ObjectType, Field } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { Args, Context, Field, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
+import { Public } from '../../common/decorators';
 import type { AuthService } from './auth.service';
 import { RateLimitGuard } from './rate-limit.guard';
-import { Public } from '../../common/decorators';
 
 @ObjectType()
 class AuthUser {
