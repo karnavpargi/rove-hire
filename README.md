@@ -2,10 +2,57 @@
 
 A full-stack recruitment management tool enabling ROVE's HR team to manage candidates end-to-end — from resume arrival through interview scheduling to offer letter generation. Built as a take-home exercise demonstrating production-grade architecture, security, and developer experience.
 
+## Test this app
+
+|              |                             |
+| ------------ | --------------------------- |
+| **Link**     | https://rove.kpargi.eu.org/ |
+| **User**     | `hr@rove.com`               |
+| **Password** | `RoveHire2024!`             |
+
+---
+
+## Submission Notes
+
+### How it is hosted
+
+The app runs on a **local server** via Docker Compose (PostgreSQL, NestJS API, Next.js web). For evaluation, it is exposed publicly through a **Cloudflare Tunnel** (`cloudflared`), which proxies HTTPS traffic to the local frontend and API without opening inbound ports on the host.
+
+### Tech stack and why
+
+| Choice           | What we chose                     | Why it was the right call                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Backend**      | NestJS + GraphQL (code-first)     | Modular architecture with guards, DI, and decorators fits a multi-domain HR app (auth, candidates, interviews, documents). GraphQL lets the dashboard fetch exactly what each view needs in one round trip, and code-first schema generation keeps TypeScript types in sync with the API.                                                                                  |
+| **Database**     | PostgreSQL 16 + Prisma            | Recruitment data is inherently relational — candidates, jobs, interviews, timeline events, and documents all have foreign-key integrity requirements. PostgreSQL gives ACID transactions (critical for atomic status transitions and offer generation), JSONB for flexible timeline metadata, and mature indexing. Prisma adds type-safe queries and a migration workflow. |
+| **File storage** | AWS S3                            | Resumes and generated PDFs must persist and be re-downloadable. S3 is durable, cheap at this scale, and pre-signed URLs let us serve private files without exposing the bucket publicly.                                                                                                                                                                                   |
+| **Hosting**      | Docker Compose on a local machine | Mandated by the exercise and ideal for a take-home: one command brings up the full stack reproducibly. Combined with `cloudflared`, it gives reviewers a live URL without deploying to a cloud provider.                                                                                                                                                                   |
+
+See [Tech Stack](#tech-stack) below for the full layer breakdown (frontend, auth, PDF, monorepo tooling).
+
+### PDF generation approach
+
+Offer letters and NDAs are rendered from **Handlebars HTML templates** and converted to PDF with **Puppeteer** (headless Chromium). This gives browser-quality layout, full Unicode support, and easy template editing without a proprietary DSL.
+
+**What we would change at scale:** Puppeteer launches a new Chromium instance per request today, which is fine for demo volume but not for production throughput. At scale we would move PDF generation to a **background worker queue** (e.g. BullMQ + Redis), maintain a **warm browser pool** instead of cold-starting Chromium, and consider a dedicated service like **Gotenberg** or a serverless headless-Chrome function to isolate memory-heavy rendering from the API process.
+
+See [PDF Generation](#pdf-generation) for the full pipeline diagram and constraints.
+
+### Anything that broke or felt off (not production-ready yet)
+
+| Area                      | Issue                                                                                                                     | Why we would not ship it yet                                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **File storage fallback** | When S3 credentials are missing or upload fails, the API falls back to local `s3Key` paths and returns `#` download URLs. | Documents appear generated but are not actually downloadable. Production needs hard failure or a local disk fallback with real serving — not silent degradation. |
+| **PDF generation**        | First Puppeteer run in Docker can be slow (Chromium cold start); each request spins up and tears down a browser.          | Needs a warm pool or async job queue before handling concurrent offer generation under load.                                                                     |
+| **Email delivery**        | No outbound email — magic links and offer notifications are manual.                                                       | Core to a real hiring workflow; without it HR must copy/paste links.                                                                                             |
+| **Single HR user**        | Seed creates one account; no invite flow or RBAC.                                                                         | Real teams need multiple users with different access levels.                                                                                                     |
+| **HTTPS cookie config**   | `COOKIE_SECURE` and `ENABLE_HSTS` default to `false` for local dev.                                                       | Must be enabled and URLs updated when served through the Cloudflare Tunnel in production-like evaluation.                                                        |
+
 ---
 
 ## Table of Contents
 
+- [Test this app](#test-this-app)
+- [Submission Notes](#submission-notes)
 - [Tech Stack](#tech-stack)
 - [Architecture Overview](#architecture-overview)
 - [Getting Started](#getting-started)
@@ -13,28 +60,26 @@ A full-stack recruitment management tool enabling ROVE's HR team to manage candi
 - [Seed Data](#seed-data)
 - [PDF Generation](#pdf-generation)
 - [Hosting & Deployment](#hosting--deployment)
-- [Production deploy cheat sheet](deploy/DEPLOY.md)
 - [Testing](#testing)
 - [Known Issues](#known-issues)
-- [What's Next](#whats-next)
 
 ---
 
 ## Tech Stack
 
-| Layer              | Technology                    | Justification                                                                                 |
-| ------------------ | ----------------------------- | --------------------------------------------------------------------------------------------- |
-| **Frontend**       | Next.js 14+ (App Router)      | Server components, file-based routing, streaming SSR, excellent DX                            |
-| **UI Framework**   | Tailwind CSS + Shadcn/UI      | Utility-first styling with accessible, composable primitives (Radix-based)                    |
-| **Client State**   | TanStack Query + Zustand      | TanStack for server-state caching/sync; Zustand for minimal client state (cross-tab session)  |
-| **Backend**        | NestJS + GraphQL (code-first) | Modular architecture with decorators, DI, guards; code-first ensures TS ↔ schema type safety  |
-| **Database**       | PostgreSQL 16                 | ACID transactions, JSONB for timeline metadata, robust indexing, mature ecosystem             |
-| **ORM**            | Prisma                        | Type-safe queries, declarative schema, migration system, excellent NestJS/GraphQL integration |
-| **File Storage**   | AWS S3                        | Industry-standard object storage; pre-signed URLs for secure, time-limited downloads          |
-| **PDF Generation** | Puppeteer (Chromium headless) | High-fidelity HTML/CSS rendering, full Unicode/emoji support, branded templates               |
-| **Authentication** | JWT in HttpOnly cookies       | Prevents XSS token theft; SameSite=Lax mitigates CSRF; 8-hour expiry with bcrypt (cost 12)    |
-| **Monorepo**       | Turborepo + pnpm workspaces   | Shared types/configs between apps; parallel builds; efficient dependency management           |
-| **Hosting**        | Docker Compose                | Local and containerized deployment with PostgreSQL and API services                           |
+| Layer              | Technology                                 | Justification                                                                                                        |
+| ------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**       | Next.js 14+ (App Router)                   | Server components, file-based routing, streaming SSR, excellent DX                                                   |
+| **UI Framework**   | Tailwind CSS + Shadcn/UI                   | Utility-first styling with accessible, composable primitives (Radix-based)                                           |
+| **Client State**   | TanStack Query + Zustand + graphql-request | TanStack for server-state caching; Zustand for session UI state; graphql-request for typed GraphQL mutations/queries |
+| **Backend**        | NestJS + GraphQL (code-first)              | Modular architecture with decorators, DI, guards; code-first ensures TS ↔ schema type safety                         |
+| **Database**       | PostgreSQL 16                              | ACID transactions, JSONB for timeline metadata, robust indexing, mature ecosystem                                    |
+| **ORM**            | Prisma                                     | Type-safe queries, declarative schema, migration system, excellent NestJS/GraphQL integration                        |
+| **File Storage**   | AWS S3                                     | Industry-standard object storage; pre-signed URLs for secure, time-limited downloads                                 |
+| **PDF Generation** | Puppeteer (Chromium headless)              | High-fidelity HTML/CSS rendering, full Unicode/emoji support, branded templates                                      |
+| **Authentication** | JWT in HttpOnly cookies                    | Prevents XSS token theft; SameSite=Lax mitigates CSRF; 8-hour expiry with bcrypt (cost 12)                           |
+| **Monorepo**       | Turborepo + pnpm workspaces                | Shared types/configs between apps; parallel builds; efficient dependency management                                  |
+| **Hosting**        | Docker Compose + cloudflared               | Local full-stack via `docker-compose.yml`; public access proxied through a Cloudflare Tunnel                         |
 
 ---
 
@@ -48,7 +93,7 @@ A full-stack recruitment management tool enabling ROVE's HR team to manage candi
                 │ GraphQL over HTTP (HttpOnly JWT cookie)
                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  Docker Host                                                     │
+│  Docker Compose                                                  │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │  NestJS API (port 3000)                                    │  │
 │  │  • GraphQL (Apollo) • Auth • State Machine • PDF Gen       │  │
@@ -56,6 +101,9 @@ A full-stack recruitment management tool enabling ROVE's HR team to manage candi
 │                          │ Prisma Client                         │
 │  ┌───────────────────────▼───────────────────────────────────┐  │
 │  │  PostgreSQL 16 (port 5432)                                 │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  Next.js Web (port 3001)                                   │  │
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
                 │
@@ -72,9 +120,12 @@ A full-stack recruitment management tool enabling ROVE's HR team to manage candi
 rove-hire/
 ├── apps/
 │   ├── web/                # Next.js 14+ frontend (App Router)
-│   │   ├── app/            # Pages & layouts
-│   │   ├── components/     # UI components (Shadcn/UI based)
-│   │   └── lib/            # Hooks, GraphQL client, stores
+│   │   └── src/
+│   │       ├── app/        # Pages & layouts
+│   │       ├── components/ # UI components (Shadcn/UI based)
+│   │       ├── hooks/      # Data-fetching and UI hooks
+│   │       ├── lib/        # GraphQL client, utilities
+│   │       └── stores/     # Zustand client state
 │   └── api/                # NestJS backend
 │       ├── src/modules/    # Auth, Candidate, Job, Interview, Document, Timeline, MagicLink, File
 │       ├── prisma/         # Schema, migrations, seed
@@ -82,7 +133,8 @@ rove-hire/
 │       └── Dockerfile      # Multi-stage build
 ├── packages/
 │   └── shared/             # Shared TypeScript types, enums, validation schemas, state machine
-├── docker-compose.yml      # PostgreSQL + API
+├── docker-compose.yml      # Full stack: PostgreSQL, API, web (+ db-setup profile)
+├── docker-compose.dev.yml  # Optional dev override (API hot reload)
 ├── turbo.json              # Build pipeline config
 └── package.json            # Workspace root
 ```
@@ -93,78 +145,66 @@ rove-hire/
 
 ### Prerequisites
 
-- **Node.js** 18+
+- **Node.js** 20+ (matches Docker base image)
 - **pnpm** (package manager)
 - **Docker** & **Docker Compose**
 
-### Quick Start (Docker — recommended)
+### Quick Start (Docker)
 
 ```bash
 # 1. Clone and install dependencies
-git clone <repo-url> && cd rove-hire
+git clone <repo-url> && cd <repo-dir>
 pnpm install
 
 # 2. Copy environment file
 cp .env.example .env
 
-# 3. Start PostgreSQL + API via Docker
-docker-compose up -d
+# 3. Initialize database (migrations + seed)
+pnpm docker:setup
 
-# 4. Run database migrations
-pnpm --filter api prisma:migrate
-
-# 5. Seed the database
-pnpm --filter api prisma:seed
-
-# 6. Start the frontend
-pnpm --filter web dev
+# 4. Start the full stack
+pnpm docker:up
 ```
 
 After these steps:
 
 - **Frontend**: http://localhost:3001
-- **API / GraphQL Playground**: http://localhost:3000/graphql
+- **API (GraphQL endpoint)**: http://localhost:3000/graphql
 - **Health check**: http://localhost:3000/api/health → `{"status":"ok"}`
 
-### Development Mode (without Docker for API)
+GraphQL Playground is **disabled** in the production Docker API (`NODE_ENV=production`). Use [Development Mode](#development-mode-api-in-docker-web-with-hot-reload) below to access the playground at http://localhost:3000/graphql.
+
+### Development Mode (API in Docker, web with hot reload)
 
 ```bash
-# 1. Start only PostgreSQL via Docker
-docker-compose up -d postgres
-
-# 2. Copy environment file (if not done)
 cp .env.example .env
-
-# 3. Install dependencies
 pnpm install
-
-# 4. Run migrations and seed
-pnpm --filter api prisma:migrate
-pnpm --filter api prisma:seed
-
-# 5. Start backend (hot reload)
-pnpm --filter api start:dev    # → localhost:3000
-
-# 6. Start frontend (hot reload)
-pnpm --filter web dev          # → localhost:3001
+pnpm docker:setup
+pnpm docker:dev
+pnpm --filter @rove-hire/web dev   # → http://localhost:3001 (API playground at :3000/graphql)
 ```
+
+The dev override sets `NODE_ENV=development` on the API container, which enables GraphQL Playground. The web dev server runs on port **3001** to avoid conflicting with the API on port **3000**.
 
 ### Environment Variables
 
-| Variable                | Default                   | Description                |
-| ----------------------- | ------------------------- | -------------------------- |
-| `POSTGRES_USER`         | `rove_user`               | PostgreSQL username        |
-| `POSTGRES_PASSWORD`     | `rove_password`           | PostgreSQL password        |
-| `POSTGRES_DB`           | `rove_hire`               | Database name              |
-| `DB_PORT`               | `5432`                    | PostgreSQL port            |
-| `API_PORT`              | `3000`                    | NestJS API port            |
-| `JWT_SECRET`            | `change-me-in-production` | Secret for JWT signing     |
-| `DATABASE_URL`          | (composed from above)     | Prisma connection string   |
-| `AWS_REGION`            | `us-east-1`               | AWS region for S3          |
-| `AWS_ACCESS_KEY_ID`     | —                         | AWS credentials for S3     |
-| `AWS_SECRET_ACCESS_KEY` | —                         | AWS credentials for S3     |
-| `S3_BUCKET_NAME`        | `rove-hire-files`         | S3 bucket for file storage |
-| `FRONTEND_URL`          | `http://localhost:3001`   | CORS allowed origin        |
+| Variable                  | Default                         | Description                               |
+| ------------------------- | ------------------------------- | ----------------------------------------- |
+| `POSTGRES_USER`           | `rove_user`                     | PostgreSQL username                       |
+| `POSTGRES_PASSWORD`       | `rove_password`                 | PostgreSQL password                       |
+| `POSTGRES_DB`             | `rove_hire`                     | Database name                             |
+| `DB_PORT`                 | `5432`                          | PostgreSQL host port                      |
+| `API_PORT`                | `3000`                          | NestJS API host port                      |
+| `WEB_PORT`                | `3001`                          | Next.js frontend host port                |
+| `JWT_SECRET`              | `change-me-in-production`       | Secret for JWT signing                    |
+| `FRONTEND_URL`            | `http://localhost:3001`         | CORS allowed origin                       |
+| `NEXT_PUBLIC_GRAPHQL_URL` | `http://localhost:3000/graphql` | GraphQL endpoint baked into the web image |
+| `COOKIE_SECURE`           | `false`                         | Set `true` when serving over HTTPS        |
+| `ENABLE_HSTS`             | `false`                         | Set `true` when serving over HTTPS        |
+| `AWS_REGION`              | `us-east-1`                     | AWS region for S3                         |
+| `AWS_ACCESS_KEY_ID`       | —                               | AWS credentials for S3                    |
+| `AWS_SECRET_ACCESS_KEY`   | —                               | AWS credentials for S3                    |
+| `S3_BUCKET_NAME`          | `rove-hire-files`               | S3 bucket for file storage                |
 
 ---
 
@@ -187,28 +227,28 @@ The database seed (`apps/api/prisma/seed.ts`) creates a realistic dataset for ev
 
 ### Job Openings (3)
 
-| Title                      | Status | Department  |
-| -------------------------- | ------ | ----------- |
-| Senior Full-Stack Engineer | Open   | Engineering |
-| Product Designer           | Open   | Design      |
-| Junior Developer           | Closed | Engineering |
+| Title                      | Status | Key skills                                         |
+| -------------------------- | ------ | -------------------------------------------------- |
+| Senior Full-Stack Engineer | Open   | TypeScript, React, Node.js, PostgreSQL, AWS        |
+| Product Designer           | Open   | Figma, User Research, Prototyping, Design Systems  |
+| DevOps Engineer            | Closed | Kubernetes, Terraform, AWS, Docker, GitHub Actions |
 
 ### Candidates (5) — across all pipeline states
 
-| Name          | Status             | Notes                                           |
-| ------------- | ------------------ | ----------------------------------------------- |
-| Alice Johnson | Applied            | Fresh application, resume uploaded              |
-| Bob Martinez  | FormSubmitted      | Completed magic link form submission            |
-| Carol Chen    | InterviewScheduled | Has completed screening interview with feedback |
-| David Park    | OfferSent          | Offer letter + NDA documents generated          |
-| Emily Wong    | Rejected           | Rejection reason recorded (min 10 chars)        |
+| Name          | Status             | Notes                                               |
+| ------------- | ------------------ | --------------------------------------------------- |
+| Alice Johnson | Applied            | Fresh application, resume uploaded                  |
+| Bob Martinez  | FormSubmitted      | Completed magic link form submission                |
+| Carol Chen    | InterviewScheduled | Completed screening interview + scheduled technical |
+| David Park    | OfferSent          | Offer letter + NDA documents generated              |
+| Emma Wilson   | Rejected           | Rejection reason recorded (min 10 chars)            |
 
 ### Additional Seed Data
 
 - **Timeline Events**: Complete state history for each candidate (status changes, interview scheduling, feedback, offer generation, rejection)
-- **Interviews**: Completed screening interview with recommendation/feedback for Carol Chen
+- **Interviews**: Completed screening + scheduled technical interview for Carol Chen
 - **Documents**: Mock S3 keys for David Park's offer letter and NDA
-- **Magic Links**: Generated tokens for the candidate application flow
+- **Magic Links**: E2E test tokens for Frank E2E Applicant (valid) and Grace Expired Link (expired)
 
 ---
 
@@ -216,7 +256,7 @@ The database seed (`apps/api/prisma/seed.ts`) creates a realistic dataset for ev
 
 ### Approach
 
-Offer letters and NDAs are generated server-side using **Puppeteer** (headless Chromium). This approach was chosen for:
+Offer letters and NDAs are generated server-side using **Handlebars** templates and **Puppeteer** (headless Chromium). This approach was chosen for:
 
 1. **High fidelity** — renders the same HTML/CSS a browser would, producing pixel-perfect PDFs
 2. **Template flexibility** — standard HTML templates with dynamic field interpolation (no special DSL)
@@ -250,105 +290,60 @@ Return pre-signed download URL (15-min expiry)
 
 ### Constraints
 
+Exercise targets (enforced by validation and service logic where applicable):
+
 - Both documents (offer + NDA) are generated atomically — if either fails, neither is persisted
 - Generation completes within 10 seconds for documents up to 10 pages
 - Fields handle text up to 500 characters without overflow
 - Optional fields are omitted gracefully (no blank gaps)
 - Candidate must have a completed interview with feedback before offer generation is allowed
 
+### At scale
+
+For higher volume we would decouple PDF rendering from the API request path: enqueue generation jobs, reuse a Chromium browser pool, and optionally swap Puppeteer for a dedicated PDF service (Gotenberg, AWS Lambda + headless Chrome, or a managed document API). Templates would move to a versioned store so legal can update offer/NDA wording without redeploying the API.
+
 ---
 
 ## Hosting & Deployment
 
-> **Production:** [`deploy/DEPLOY.md`](deploy/DEPLOY.md) — registry workflow cheat sheet.  
-> Run `pnpm deploy:help` anytime to print it.
+The stack runs on a **local server** using **Docker Compose**. Public evaluation access is provided by **Cloudflare Tunnel** (`cloudflared`), which forwards HTTPS to the local web (port 3001) and API (port 3000) without exposing the host to inbound traffic.
 
-### Local development (Docker Compose)
+Configuration lives in `.env` (from `.env.example`) and `docker-compose.yml`.
 
-The `docker-compose.yml` runs two services:
+### Commands
 
-| Service    | Image                      | Port | Purpose                     |
-| ---------- | -------------------------- | ---- | --------------------------- |
-| `postgres` | `postgres:16-alpine`       | 5432 | Database with health checks |
-| `api`      | Custom (multi-stage build) | 3000 | NestJS API server           |
+| Command             | Description                                         |
+| ------------------- | --------------------------------------------------- |
+| `pnpm docker:setup` | Run migrations and seed (first time or reset)       |
+| `pnpm docker:up`    | Build and start postgres, API, and web containers   |
+| `pnpm docker:down`  | Stop and remove containers                          |
+| `pnpm docker:logs`  | Follow container logs                               |
+| `pnpm docker:dev`   | Start postgres + API with hot reload (dev override) |
 
-Access the API at `http://localhost:3000` when running via Docker Compose. Run the Next.js frontend separately with `pnpm --filter web dev`.
+### Services
 
-### Production deploy (DietPi server + host nginx)
+| Service    | Image / build         | Default port | Purpose                     |
+| ---------- | --------------------- | ------------ | --------------------------- |
+| `postgres` | `postgres:16-alpine`  | 5432         | Database with health checks |
+| `api`      | `apps/api/Dockerfile` | 3000         | NestJS GraphQL API          |
+| `web`      | `apps/web/Dockerfile` | 3001         | Next.js frontend            |
 
-Production runs under **`/home/dietpi/rove-hire`** using `docker-compose.prod.yml`. Docker binds the API and web apps to **localhost only**; your **existing host nginx** proxies `https://rove.kpargi.eu.org` to those ports (other apps on the server are untouched).
+The API container runs Prisma migrations on startup. Use `pnpm docker:setup` once to apply migrations and load seed data (HR user, jobs, candidates).
 
-#### Registry deploy (recommended for Raspberry Pi)
+### Cloudflare Tunnel (public access)
 
-Build on your Mac, push to GHCR/Docker Hub, pull on the server — no on-Pi compile.
+When exposing the local stack for review:
 
-**Cheat sheet:** [`deploy/DEPLOY.md`](deploy/DEPLOY.md) · `pnpm deploy:help`
+1. Start the stack: `pnpm docker:up`
+2. Run `cloudflared tunnel --url http://localhost:3001` (or point a named tunnel at both web and API origins)
+3. Update `.env` with the tunnel hostname: set `FRONTEND_URL`, `NEXT_PUBLIC_GRAPHQL_URL`, `COOKIE_SECURE=true`, and `ENABLE_HSTS=true`, then rebuild
 
-```bash
-pnpm docker:push        # build linux/arm64 images and push
-pnpm deploy:registry    # SSH: pull images, migrate, start
-```
+### Production notes
 
-Uses `docker-compose.registry.yml` instead of building with `--build` on the server.
-
-#### Build-on-server deploy
-
-**SSH target:** `root@192.168.10.4`  
-**Install path:** `/home/dietpi/rove-hire`  
-**Public URL:** `https://rove.kpargi.eu.org`
-
-| Component       | Purpose                                              |
-| --------------- | ---------------------------------------------------- |
-| Host nginx      | Existing server nginx → `127.0.0.1:13000` / `:13001` |
-| `web` container | Next.js frontend on localhost `${WEB_HOST_PORT}`     |
-| `api` container | NestJS GraphQL API on localhost `${API_HOST_PORT}`   |
-| `postgres`      | Database in `./data/postgres` under the install path |
-
-Default localhost ports (override in `deploy/deploy.env` if needed):
-
-| Port  | Service |
-| ----- | ------- |
-| 13000 | API     |
-| 13001 | Web     |
-
-#### First-time server setup
-
-```bash
-# On the server (once): install Docker + Compose
-ssh root@192.168.10.4 'bash -s' < deploy/bootstrap-server.sh
-
-# On your machine: configure secrets
-cp deploy/deploy.env.example deploy/deploy.env
-# Edit deploy/deploy.env — set POSTGRES_PASSWORD, JWT_SECRET, AWS keys, ports
-
-# Deploy (syncs to /home/dietpi/rove-hire, migrates, seeds, starts Docker, updates host nginx)
-pnpm deploy
-```
-
-The deploy script installs nginx **snippets** under `/etc/nginx/snippets/` and, by default, does **not** create a conflicting server block (`NGINX_USE_EXISTING_SERVER=true`). Add these includes to your existing `rove.kpargi.eu.org` HTTPS server block:
-
-```nginx
-include /etc/nginx/snippets/rove-hire-upstreams.conf;
-include /etc/nginx/snippets/rove-hire-locations.conf;
-```
-
-Set `NGINX_USE_EXISTING_SERVER=false` in `deploy/deploy.env` only if you want a standalone `:80` server block installed automatically.
-
-After deploy:
-
-- **App:** https://rove.kpargi.eu.org
-- **GraphQL:** https://rove.kpargi.eu.org/graphql
-- **Health:** https://rove.kpargi.eu.org/api/health (public, no auth)
-- **Login:** `hr@rove.com` / `RoveHire2024!`
-
-Ensure your edge proxy sends `X-Forwarded-Proto: https` to nginx. `deploy/deploy.env` sets `COOKIE_SECURE=true` and `ENABLE_HSTS=true` for the public HTTPS URL.
-
-### Production Considerations
-
-- The API Dockerfile uses a multi-stage build (build → production) to minimize image size
-- PostgreSQL data is persisted via a Docker volume (`postgres_data`)
-- Health checks ensure the API starts only after PostgreSQL is ready
-- Set a strong `JWT_SECRET` in production (not the default)
+- Set strong values for `POSTGRES_PASSWORD` and `JWT_SECRET` in `.env`.
+- When serving over HTTPS (including via cloudflared), set `FRONTEND_URL`, `NEXT_PUBLIC_GRAPHQL_URL`, `COOKIE_SECURE=true`, and `ENABLE_HSTS=true`, then rebuild: `pnpm docker:up`.
+- PostgreSQL data persists in the `postgres_data` Docker volume.
+- Health checks ensure the API starts only after PostgreSQL is ready, and the web container waits for a healthy API.
 
 ---
 
@@ -359,15 +354,19 @@ Ensure your edge proxy sends `X-Forwarded-Proto: https` to nginx. `deploy/deploy
 pnpm test
 
 # Run tests for a specific workspace
-pnpm --filter api test
-pnpm --filter web test
-pnpm --filter shared test
+pnpm --filter @rove-hire/api test
+pnpm --filter @rove-hire/web test
+pnpm --filter @rove-hire/shared test
+
+# Run API integration tests (requires running Postgres)
+pnpm --filter @rove-hire/api test:integration
 
 # Run end-to-end tests (Playwright)
 pnpm test:e2e
 
-# Run tests in watch mode
-pnpm --filter api test:watch
+# Run tests in watch mode (Vitest)
+pnpm --filter @rove-hire/api exec vitest
+pnpm --filter @rove-hire/web exec vitest
 ```
 
 ### Test Categories
@@ -392,27 +391,14 @@ The project uses property-based testing (PBT) to verify invariants hold across a
 
 ## Known Issues
 
-| Issue                            | Impact                                                      | Workaround                                                    |
-| -------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
-| S3 requires real AWS credentials | File upload/download non-functional without valid keys      | Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `.env` |
-| Puppeteer in Docker              | First PDF generation may be slow due to Chromium cold start | Subsequent generations are faster (Chromium stays warm)       |
+See [Anything that broke or felt off](#anything-that-broke-or-felt-off-not-production-ready-yet) in Submission Notes for the full production-readiness assessment. Quick reference:
 
----
-
-## What's Next
-
-Improvements planned for future iterations:
-
-| Feature                       | Description                                                                             |
-| ----------------------------- | --------------------------------------------------------------------------------------- |
-| **Email notifications**       | Notify candidates on status changes (magic link sent, interview scheduled, offer ready) |
-| **Role-based access control** | Multiple HR users with different permission levels (admin, recruiter, hiring manager)   |
-| **Audit log**                 | Immutable append-only log of all system actions for compliance                          |
-| **Performance monitoring**    | APM integration (OpenTelemetry) for request tracing and bottleneck identification       |
-| **Calendar integration**      | Google Calendar / Outlook sync for interview scheduling                                 |
-| **Bulk operations**           | Multi-select candidates for batch status changes or rejection                           |
-| **Advanced search**           | Full-text search across resumes and candidate notes                                     |
-| **Analytics dashboard**       | Pipeline conversion rates, time-to-hire metrics, bottleneck visualization               |
+| Issue                            | Impact                                                                             | Workaround                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| S3 requires real AWS credentials | File upload/download non-functional without valid keys                             | Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `.env` |
+| S3 fallback when upload fails    | Documents saved with local keys; download URLs return `#`                          | Configure valid S3 credentials; do not rely on fallback       |
+| Puppeteer in Docker              | Each PDF request launches and tears down Chromium; first run in Docker can be slow | Expect ~3–10s per generation; needs a browser pool at scale   |
+| No email delivery                | Magic links and offers must be shared manually                                     | Copy link from the HR dashboard                               |
 
 ---
 

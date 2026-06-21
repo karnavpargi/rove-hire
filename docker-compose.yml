@@ -1,12 +1,17 @@
 # =============================================================================
-# ROVE Hire — Docker Compose (Development)
-# Services: PostgreSQL 16, NestJS API
+# ROVE Hire — Docker Compose (single source of truth)
+#
+# First-time setup:
+#   cp .env.example .env   # set secrets for production
+#   docker compose --profile setup run --rm db-setup
+#   docker compose up -d --build
+#
+# Development (API in Docker, web via pnpm):
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up postgres api -d
+#   pnpm --filter web dev
 # =============================================================================
 
 services:
-  # ---------------------------------------------------------------------------
-  # PostgreSQL 16 Database
-  # ---------------------------------------------------------------------------
   postgres:
     image: postgres:16-alpine
     container_name: rove-hire-db
@@ -28,9 +33,6 @@ services:
     networks:
       - rove-network
 
-  # ---------------------------------------------------------------------------
-  # NestJS API Server
-  # ---------------------------------------------------------------------------
   api:
     build:
       context: .
@@ -43,18 +45,59 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-rove_user}:${POSTGRES_PASSWORD:-rove_password}@postgres:5432/${POSTGRES_DB:-rove_hire}?schema=public
-      # AWS S3 configuration (set in .env for real credentials)
       AWS_REGION: ${AWS_REGION:-us-east-1}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-rove-hire-files}
-      # JWT Secret
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
-      # Frontend origin for CORS
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
-    volumes:
-      - ./apps/api/src:/app/apps/api/src:ro
-      - ./packages/shared/src:/app/packages/shared/src:ro
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      ENABLE_HSTS: ${ENABLE_HSTS:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - rove-network
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_GRAPHQL_URL: ${NEXT_PUBLIC_GRAPHQL_URL:-http://localhost:3000/graphql}
+    container_name: rove-hire-web
+    restart: unless-stopped
+    ports:
+      - '${WEB_PORT:-3001}:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - rove-network
+
+  db-setup:
+    profiles: [setup]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: db-setup
+    container_name: rove-hire-db-setup
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-rove_user}:${POSTGRES_PASSWORD:-rove_password}@postgres:5432/${POSTGRES_DB:-rove_hire}?schema=public
+    command: >
+      sh -c "cd apps/api &&
+      pnpm exec prisma migrate deploy &&
+      pnpm exec prisma db seed"
     depends_on:
       postgres:
         condition: service_healthy

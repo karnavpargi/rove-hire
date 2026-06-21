@@ -1,7 +1,6 @@
 # =============================================================================
-# ROVE Hire — Docker Compose Override (Development)
-# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
-# Mounts source code for hot-reloading during development.
+# ROVE Hire — Development override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up postgres api -d
 # =============================================================================
 
 services:

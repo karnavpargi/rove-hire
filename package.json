@@ -15,10 +15,12 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "deploy": "bash deploy/deploy.sh",
-    "deploy:help": "cat deploy/DEPLOY.md",
-    "docker:push": "bash deploy/docker-build-push.sh",
-    "deploy:registry": "bash deploy/deploy-registry.sh",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:setup": "docker compose --profile setup run --rm db-setup",
+    "docker:logs": "docker compose logs -f",
+    "docker:dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up postgres api -d",
+    "docker:test": "bash scripts/test-production.sh",
     "prepare": "husky"
   },
   "devDependencies": {
