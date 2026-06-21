@@ -76,7 +76,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-      target: build
+      target: db-setup
     container_name: rove-hire-db-setup
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-rove_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-rove_hire}?schema=public

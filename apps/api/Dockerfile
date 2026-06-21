@@ -10,6 +10,8 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+ENV HUSKY=0
+
 # Install Chromium and its dependencies for Puppeteer PDF generation
 RUN apk add --no-cache \
     chromium \
@@ -42,6 +44,31 @@ COPY apps/api/ apps/api/
 RUN pnpm --filter @rove-hire/shared build
 RUN cd apps/api && pnpm exec prisma generate
 RUN pnpm --filter @rove-hire/api build
+
+# ---------------------------------------------------------------------------
+# Stage: db-setup (migrate + seed only — skips Chromium and NestJS build)
+# ---------------------------------------------------------------------------
+FROM node:20-alpine AS db-setup
+
+WORKDIR /app
+
+ENV HUSKY=0
+
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json apps/api/
+COPY packages/shared/package.json packages/shared/
+
+RUN pnpm install --frozen-lockfile --ignore-scripts --filter @rove-hire/api...
+
+COPY apps/api/prisma apps/api/prisma
+COPY apps/api/prisma.config.ts apps/api/
+COPY apps/api/tsconfig.json apps/api/
+
+# prisma.config.ts requires DATABASE_URL at generate time; runtime URL comes from compose.
+ENV DATABASE_URL=postgresql://build:build@localhost:5432/build?schema=public
+RUN cd apps/api && pnpm exec prisma generate
 
 # ---------------------------------------------------------------------------
 # Stage 2: Production
